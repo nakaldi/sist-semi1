@@ -1,0 +1,12 @@
+# 이클립스 관련 파일 무시
+.classpath
+.project
+.settings/
+
+# 빌드 결과물 무시
+/bin/
+/target/
+
+# 임시 파일 무시
+*.log
+*.tmp
