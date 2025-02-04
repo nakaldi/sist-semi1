@@ -7,6 +7,7 @@ public class Course {
 	private int departmentId;
 	private String credit;
 	private String semester;
+	private String syllabus;
 
 	public int getCourseId() {
 		return courseId;
@@ -56,4 +57,11 @@ public class Course {
 		this.semester = semester;
 	}
 
+	public String getSyllabus() {
+		return syllabus;
+	}
+
+	public void setSyllabus(String syllabus) {
+		this.syllabus = syllabus;
+	}
 }
