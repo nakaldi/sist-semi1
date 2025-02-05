@@ -4,6 +4,12 @@ public class Manager {
 	private int managerId;
 	private String password;
 
+	public Manager(int managerId, String password) {
+		super();
+		this.managerId = managerId;
+		this.password = password;
+	}
+
 	public int getManagerId() {
 		return managerId;
 	}
