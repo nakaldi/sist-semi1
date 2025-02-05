@@ -13,7 +13,7 @@ import kims.semi1.model.Professor;
 public class ProfessorDao {
 
 	// professor_id 로 검색해서 하나라도 있으면 true 없으면 false 를 반환
-	public boolean isProfessorIdExist(int professorId) {
+	public boolean existsProfessorId(int professorId) {
 		String sql = "SELECT COUNT(*) FROM professors WHERE professor_id = ?";
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setInt(1, professorId);
@@ -34,7 +34,7 @@ public class ProfessorDao {
 	}
 
 	// Professor 객체 professors 테이블에 저장
-	public void insertUser(Professor professor) {
+	public void insertProfessor(Professor professor) {
 		String sql = "INSERT INTO "
 				+ "professors (professor_id, name, phone, birth_date, email, password, department_id, hire_date) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -57,7 +57,7 @@ public class ProfessorDao {
 		}
 	}
 
-	// 아이디로 검색해서 professors 테이블에서 Professor 객체 반환 
+	// 아이디로 검색해서 professors 테이블에서 Professor 객체 반환
 	public Professor getProfessorById(int professorId) {
 		String sql = "SELECT * FROM professors WHERE professor_id = ?";
 		Professor professor = null;

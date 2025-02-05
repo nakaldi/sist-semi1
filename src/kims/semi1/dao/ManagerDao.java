@@ -11,7 +11,7 @@ import kims.semi1.model.Manager;
 public class ManagerDao {
 
 	// manager_id 로 검색해서 하나라도 있으면 true 없으면 false 를 반환
-	public boolean isManagerIdExist(int managerId) {
+	public boolean existsManagerId(int managerId) {
 		String sql = "SELECT COUNT(*) FROM managers WHERE manager_id = ?";
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setInt(1, managerId);
@@ -27,12 +27,13 @@ public class ManagerDao {
 			e.printStackTrace();
 		}
 		// rs.next가 없으면 아이디가 없는 것이므로 false 반환
+		System.out.println("resultset in ManagerDao.existsManagerId() is empty");
 		return false;
 	}
 
 	// Manager 객체 managers 테이블에 저장
-	public void insertUser(Manager manager) {
-		String sql = "INSERT INTO user_info (manager_id, password) VALUES (?, ?)";
+	public void insertManager(Manager manager) {
+		String sql = "INSERT INTO managers (manager_id, password) VALUES (?, ?)";
 
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 

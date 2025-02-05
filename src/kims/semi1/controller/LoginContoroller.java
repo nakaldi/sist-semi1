@@ -27,12 +27,15 @@ public class LoginContoroller {
 			System.out.println("====로그인====");
 			int loggedInUserId = loginService.loginUser(scanUserId(sc), scanUserPw(sc));
 
-			if (loggedInUserId != -1) {
+			if (loggedInUserId == -1) {
+				System.out.println("아이디가 없습니다. 최초화면으로 돌아갑니다.");
+				handleUserInput(sc);
+			} else if (loggedInUserId == -2) {
+				System.out.println("비밀번호가 일치하지 않습니다. 최초화면으로 돌아갑니다.");
+				handleUserInput(sc);
+			} else {
 				currentUserId = loggedInUserId;
 				System.out.println("로그인 성공");
-			} else {
-				System.out.println("로그인 실패, 최초화면으로 돌아갑니다.");
-				handleUserInput(sc);
 			}
 			break;
 		case 0:

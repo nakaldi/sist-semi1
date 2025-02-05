@@ -28,26 +28,28 @@ public class LoginService {
 		Object user = null;
 		int userId = 0;
 
-		if (managerDao.isManagerIdExist(id)) {
+		if (managerDao.existsManagerId(id)) {
 			user = managerDao.getManagerById(id);
-		} else if (professorDao.isProfessorIdExist(id)) {
+		} else if (professorDao.existsProfessorId(id)) {
 			user = professorDao.getProfessorById(id);
-		} else if (studentDao.isStudentIdExist(id)) {
+		} else if (studentDao.existsStudentId(id)) {
 			user = studentDao.getStudentById(id);
 		} else {
-			System.out.println("id is not exist. return -1");
+			System.out.println("id does not exist. return -1");
 			return -1;
 		}
 
-		if (user instanceof Manager || password.equals(((Manager) user).getPassword())) {
+		// || && 논리연산자는 첫 번째 조건이 참이면 두 번째 조건을 평가하지 않는 단축 평가(short-circuit evaluation)를 사용
+		// 그래서 user 가 Manager 의 인스턴스가 아니면 뒤에 캐스팅은 일어나지 않아 예외가 발생하지 않음.
+		if (user instanceof Manager && password.equals(((Manager) user).getPassword())) {
 			userId = ((Manager) user).getManagerId();
-		} else if (user instanceof Professor || password.equals(((Professor) user).getPassword())) {
+		} else if (user instanceof Professor && password.equals(((Professor) user).getPassword())) {
 			userId = ((Professor) user).getProfessorId();
-		} else if (user instanceof Student || password.equals(((Student) user).getPassword())) {
+		} else if (user instanceof Student && password.equals(((Student) user).getPassword())) {
 			userId = ((Student) user).getStudentId();
 		} else {
-			System.out.println("password is incorrect. return -1");
-			return -1;
+			System.out.println("password is incorrect. return -2");
+			return -2;
 		}
 
 		return userId;

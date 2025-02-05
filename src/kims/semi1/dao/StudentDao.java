@@ -13,7 +13,7 @@ import kims.semi1.model.Student;
 public class StudentDao {
 
 	// student_id 로 검색해서 하나라도 있으면 true 없으면 false 를 반환
-	public boolean isStudentIdExist(int studentId) {
+	public boolean existsStudentId(int studentId) {
 		String sql = "SELECT COUNT(*) FROM students WHERE student_id = ?";
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setInt(1, studentId);
@@ -29,12 +29,12 @@ public class StudentDao {
 			e.printStackTrace();
 		}
 		// rs.next가 없으면 문제가 있는것이기 때문에 false 반환
-		System.out.println("resultset in StudentDao.isStudentIdExist() is empty");
+		System.out.println("resultset in StudentDao.existsStudentId() is empty");
 		return false;
 	}
 
 	// Student 객체 students 테이블에 저장
-	public void insertUser(Student student) {
+	public void insertStudent(Student student) {
 		String sql = "INSERT INTO "
 				+ "students (student_id, name, phone, birth_date, email, password, department_id, enrollment_year) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -51,7 +51,7 @@ public class StudentDao {
 			pstmt.setInt(8, student.getEnrollmentYear());
 
 			pstmt.executeUpdate();
-
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
