@@ -10,7 +10,7 @@ import kims.semi1.model.Manager;
 
 public class ManagerDao {
 
-	// 유저 id 중복체크
+	// manager_id 로 검색해서 하나라도 있으면 true 없으면 false 를 반환
 	public boolean isManagerIdExist(int managerId) {
 		String sql = "SELECT COUNT(*) FROM managers WHERE manager_id = ?";
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -30,23 +30,23 @@ public class ManagerDao {
 		return false;
 	}
 
-	// 유저정보 DB에 저장
-//	public void insertUser(Manager manager) {
-//		String sql = "INSERT INTO user_info (user_id, user_pw) VALUES (?, ?)";
-//
-//		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//
-//			pstmt.setInt(1, manager.getManagerId());
-//			pstmt.setString(2, manager.getPassword());
-//
-//			pstmt.executeUpdate();
-//
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}
-// 	}
+	// Manager 객체 managers 테이블에 저장
+	public void insertUser(Manager manager) {
+		String sql = "INSERT INTO user_info (manager_id, password) VALUES (?, ?)";
 
-	// 아이디로 유저 정보 불러오기
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, manager.getManagerId());
+			pstmt.setString(2, manager.getPassword());
+
+			pstmt.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// manager_id 로 검색해서 managers 테이블에서 Manager 객체 반환
 	public Manager getManagerById(int managerId) {
 		String sql = "SELECT * FROM managers WHERE manager_id = ?";
 		Manager manager = null;

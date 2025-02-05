@@ -16,9 +16,8 @@ public class LoginContoroller {
 
 	public void handleUserInput(Scanner sc) {
 
-		System.out.println("====회원 시스템====");
 		System.out.println("1. 로그인");
-		System.out.println("0. 게임 종료");
+		System.out.println("0. 프로그램 종료");
 		System.out.print(">>");
 		int input = sc.next().charAt(0) - '0';
 		sc.nextLine();
@@ -28,7 +27,7 @@ public class LoginContoroller {
 			System.out.println("====로그인====");
 			int loggedInUserId = loginService.loginUser(scanUserId(sc), scanUserPw(sc));
 
-			if (loggedInUserId != 0) {
+			if (loggedInUserId != -1) {
 				currentUserId = loggedInUserId;
 				System.out.println("로그인 성공");
 			} else {
@@ -36,7 +35,7 @@ public class LoginContoroller {
 				handleUserInput(sc);
 			}
 			break;
-				case 0:
+		case 0:
 			System.out.println("프로그램 종료");
 			System.exit(0);
 		default:

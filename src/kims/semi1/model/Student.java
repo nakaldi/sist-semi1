@@ -12,6 +12,19 @@ public class Student {
 	private int departmentId;
 	private int enrollmentYear;
 
+	public Student(int studentId, String name, String phone, LocalDate birthDate, String email, String password,
+			int departmentId, int enrollmentYear) {
+		super();
+		this.studentId = studentId;
+		this.name = name;
+		this.phone = phone;
+		this.birthDate = birthDate;
+		this.email = email;
+		this.password = password;
+		this.departmentId = departmentId;
+		this.enrollmentYear = enrollmentYear;
+	}
+
 	public int getStudentId() {
 		return studentId;
 	}

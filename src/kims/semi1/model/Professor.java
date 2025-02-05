@@ -12,6 +12,19 @@ public class Professor {
 	private int departmentId;
 	private LocalDate hireDate;
 
+	public Professor(int professorId, String name, String phone, LocalDate birthDate, String email, String password,
+			int departmentId, LocalDate hireDate) {
+		super();
+		this.professorId = professorId;
+		this.name = name;
+		this.phone = phone;
+		this.birthDate = birthDate;
+		this.email = email;
+		this.password = password;
+		this.departmentId = departmentId;
+		this.hireDate = hireDate;
+	}
+
 	public int getProfessorId() {
 		return professorId;
 	}
