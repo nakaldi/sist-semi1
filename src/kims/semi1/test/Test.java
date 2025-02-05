@@ -5,5 +5,6 @@ public class Test {
 	public Test() {
 		System.out.println("깔깔깔");
 		System.out.println("김동민입니다 하하 ");
+		System.out.println("나는누구지");
 	}
 }
