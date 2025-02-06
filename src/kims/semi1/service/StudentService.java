@@ -1,26 +1,30 @@
 package kims.semi1.service;
 
+import kims.semi1.dao.DepartmentDao;
 import kims.semi1.dao.StudentDao;
+import kims.semi1.model.Department;
 import kims.semi1.model.Student;
 
 public class StudentService {
 	private final StudentDao studentDao;
+	private final DepartmentDao departmentDao;
 
 	public StudentService() {
 		studentDao = new StudentDao();
+		departmentDao = new DepartmentDao();
 	}
 
-	public Student getStudentInfo(int studentId) {
+	public Object[] getStudentAndDepartmentInfo(int studentId) {
 		Student student = studentDao.getStudentById(studentId);
-		return student;
+		Department department = departmentDao.getDepartmentById(student.getDepartmentId());
+		Object[] result = new Object[2];
+		result[0] = student;
+		result[1] = department;
+		return result;
 	}
 
-	public void printStudentInfo(Student student) {
-		System.out.println("---------------------------학생 정보----------------------------");
-		System.out.println("학번 : " + student.getStudentId() + " \t 이름 : " + student.getName());
-		System.out.println("전화번호 : " + student.getPhone() + " \t 생년월일 : " + student.getBirthDate());
-		System.out.println("email : " + student.getEmail());
-		System.out.println("학과 : " + student.getDepartmentId() + " \t 입학년도 : " + student.getEnrollmentYear());
-		System.out.println("---------------------------------------------------------------");
+	//TODO 새롭게 입력받아 만들어진 newStudent의 값들을 유효성검사 해줘야함. ex)전화번호 형식 등
+	public Student updateStudentInfo(Student newStudent) {
+		return studentDao.updateStudent(newStudent) ? newStudent : null;
 	}
 }

@@ -25,6 +25,19 @@ public class Student {
 		this.enrollmentYear = enrollmentYear;
 	}
 
+	// Student 객체를 받아와서 새로운 Student 객체로 복제하는 생성자
+	public Student(Student another) {
+		super();
+		this.studentId = another.getStudentId();
+		this.name = another.getName();
+		this.phone = another.getPhone();
+		this.birthDate = another.getBirthDate();
+		this.email = another.getEmail();
+		this.password = another.getPassword();
+		this.departmentId = another.getDepartmentId();
+		this.enrollmentYear = another.getEnrollmentYear();
+	}
+
 	public int getStudentId() {
 		return studentId;
 	}
