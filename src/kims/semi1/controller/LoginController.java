@@ -4,13 +4,13 @@ import java.util.Scanner;
 
 import kims.semi1.service.LoginService;
 
-public class LoginContoroller {
+public class LoginController {
 
 	private final LoginService loginService;
 	private int currentUserId;
 	Scanner sc;
 
-	public LoginContoroller() {
+	public LoginController() {
 		loginService = new LoginService();
 	}
 
