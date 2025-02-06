@@ -85,4 +85,40 @@ public class StudentDao {
 		}
 		return student;
 	}
+
+	// students 테이블에서 Student 객체 반환
+	public Student findStudentByNameAndBirthDateAndEmail(String targetName, LocalDate targetBirthDate,
+			String targetEmail) {
+		String sql = "SELECT * FROM students WHERE name = ? and birth_date = ? and email = ?";
+		Student student = null;
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, targetName);
+			pstmt.setDate(2, Date.valueOf(targetBirthDate));
+			pstmt.setString(3, targetEmail);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+
+					int studentId = rs.getInt("student_id");
+					String name = rs.getString("name");
+					String phone = rs.getString("phone");
+					LocalDate birthDate = rs.getDate("birth_date").toLocalDate();
+					String email = rs.getString("email");
+					String password = rs.getString("password");
+					int departmentId = rs.getInt("department_id");
+					int enrollmentYear = rs.getInt("enrollment_year");
+					student = new Student(studentId, name, phone, birthDate, email, password, departmentId,
+							enrollmentYear);
+				} else {
+					return null;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return student;
+	}
+
 }

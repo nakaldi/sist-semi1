@@ -1,24 +1,29 @@
 package kims.semi1.controller;
 
+import java.time.LocalDate;
 import java.util.Scanner;
 
+import kims.semi1.service.FindingIdService;
 import kims.semi1.service.LoginService;
+import kims.semi1.util.DateUtils;
 
 public class LoginController {
 
 	private final LoginService loginService;
+	private final FindingIdService findingIdService;
 	private int currentUserId;
 	Scanner sc;
 	ProfessorController professorControlloer;
 
 	public LoginController() {
 		loginService = new LoginService();
-		// professorControlloer = new ProfessorController(currentUserId);
+		findingIdService = new FindingIdService();
 	}
 
 	public void handleUserInput(Scanner sc) {
 
 		System.out.println("1. 로그인");
+		System.out.println("2. 아이디 찾기");
 		System.out.println("0. 프로그램 종료");
 		System.out.print(">>");
 		int input = sc.next().charAt(0) - '0';
@@ -42,6 +47,30 @@ public class LoginController {
 				System.out.println("로그인 성공");
 				professorControlloer.printProfessorMenu(sc);
 			}
+			break;
+		case 2:
+			System.out.println("==아이디찾기==");
+			System.out.print("이름>>");
+			String name = sc.next();
+			sc.nextLine();
+
+			System.out.print("생년월일>>");
+			LocalDate date = DateUtils.convertStringToLocalDate(sc.next());
+			sc.nextLine();
+			System.out.println(date);
+
+			System.out.print("이메일>>");
+			String email = sc.next();
+			sc.nextLine();
+
+			int foundId = findingIdService.findId(name, date, email);
+			if (foundId == -1) {
+				System.out.println("등록된 아이디가 없습니다.");
+				handleUserInput(sc);
+			} else {
+				System.out.println("아이디는 " + foundId + "입니다.");
+			}
+
 			break;
 		case 0:
 			System.out.println("프로그램 종료");
