@@ -51,13 +51,13 @@ public class StudentDao {
 			pstmt.setInt(8, student.getEnrollmentYear());
 
 			pstmt.executeUpdate();
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	// 아이디로 검색해서 students 테이블에서 Student 객체 반환 
+	// 아이디로 검색해서 students 테이블에서 Student 객체 반환
 	public Student getStudentById(int studentId) {
 		String sql = "SELECT * FROM students WHERE student_id = ?";
 		Student student = null;

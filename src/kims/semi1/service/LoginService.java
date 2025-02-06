@@ -39,7 +39,8 @@ public class LoginService {
 			return -1;
 		}
 
-		// || && 논리연산자는 첫 번째 조건이 참이면 두 번째 조건을 평가하지 않는 단축 평가(short-circuit evaluation)를 사용
+		// || && 논리연산자는 첫 번째 조건이 참이면 두 번째 조건을 평가하지 않는 단축 평가(short-circuit evaluation)를
+		// 사용
 		// 그래서 user 가 Manager 의 인스턴스가 아니면 뒤에 캐스팅은 일어나지 않아 예외가 발생하지 않음.
 		if (user instanceof Manager && password.equals(((Manager) user).getPassword())) {
 			userId = ((Manager) user).getManagerId();

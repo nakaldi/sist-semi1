@@ -9,9 +9,11 @@ public class LoginController {
 	private final LoginService loginService;
 	private int currentUserId;
 	Scanner sc;
+	ProfessorController professorControlloer;
 
 	public LoginController() {
 		loginService = new LoginService();
+		// professorControlloer = new ProfessorController(currentUserId);
 	}
 
 	public void handleUserInput(Scanner sc) {
@@ -35,7 +37,10 @@ public class LoginController {
 				handleUserInput(sc);
 			} else {
 				currentUserId = loggedInUserId;
+
+				professorControlloer = new ProfessorController(currentUserId);
 				System.out.println("로그인 성공");
+				professorControlloer.printProfessorMenu(sc);
 			}
 			break;
 		case 0:
