@@ -51,13 +51,13 @@ public class StudentDao {
 			pstmt.setInt(8, student.getEnrollmentYear());
 
 			pstmt.executeUpdate();
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	// 아이디로 검색해서 students 테이블에서 Student 객체 반환 
+	// 아이디로 검색해서 students 테이블에서 Student 객체 반환
 	public Student getStudentById(int studentId) {
 		String sql = "SELECT * FROM students WHERE student_id = ?";
 		Student student = null;
@@ -85,4 +85,48 @@ public class StudentDao {
 		}
 		return student;
 	}
+
+	// students 테이블에서 Student 객체 반환
+	public Student findStudentByNameAndBirthDateAndEmail(String targetName, LocalDate targetBirthDate,
+			String targetEmail) {
+		String sql = "SELECT * FROM students WHERE name = ? and birth_date = ? and email = ?";
+		Student student = null;
+
+		System.out.println(targetBirthDate);
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, targetName);
+			pstmt.setDate(2, Date.valueOf(targetBirthDate));
+
+			Date.valueOf(targetBirthDate);
+
+			pstmt.setString(3, targetEmail);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+
+					int studentId = rs.getInt("student_id");
+					String name = rs.getString("name");
+					String phone = rs.getString("phone");
+					LocalDate birthDate = rs.getDate("birth_date").toLocalDate();
+
+					System.out.println(birthDate);
+
+					String email = rs.getString("email");
+					String password = rs.getString("password");
+					int departmentId = rs.getInt("department_id");
+					int enrollmentYear = rs.getInt("enrollment_year");
+					student = new Student(studentId, name, phone, birthDate, email, password, departmentId,
+							enrollmentYear);
+				} else {
+					return null;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return student;
+	}
+
 }

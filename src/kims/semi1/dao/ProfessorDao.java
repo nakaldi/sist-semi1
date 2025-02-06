@@ -85,4 +85,39 @@ public class ProfessorDao {
 		}
 		return professor;
 	}
+
+	// Professors 테이블에서 Professor 객체 반환
+	public Professor findProfessorByNameAndBirthDateAndEmail(String targetName, LocalDate targetBirthDate,
+			String targetEmail) {
+		String sql = "SELECT * FROM Professors WHERE name = ? and birth_date = ? and email = ?";
+		Professor Professor = null;
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, targetName);
+			pstmt.setDate(2, Date.valueOf(targetBirthDate));
+			pstmt.setString(3, targetEmail);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+
+					int ProfessorId = rs.getInt("Professor_id");
+					String name = rs.getString("name");
+					String phone = rs.getString("phone");
+					LocalDate birthDate = rs.getDate("birth_date").toLocalDate();
+					String email = rs.getString("email");
+					String password = rs.getString("password");
+					int departmentId = rs.getInt("department_id");
+					LocalDate hireDate = rs.getDate("hire_date").toLocalDate();
+					Professor = new Professor(ProfessorId, name, phone, birthDate, email, password, departmentId,
+							hireDate);
+				} else {
+					return null;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return Professor;
+	}
 }
