@@ -14,6 +14,7 @@ public class LoginController {
 	private int currentUserId;
 	Scanner sc;
 	ProfessorController professorControlloer;
+	private StudentController studentController;
 
 	public LoginController() {
 		loginService = new LoginService();
@@ -42,10 +43,17 @@ public class LoginController {
 				handleUserInput(sc);
 			} else {
 				currentUserId = loggedInUserId;
-
-				professorControlloer = new ProfessorController(currentUserId);
 				System.out.println("로그인 성공");
-				professorControlloer.printProfessorMenu(sc);
+
+				if (Integer.toString(currentUserId).charAt(4) == '1') {
+					studentController = new StudentController(currentUserId);
+					studentController.selectStudentMenu(sc);
+				} else if (Integer.toString(currentUserId).charAt(4) == '2') {
+					professorControlloer = new ProfessorController(currentUserId);
+					professorControlloer.printProfessorMenu(sc);
+				} else if (Integer.toString(currentUserId).charAt(4) == '3') {
+//매니저놈 마이페이지 레츠고 레츠고
+				}
 			}
 			break;
 		case 2:
