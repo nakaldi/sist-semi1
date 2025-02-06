@@ -92,15 +92,10 @@ public class StudentDao {
 		String sql = "SELECT * FROM students WHERE name = ? and birth_date = ? and email = ?";
 		Student student = null;
 
-		System.out.println(targetBirthDate);
-
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			pstmt.setString(1, targetName);
 			pstmt.setDate(2, Date.valueOf(targetBirthDate));
-
-			Date.valueOf(targetBirthDate);
-
 			pstmt.setString(3, targetEmail);
 
 			try (ResultSet rs = pstmt.executeQuery()) {
@@ -110,9 +105,6 @@ public class StudentDao {
 					String name = rs.getString("name");
 					String phone = rs.getString("phone");
 					LocalDate birthDate = rs.getDate("birth_date").toLocalDate();
-
-					System.out.println(birthDate);
-
 					String email = rs.getString("email");
 					String password = rs.getString("password");
 					int departmentId = rs.getInt("department_id");
