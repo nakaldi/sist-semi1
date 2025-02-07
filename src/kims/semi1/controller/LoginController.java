@@ -15,6 +15,7 @@ public class LoginController {
 	Scanner sc;
 	ProfessorController professorControlloer;
 	private StudentController studentController;
+	private ManagerController managerController;
 
 	public LoginController() {
 		loginService = new LoginService();
@@ -52,7 +53,8 @@ public class LoginController {
 					professorControlloer = new ProfessorController(currentUserId);
 					professorControlloer.printProfessorMenu(sc);
 				} else if (Integer.toString(currentUserId).charAt(4) == '3') {
-//매니저놈 마이페이지 레츠고 레츠고
+					managerController = new ManagerController(currentUserId);
+					managerController.selectManagertMenu(sc);
 				}
 			}
 			break;
