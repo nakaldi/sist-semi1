@@ -6,11 +6,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Scanner;
 
 import kims.semi1.config.DBConnector;
 import kims.semi1.model.Professor;
 
 public class ProfessorDao {
+
+	public ProfessorDao() {
+
+	}
 
 	// professor_id 로 검색해서 하나라도 있으면 true 없으면 false 를 반환
 	public boolean existsProfessorId(int professorId) {
@@ -83,7 +88,50 @@ public class ProfessorDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
 		return professor;
+	}
+
+	// 교수 정보 변경
+	public int modifyProfessorInfo(String typeInfo, String modifyInfo, int currentUserId, Scanner sc) {
+
+		String modifyProfessorInfoSql = "UPDATE professors SET " + typeInfo + " = ? WHERE professor_id = ?";
+		try (Connection conn = DBConnector.getConnection();
+				PreparedStatement ps = conn.prepareStatement(modifyProfessorInfoSql)) {
+			ps.setString(1, modifyInfo);
+			ps.setInt(2, currentUserId);
+
+			int resultOutput = ps.executeUpdate();
+			if (resultOutput > 0) {
+				System.out.println("수정이 완료되었습니다.");
+				String selectSql = "SELECT name, phone, email, password FROM professors WHERE professor_id = ?";
+				try (PreparedStatement selectps = conn.prepareStatement(selectSql)) {
+					selectps.setInt(1, currentUserId);
+					try (ResultSet rs = selectps.executeQuery()) {
+						if (rs.next()) {
+
+							String professorName = rs.getString("name");
+							String professorPhone = rs.getString("phone");
+							String professorEmail = rs.getString("email");
+							String professorPw = rs.getString("password");
+
+							System.out.println(professorName + " | " + professorPhone + " | " + professorEmail + " | "
+									+ professorPw);
+
+						}
+
+					}
+
+				}
+			} else {
+				System.out.println("수정에 실패했습니다.");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return currentUserId;
 	}
 
 	// Professors 테이블에서 Professor 객체 반환
