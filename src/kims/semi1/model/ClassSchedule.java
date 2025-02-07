@@ -7,6 +7,15 @@ public class ClassSchedule {
 	private String startTime;
 	private String endTime;
 
+	public ClassSchedule(int scheduleId, int courseId, String dayOfWeek, String startTime, String endTime) {
+		super();
+		this.scheduleId = scheduleId;
+		this.courseId = courseId;
+		this.dayOfWeek = dayOfWeek;
+		this.startTime = startTime;
+		this.endTime = endTime;
+	}
+
 	public int getScheduleId() {
 		return scheduleId;
 	}

@@ -5,6 +5,13 @@ public class Enrollment {
 	private int studentId;
 	private int courseId;
 
+	public Enrollment(int enrollmentId, int studentId, int courseId) {
+		super();
+		this.enrollmentId = enrollmentId;
+		this.studentId = studentId;
+		this.courseId = courseId;
+	}
+
 	public int getEnrollmentId() {
 		return enrollmentId;
 	}
