@@ -6,6 +6,14 @@ public class Grade {
 	private double grade;
 	private String studentReview;
 
+	public Grade(int gradeId, int enrollmentId, double grade, String studentReview) {
+		super();
+		this.gradeId = gradeId;
+		this.enrollmentId = enrollmentId;
+		this.grade = grade;
+		this.studentReview = studentReview;
+	}
+
 	public int getGradeId() {
 		return gradeId;
 	}
