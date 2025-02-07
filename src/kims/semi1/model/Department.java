@@ -6,6 +6,14 @@ public class Department {
 	private String phone;
 	private int buildingId;
 
+	public Department(int departmentId, String name, String phone, int buildingId) {
+		super();
+		this.departmentId = departmentId;
+		this.name = name;
+		this.phone = phone;
+		this.buildingId = buildingId;
+	}
+
 	public int getDepartmentId() {
 		return departmentId;
 	}

@@ -121,4 +121,28 @@ public class StudentDao {
 		return student;
 	}
 
+	// 학생 정보를 업데이트하는 메서드
+	public boolean updateStudent(Student student) {
+		String sql = "UPDATE students SET name = ?, phone = ?, birth_date = ?, email = ?, password = ?,"
+				+ " department_id = ?, enrollment_year = ? WHERE student_id = ?";
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, student.getName());
+			pstmt.setString(2, student.getPhone());
+			pstmt.setDate(3, Date.valueOf(student.getBirthDate()));
+			pstmt.setString(4, student.getEmail());
+			pstmt.setString(5, student.getPassword());
+			pstmt.setInt(6, student.getDepartmentId());
+			pstmt.setInt(7, student.getEnrollmentYear());
+			pstmt.setInt(8, student.getStudentId());
+
+			int affectedRows = pstmt.executeUpdate();
+			return affectedRows > 0; // 업데이트된 행이 있는 경우 true 반환
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 }
