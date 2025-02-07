@@ -13,6 +13,7 @@ public class StudentController {
 
 	public StudentController(int currentUserId) {
 		this.studentService = new StudentService();
+		
 		Object[] temps = studentService.getStudentAndDepartmentInfo(currentUserId);
 		student = (Student) temps[0];
 		department = (Department) temps[1];
