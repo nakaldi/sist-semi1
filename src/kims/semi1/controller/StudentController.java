@@ -13,7 +13,7 @@ public class StudentController {
 
 	public StudentController(int currentUserId) {
 		this.studentService = new StudentService();
-		
+
 		Object[] temps = studentService.getStudentAndDepartmentInfo(currentUserId);
 		student = (Student) temps[0];
 		department = (Department) temps[1];
@@ -21,22 +21,33 @@ public class StudentController {
 
 	public void selectStudentMenu(Scanner sc) {
 
-		printStudentInfo();
+		while (true) {
+			printStudentInfo();
 
-		// 1개인정보 수정, 2수강관리, 3출결관리, 4성적관리, 5로그아웃 메뉴가 있음
-		System.out.println("1.학생 정보 수정");
-		System.out.println("2.수강 관리");
-		System.out.println("3.성적 관리");
-		System.out.println("4.로그아웃");
-		System.out.print(">> ");
+			// 1개인정보 수정, 2수강관리, 3출결관리, 4성적관리, 5로그아웃 메뉴가 있음
+			System.out.println("1.학생 정보 수정");
+			System.out.println("2.수강 관리");
+			System.out.println("3.성적 관리");
+			System.out.println("4.로그아웃");
+			System.out.print(">> ");
 
-		int input = sc.next().charAt(0) - '0';
-		sc.nextLine();
+			int input = sc.next().charAt(0) - '0';
+			sc.nextLine();
 
-		switch (input) {
-		case 1:
-			modifyStudentInfo(sc);
+			switch (input) {
+			case 1:
+				modifyStudentInfo(sc);
+				break;
+			case 2:
+				manageEnrollment(sc);
+				break;
+			case 3:
+				break;
+			case 4:
+				return;
+			}
 		}
+
 	}
 
 	public void printStudentInfo() {
@@ -87,19 +98,41 @@ public class StudentController {
 				} else {
 					student = updatedStudent;
 					System.out.println("등록 성공!");
-					selectStudentMenu(sc);
 					return;
 				}
 			case 6:
 				System.out.println("취소되었습니다.");
-				selectStudentMenu(sc);
 				return;
 			default:
 				System.out.println("다시 입력해주세요.");
 				break;
 			}
-
 		}
 	}
 
+	public void manageEnrollment(Scanner sc) {
+
+		while (true) {
+			System.out.println("------------------학생 정보 수정------------------");
+			System.out.println("1. 수강신청 \t 2. 수강현황 \t 3. 수강취소 \t 4. 나가기");
+			System.out.print(">>");
+
+			int input = sc.next().charAt(0) - '0';
+			switch (input) {
+			case 1:
+				
+
+				break;
+			case 2:
+
+				break;
+			case 3:
+
+				break;
+			case 4:
+
+				return;
+			}
+		}
+	}
 }
