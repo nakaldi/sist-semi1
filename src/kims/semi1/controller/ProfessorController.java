@@ -69,7 +69,8 @@ public class ProfessorController {
 			System.out.println("1. 강의 등록");
 			System.out.println("2. 강의 현황 조회");
 			System.out.println("3. 강의 평가 조회");
-			System.out.println("4. 나가기");
+			System.out.println("4. 시간표 조회");
+			System.out.println("5. 나가기");
 
 			int professorInfoInput = sc.next().charAt(0) - '0';
 			sc.nextLine();
@@ -82,8 +83,9 @@ public class ProfessorController {
 				professorDao.printCourseInfo(currentUserId);
 			case 3:
 				professorDao.printStudentRivew(currentUserId);
-				
 			case 4:
+				professorDao.selectSchedule(currentUserId);
+			case 5:
 				printProfessorMenu(sc);
 				
 

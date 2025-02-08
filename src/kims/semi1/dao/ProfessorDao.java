@@ -91,7 +91,11 @@ public class ProfessorDao {
 	//시간표 조회
 	public int selectSchedule(int currentUserId) {
 		System.out.println("==시간표 출력 메뉴==");
-		String printSchedulesSql = "select ";
+		String printSchedulesSql = "select c.name as course_name,p.name as professor_name,s.day_of_week,s.start_time,s.end_time "
+				+ "from courses c, class_schedules s, professors p "
+				+ "where c.professor_id = ? "
+				+ "and c.course_id = s.course_id "
+				+ "and c.professor_id = p.professor_id ";
 
 		try (Connection conn = DBConnector.getConnection();
 				PreparedStatement schedulsps = conn.prepareStatement(printSchedulesSql)) {
@@ -99,12 +103,15 @@ public class ProfessorDao {
 			
 			try (ResultSet rs = schedulsps.executeQuery()) {
 				while(rs.next()) {
-					System.out.println("rs 진입");
-					String c_name = rs.getString("course_name");
-					String studentRiview = rs.getString("student_review");
 					
-					System.out.println("강의명\t|\t학생리뷰");
-					System.out.println(c_name +"	|	"+studentRiview);
+					String courseName = rs.getString("course_name");
+					String professorName = rs.getString("professor_name");
+					String courseDay = rs.getString("day_of_week");
+					String courseStart = rs.getString("start_time");
+					String courseEnd = rs.getString("end_time");
+					
+					System.out.println("강의명" +"	|	"+"교수 이름"+"	|	"+"요일"+"	|	"+"시작 시간"+"	|	"+"종료시간");
+					System.out.println(courseName +"	|	"+professorName+"	|	"+courseDay+"	|	"+courseStart+"	|	"+courseEnd);
 
 				}
 				
@@ -129,6 +136,8 @@ public class ProfessorDao {
 	// 강의 등록
 	public int registCourse(int currentUserId, Scanner sc) {
 
+		
+		//이거 무조건 고쳐라 시퀀스 들고와서 같은값으로 넣는거
 		System.out.print("1.강의명 : ");
 		String courseName = sc.nextLine();
 		System.out.println("2. 진행할 강의 건물 : ");
@@ -173,6 +182,7 @@ public class ProfessorDao {
 		registCourseTime(currentUserId,courseDay,courseStart,courseEnd);
 		return currentUserId;
 	}
+	
 		public int registCourseTime(int currentUserId, String courseDay, String courseStart, String courseEnd) {
 			
 		
