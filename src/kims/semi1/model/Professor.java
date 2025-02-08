@@ -24,6 +24,19 @@ public class Professor {
 		this.departmentId = departmentId;
 		this.hireDate = hireDate;
 	}
+	
+	public Professor(Professor another) {
+		super();
+		this.professorId = another.getProfessorId();
+		this.name = another.getName();
+		this.phone = another.getPhone();
+		this.birthDate = another.getBirthDate();
+		this.email = another.getEmail();
+		this.password = another.getPassword();
+		this.departmentId = another.getDepartmentId();
+		this.hireDate = another.getHireDate();
+		
+	}
 
 	public int getProfessorId() {
 		return professorId;

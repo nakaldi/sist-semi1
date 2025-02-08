@@ -13,10 +13,6 @@ import kims.semi1.model.Professor;
 
 public class ProfessorDao {
 
-	public ProfessorDao() {
-
-	}
-
 	// professor_id 로 검색해서 하나라도 있으면 true 없으면 false 를 반환
 	public boolean existsProfessorId(int professorId) {
 		String sql = "SELECT COUNT(*) FROM professors WHERE professor_id = ?";
@@ -92,6 +88,147 @@ public class ProfessorDao {
 		return professor;
 	}
 
+	// 강의 등록
+	public void registCourse(int currentUserId, Scanner sc) {
+
+		System.out.print("1.강의명 : ");
+		String courseName = sc.nextLine();
+		System.out.println("2. 진행할 강의 건물");
+		int departmentId = sc.nextInt();
+		sc.nextLine();
+		System.out.print("2.학기 : ");
+		String semester = sc.nextLine();
+		System.out.print("3.학점 : ");
+		String credits = sc.nextLine();
+		System.out.print("4.강의설명 : ");
+		StringBuilder coursePlan = new StringBuilder();
+		String line;
+
+		while (!(line = sc.nextLine()).isEmpty()) {
+			coursePlan.append(line).append("\n");
+		}
+
+		String insertCourseSql = "insert into courses values(seq_course_id.nextval,?,?,?,?,?,?)";
+		try (Connection conn = DBConnector.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(insertCourseSql)) {
+			pstmt.setString(1, courseName);
+			pstmt.setInt(2, currentUserId);
+			pstmt.setInt(3, departmentId);
+			pstmt.setString(4, credits);
+			pstmt.setString(5, semester);
+			pstmt.setString(6, coursePlan.toString());
+			
+			int result = pstmt.executeUpdate();
+
+			if(result > 0) {
+				System.out.println("등록 완료");
+			}else {
+				System.out.println("등록 실패");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+	//강의평가 조회
+	public int printStudentRivew(int currentUserId) {
+		
+		String reviewSql = "SELECT c.name AS course_name, g.student_review "
+				+ "FROM courses c, enrollments e, grades g "
+				+ "WHERE c.professor_id = ? "
+				+ "AND c.course_id = e.course_id "
+				+ "AND e.enrollment_id = g.enrollment_id "
+				+ "AND g.student_review IS NOT NULL ";
+		try (Connection conn = DBConnector.getConnection();
+				PreparedStatement reviewps = conn.prepareStatement(reviewSql)) {
+			reviewps.setInt(1, currentUserId);
+			System.out.println(currentUserId + "current까지 왔삼");
+			
+			try (ResultSet rs = reviewps.executeQuery()) {
+				System.out.println(rs + "try 진입");
+				while(rs.next()) {
+					System.out.println("rs 진입");
+					String c_name = rs.getString("course_name");
+					String studentRiview = rs.getString("student_review");
+					
+					System.out.println("강의명\t|\t학생리뷰");
+					System.out.println(c_name +"	|	"+studentRiview);
+
+				}
+				
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return currentUserId;
+		
+	}
+	
+	//교수 강의 현황 조회
+	public int printCourseInfo(int currentUserId) {
+		
+		System.out.println("==강의 등록 메뉴==");
+		String selectSql = "SELECT name, department_id ,semester, credits ,courseplan  FROM courses WHERE professor_id = ?";
+		try (Connection conn = DBConnector.getConnection();
+				PreparedStatement selectps = conn.prepareStatement(selectSql)) {
+			selectps.setInt(1, currentUserId);
+			try (ResultSet rs = selectps.executeQuery()) {
+				while (rs.next()) {
+
+					String courseName = rs.getString("name");
+					int departmentId = rs.getInt("department_id");
+					String courseSemester = rs.getString("semester");
+					String courseCredit = rs.getString("credits");
+					String coursePlan = rs.getString("courseplan");
+
+					System.out.println(courseName +"	|	"+departmentId+ "	|	" + courseSemester + "	|	" + courseCredit + "	|	" + coursePlan);
+
+				}
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return currentUserId;
+		
+	}
+
+	// 교수 강의 등록시 정보 출력
+	public int printCourseInfoInRegistCourse(int currentUserId) {
+
+		System.out.println("==강의 등록 메뉴==");
+		System.out.println("==강의 등록 메뉴==");
+		String selectSql = "SELECT name, department_id ,semester, credits ,courseplan  FROM courses WHERE professor_id = ?";
+		try (Connection conn = DBConnector.getConnection();
+				PreparedStatement selectps = conn.prepareStatement(selectSql)) {
+			selectps.setInt(1, currentUserId);
+			try (ResultSet rs = selectps.executeQuery()) {
+				while (rs.next()) {
+
+					String courseName = rs.getString("name");
+					int departmentId = rs.getInt("department_id");
+					String courseSemester = rs.getString("semester");
+					String courseCredit = rs.getString("credits");
+					String coursePlan = rs.getString("courseplan");
+
+					System.out.println(courseName +"	|	"+departmentId+ "	|	" + courseSemester + "	|	" + courseCredit + "	|	" + coursePlan);
+
+				}
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return currentUserId;
+	}
+	
 	// 교수 정보 변경
 	public int modifyProfessorInfo(String typeInfo, String modifyInfo, int currentUserId, Scanner sc) {
 
@@ -167,5 +304,28 @@ public class ProfessorDao {
 			e.printStackTrace();
 		}
 		return Professor;
+	}
+
+	public boolean updateProfessor(Professor professor) {
+		String sql = "UPDATE professors SET name = ?, phone = ?, birth_date = ?, email = ?, password = ?,"
+				+ " department_id = ?, hire_date = ? WHERE professor_id = ?";
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setString(1, professor.getName());
+			pstmt.setString(2, professor.getPhone());
+			pstmt.setDate(3, Date.valueOf(professor.getBirthDate()));
+			pstmt.setString(4, professor.getEmail());
+			pstmt.setString(5, professor.getPassword());
+			pstmt.setInt(6, professor.getDepartmentId());
+			pstmt.setDate(7, Date.valueOf(professor.getBirthDate()));
+			pstmt.setInt(8, professor.getProfessorId());
+
+			int affectedRows = pstmt.executeUpdate();
+			return affectedRows > 0; // 업데이트된 행이 있는 경우 true 반환
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 }

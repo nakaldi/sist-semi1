@@ -9,10 +9,14 @@ import java.util.Scanner;
 
 import kims.semi1.config.DBConnector;
 import kims.semi1.dao.ProfessorDao;
+import kims.semi1.model.Professor;
+import kims.semi1.service.ProfessorService;
 
 public class ProfessorController {
 
+	private final ProfessorService professorService;
 	int currentUserId;
+	Professor professor;
 	ProfessorDao professorDao;
 	// 변경 값 저장 변수
 	String typeName = "name";
@@ -21,19 +25,22 @@ public class ProfessorController {
 	String typePw = "password";
 
 	public ProfessorController() {
-
+		this.professorService = new ProfessorService();
 		this.professorDao = new ProfessorDao();
 	}
 
 	public ProfessorController(int currentUserId) {
 		this.currentUserId = currentUserId;
 		this.professorDao = new ProfessorDao();
+
+		this.professorService = new ProfessorService();
+		Object[] temps = professorService.getProfessorInfo(currentUserId);
+		professor = (Professor) temps[0];
 	}
 
 	public void printProfessorMenu(Scanner sc) {
 
-		printProfessorInfo();
-
+		System.out.println("==교수 정보 메뉴==");
 		System.out.println("1.교수 정보 수정");
 		System.out.println("2.강의 관리");
 		System.out.println("3.학생 출결 관리");
@@ -45,15 +52,50 @@ public class ProfessorController {
 		sc.nextLine();
 
 		switch (input) {
+
 		case 1:
 			modifyProfessorInfo(sc);
 
+		case 2:
+			managementCourse(sc);
+
+		}
+
+	}
+
+	public void managementCourse(Scanner sc) {
+		while (true) {
+			System.out.println("==강의 관리 메뉴==");
+			System.out.println("1. 강의 등록");
+			System.out.println("2. 강의 현황 조회");
+			System.out.println("3. 강의 평가 조회");
+			System.out.println("4. 나가기");
+
+			int professorInfoInput = sc.next().charAt(0) - '0';
+			sc.nextLine();
+
+			switch (professorInfoInput) {
+			case 1:
+				professorDao.printCourseInfoInRegistCourse(currentUserId);
+				professorDao.registCourse(currentUserId, sc);
+			case 2:
+				professorDao.printCourseInfo(currentUserId);
+			case 3:
+				professorDao.printStudentRivew(currentUserId);
+				
+			case 4:
+				printProfessorMenu(sc);
+				
+
+			}
 		}
 	}
 
 	public void modifyProfessorInfo(Scanner sc) {
+		Professor updateProfessorInfo = new Professor(professor);
 		while (true) {
 
+			printProfessorInfo();
 			System.out.println("==개인 정보 수정==");
 			System.out.println("1.이름 수정");
 			System.out.println("2.전화번호 수정");
@@ -66,44 +108,44 @@ public class ProfessorController {
 			sc.nextLine();
 
 			switch (professorInfoInput) {
-
 			case 1:
-				System.out.println("변경할 이름 : ");
-				String modifyName = sc.nextLine();
-
-				professorDao.modifyProfessorInfo(typeName, modifyName, currentUserId, sc);
+				System.out.print("이름>>");
+				updateProfessorInfo.setName(sc.next());
+				sc.nextLine();
 				break;
-
 			case 2:
-				System.out.println("변경할 전화번호 : ");
-				String modifyPhone = sc.nextLine();
-
-				professorDao.modifyProfessorInfo(typePhone, modifyPhone, currentUserId, sc);
+				System.out.print("전화번호>>");
+				updateProfessorInfo.setPhone(sc.next());
+				sc.nextLine();
 				break;
-
 			case 3:
-				System.out.println("변경할 이메일 : ");
-				String modifyEmail = sc.nextLine();
-
-				professorDao.modifyProfessorInfo(typeEmail, modifyEmail, currentUserId, sc);
+				System.out.print("email>>");
+				updateProfessorInfo.setEmail(sc.next());
+				sc.nextLine();
 				break;
-
 			case 4:
-				System.out.println("변경할 비밀번호 : ");
-				String modifyPw = sc.nextLine();
-
-				professorDao.modifyProfessorInfo(typePw, modifyPw, currentUserId, sc);
+				System.out.print("비밀번호>>");
+				updateProfessorInfo.setPassword(sc.next());
+				sc.nextLine();
 				break;
-
 			case 5:
-				// 미구현
-				break;
-
+				if (professorService.updateStudentInfo(updateProfessorInfo) == null) {
+					System.out.println("등록 실패.");
+					break;
+				} else {
+					professor = updateProfessorInfo;
+					System.out.println("등록 성공!");
+					managementCourse(sc);
+					return;
+				}
 			case 6:
-				printProfessorInfo();
+				System.out.println("취소되었습니다.");
+				managementCourse(sc);
+				return;
+			default:
+				System.out.println("다시 입력해주세요.");
 				break;
 			}
-
 		}
 	}
 
