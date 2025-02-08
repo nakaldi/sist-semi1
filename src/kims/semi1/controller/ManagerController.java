@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 import kims.semi1.config.DBConnector;
 import kims.semi1.dao.ClassScheduleDao;
-import kims.semi1.dao.ProfessorDao;
 import kims.semi1.model.ClassSchedule;
 
 public class ManagerController {
@@ -41,12 +40,14 @@ public class ManagerController {
 				professorInfo(sc);
 				break;
 			case 3:
+				selectStudentMenu(sc);
 				break;
 			case 4:
 				searchCourseInfo(sc);
 				break;
 			case 5:
-				break;
+				System.out.println("로그아웃 되었습니다");
+				return;
 			}
 		}
 	}
@@ -238,7 +239,7 @@ public class ManagerController {
 			System.out.println("1.시간표 조회");
 			System.out.println("2.시간표 등록");
 			System.out.println("3.시간표 삭제");
-			System.out.println("4.나가기");
+			System.out.println("4.메뉴로 돌아가기");
 			System.out.print(">>");
 			int input = sc.next().charAt(0) - '0';
 			sc.nextLine();
@@ -254,8 +255,8 @@ public class ManagerController {
 				deleteClassSchedule(sc);
 				break;
 			case 4:
-				selectManagertMenu(sc);
-				break;
+				System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
+				return;
 			}
 		}
 	}
@@ -333,7 +334,7 @@ public class ManagerController {
 			Connection conn = null;
 			PreparedStatement pstmt = null;
 			System.out.print("시간표 ID>> ");
-			int inputClassScheduleID = sc.next().charAt(0) - '0';
+			int inputClassScheduleID = sc.nextInt();
 			try {
 				conn = DBConnector.getConnection();
 				String DeleteclassSchedule = "DELETE FROM class_schedules WHERE schedule_id = ?";
@@ -364,19 +365,42 @@ public class ManagerController {
 	// 학생정보조회 학생정보등록 나가기 화면을 보여주면서 선택할 수 있는 메소드
 	public void selectStudentMenu(Scanner sc) {
 		while (true) {
-			System.out.println("1.학생정보조회 2.학생정보등록 3. 나가기");
+			System.out.println("1.학생정보조회 2.학생정보등록 3. 메뉴로 돌아가기");
 			System.out.print("선택>>");
 			int input = sc.next().charAt(0) - '0';
 			sc.nextLine();
 			switch (input) {
 			case 1:
-				searchStudentInfo(sc);
+				searchStudentMain(sc);
 				break;
 			case 2:
 				insertStudentInfo(sc);
 				break;
 			case 3:
+				System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
 				return;
+			}
+		}
+	}
+
+	// 학생정보조회 메뉴
+	public void searchStudentMain(Scanner sc) {
+		while (true) {
+			System.out.println("1.학생정보전체조회 2.학생학번조회 3.학생정보등록 메뉴로 돌아가기");
+			System.out.print(">>");
+			int input = sc.next().charAt(0) - '0';
+			sc.nextLine();
+			switch (input) {
+			case 1:
+				printAllStudentInfo();
+				break;
+			case 2:
+				searchStudentInfo(sc);
+				break;
+			case 3:
+				return;
+			default:
+				System.out.println("1~2사이에 숫자를 입력해주세요");
 			}
 		}
 	}
@@ -393,7 +417,7 @@ public class ManagerController {
 
 		try {
 			conn = DBConnector.getConnection();
-			String studentInofo = "SELECT student_id , name , phone , birth_date , email , password , enrollment_year  "
+			String studentInofo = "SELECT student_id , name , phone , to_char(birth_date,'yyyy-mm-dd'), email , password , enrollment_year  "
 					+ "FROM students " + "WHERE student_id = ? ";
 			pstmt = conn.prepareStatement(studentInofo);
 			pstmt.setInt(1, studentID);
@@ -402,11 +426,12 @@ public class ManagerController {
 				do {
 					String studentName = rs.getString("name");
 					String phone = rs.getString("phone");
-					String birthDate = rs.getString("birth_date");
+					String birthDate = rs.getString("to_char(birth_date,'yyyy-mm-dd')");
 					String email = rs.getString("email");
 					String password = rs.getString("password");
 					String enrollmentYear = rs.getString("enrollment_year");
-					System.out.println(studentID + studentName + phone + birthDate + email + password + enrollmentYear);
+					System.out.println(studentID + "|" + studentName + "|" + phone + "|" + birthDate + "|" + email + "|"
+							+ password + "|" + enrollmentYear);
 				} while (rs.next());
 			}
 		} catch (SQLException e) {
@@ -432,7 +457,7 @@ public class ManagerController {
 					int studentID = rs.getInt("student_id");
 					String studentName = rs.getString("name");
 					String phone = rs.getString("phone");
-					String birthDate = rs.getString("birth_date");
+					String birthDate = rs.getString("to_char(birth_date,'yyyy-mm-dd')");
 					String email = rs.getString("email");
 					String password = rs.getString("password");
 					String enrollmentYear = rs.getString("enrollment_year");
