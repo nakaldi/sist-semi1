@@ -4,6 +4,12 @@ public class Unit {
 	private String unitId;
 	private int buildingId;
 
+	public Unit(String unitId, int buildingId) {
+		super();
+		this.unitId = unitId;
+		this.buildingId = buildingId;
+	}
+
 	public String getUnitId() {
 		return unitId;
 	}

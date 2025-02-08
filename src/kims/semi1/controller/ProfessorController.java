@@ -172,7 +172,5 @@ public class ProfessorController {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
 	}
-
 }

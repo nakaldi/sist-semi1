@@ -4,6 +4,12 @@ public class Building {
 	private int buildingId;
 	private String name;
 
+	public Building(int buildingId, String name) {
+		super();
+		this.buildingId = buildingId;
+		this.name = name;
+	}
+
 	public int getBuildingId() {
 		return buildingId;
 	}

@@ -9,6 +9,18 @@ public class Course {
 	private String semester;
 	private String syllabus;
 
+	public Course(int courseId, String name, int professorId, int departmentId, String credit, String semester,
+			String syllabus) {
+		super();
+		this.courseId = courseId;
+		this.name = name;
+		this.professorId = professorId;
+		this.departmentId = departmentId;
+		this.credit = credit;
+		this.semester = semester;
+		this.syllabus = syllabus;
+	}
+
 	public int getCourseId() {
 		return courseId;
 	}
