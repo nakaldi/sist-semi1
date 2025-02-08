@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import kims.semi1.config.DBConnector;
 import kims.semi1.dao.ClassScheduleDao;
+import kims.semi1.dao.ProfessorDao;
 import kims.semi1.model.ClassSchedule;
 
 public class ManagerController {
@@ -21,42 +22,128 @@ public class ManagerController {
 	}
 
 	public void selectManagertMenu(Scanner sc) {
-		System.out.println("1. 시간표 관리");
-		System.out.println("2. 교수정보 관리");
-		System.out.println("3. 학생 정보 관리");
-		System.out.println("4. 강의 조회");
-		System.out.println("5. 로그아웃");
-		System.out.print("메뉴>");
-		int input = sc.next().charAt(0) - '0';
-		sc.nextLine();
-
-		switch (input) {
-		case 1:
-			selectClassScheduleMenu(sc);
-			break;
-		case 2:
-			break;
-		case 3:
-			break;
-		case 4:
-			searchCourseInfo(sc);
-			break;
-		case 5:
-			break;
+		while(true) {
+			System.out.println("1. 시간표 관리");
+			System.out.println("2. 교수정보 관리");
+			System.out.println("3. 학생 정보 관리");
+			System.out.println("4. 강의 조회");
+			System.out.println("5. 로그아웃");
+			System.out.print("메뉴>");
+			int input = sc.next().charAt(0) - '0';
+			sc.nextLine();
+			
+			switch (input) {
+			case 1:
+				selectClassScheduleMenu(sc);
+				break;
+			case 2:
+				professorInfo(sc);
+				break;
+			case 3:
+				break;
+			case 4:
+				searchCourseInfo(sc);
+				break;
+			case 5:
+				break;
+			}
 		}
 	}
 
-//	// 2.교수정보관리
-//	public void professorSearch(Scanner sc) {
-//		
-//		//교수 정보 조회 
-//		System.out.println("====교수 정보 관리====");
-//		System.out.println("1.교수 정보 조회");
-//		System.out.println("2.교수 강의 조회");
-//		System.out.print("메뉴>> ");
-//		int professorScInput = sc.next().charAt(0) - '0';
-//		sc.nextLine();
-//	}
+	// 2.교수정보관리
+	public void professorInfo(Scanner sc) {
+		while (true) {
+			System.out.println("====교수 정보 관리====");
+			System.out.println("1.교수 정보 조회");
+			System.out.println("2.교수 정보 등록");
+			System.out.println("3.메뉴로 돌아가기");
+			System.out.print("메뉴>> ");
+			int professorScInput = sc.next().charAt(0) - '0';
+			sc.nextLine();
+
+			Connection conn = null;
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+
+			try {
+				conn = DBConnector.getConnection();
+
+				switch (professorScInput) {
+				// 1.교수정보조회
+				case 1:
+					System.out
+							.println("-----------------------------------교수 정보 조회-----------------------------------");
+					String professorInfoSql = "select professor_id,name,phone,to_char(birth_date,'yyyy-mm-dd'),email,to_char(hire_date,'yy-mm-dd') from professors";
+					ps = conn.prepareStatement(professorInfoSql);
+					rs = ps.executeQuery();
+
+					while (rs.next()) {
+						String professorID = rs.getString("professor_id");
+						String professorName = rs.getString("name");
+						String professorPhone = rs.getString("phone");
+						String professorBirth = rs.getString("to_char(birth_date,'yyyy-mm-dd')");
+						String professorEmail = rs.getString("email");
+						String professorHiredate = rs.getString("to_char(hire_date,'yy-mm-dd')");
+
+						System.out.println(professorID + "|" + professorName + "|" + professorPhone + "|"
+								+ professorBirth + "|" + professorEmail + "|" + professorHiredate);
+					}
+					break;
+
+				// 2.교수정보등록
+				case 2:
+					
+					System.out
+							.println("-----------교수 정보 등록-----------");
+					String professorSaveSql = "insert into professors(professor_id,name,phone,birth_date,email,password,department_id,hire_date )\r\n"
+							+ "values(to_char(sysdate,'yyyy')||LPAD(seq_professor_num.nextval,6,'0'),?,?,?,?,?,?,to_char(sysdate,'yyyy-mm-dd'))";
+					ps = conn.prepareStatement(professorSaveSql);
+	
+					System.out.print("이름>> ");
+					String saveName = sc.nextLine();
+					ps.setString(1, saveName);
+
+					System.out.print("전화번호>> ");
+					String savePhone = sc.nextLine();
+					ps.setString(2, savePhone);
+
+					System.out.print("생년월일>> ");
+					String saveBirthday = sc.nextLine();
+					ps.setString(3, saveBirthday);
+
+					System.out.print("이메일>> ");
+					String saveEmail = sc.nextLine();
+					ps.setString(4, saveEmail);
+
+					String savePassword = saveBirthday;
+					ps.setString(5, savePassword);
+
+					System.out.print("학과번호>> ");
+					String saveDepartmentId = sc.nextLine();
+					ps.setString(6, saveDepartmentId);
+
+					System.out.println("등록이 완료되었습니다.");
+					
+					ps.executeUpdate();
+					
+					break;
+
+				case 3:
+					System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
+					return;
+					
+				default:
+					System.out.println("올바른 메뉴를 선택해주세요.");
+					break;
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}finally {
+				DBConnector.close(conn, ps);
+			}
+		}
+	}
 
 	// 4.강의정보관리
 	public void searchCourseInfo(Scanner sc) {
@@ -65,7 +152,7 @@ public class ManagerController {
 			System.out.println("====강의 조회====");
 			System.out.println("1.전체 강의 조회");
 			System.out.println("2.특정 강의 조회");
-			System.out.println("3.나가기");
+			System.out.println("3.메뉴로 돌아가기");
 			System.out.print("메뉴>> ");
 			int coursesInfoInput = sc.next().charAt(0) - '0';
 			sc.nextLine();
@@ -128,7 +215,9 @@ public class ManagerController {
 					break;
 
 				case 3:
-					selectManagertMenu(sc);
+					System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
+					return;
+					
 				default:
 					System.out.println("올바른 메뉴를 선택해주세요.");
 					break;
