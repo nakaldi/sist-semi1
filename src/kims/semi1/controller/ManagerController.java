@@ -3,6 +3,7 @@ package kims.semi1.controller;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 import kims.semi1.config.DBConnector;
@@ -238,6 +239,7 @@ public class ManagerController {
 			System.out.println("1.시간표 조회");
 			System.out.println("2.시간표 등록");
 			System.out.println("3.시간표 삭제");
+			System.out.println("4.나가기");
 			System.out.print(">>");
 			int input = sc.next().charAt(0) - '0';
 			switch (input) {
@@ -248,7 +250,10 @@ public class ManagerController {
 				saveClassScheduleInfo(sc);
 				break;
 			case 3:
-
+				deleteClassSchedule(sc);
+				break;
+			case 4:
+				selectManagertMenu(sc);
 				break;
 			}
 		}
@@ -256,26 +261,52 @@ public class ManagerController {
 
 	// 데이터베이스에 저장되어있는 전체시간표를 보여주는 메소드
 	public void printClassScheduleInofo() {
-
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try {
+			conn = DBConnector.getConnection();
+			String classScheduleInofo = "SELECT schedule_id,courses.name,day_of_week,start_time,end_time,professors.name AS professorname "
+					  +"FROM class_schedules,courses,professors "
+				      +"WHERE class_schedules.course_id = courses.course_id "
+				      + "AND professors.professor_id = courses.professor_id";
+			pstmt = conn.prepareStatement(classScheduleInofo);
+			rs = pstmt.executeQuery();
+			System.out.println("시간표ID	|강의명	|요일	|시작시간	|종료시간	|교수이름");
+			while(rs.next()) {
+				int schdeuleID = rs.getInt("schedule_id");
+				String courseName = rs.getString("name");
+				String dayOfWeek = rs.getString("day_of_week");
+				String startTime = rs.getString("start_time");
+				String endTime = rs.getString("end_time");
+				String professorName = rs.getString("professorname");
+				System.out.println(schdeuleID +"\t"+"|"+courseName+"\t"+"|"+dayOfWeek+"\t"+"|"+startTime+"\t"+"|"+endTime+"\t"+"|"+professorName);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			DBConnector.close(conn, pstmt, rs);
+		}
 	}
 
 	// 시간표 데이터 저장.
 	public void saveClassScheduleInfo(Scanner sc) {
-		ClassSchedule classchedules = new ClassSchedule(0, 0, null, null, null);
+		ClassSchedule classShedule = new ClassSchedule(0, 0, null, null, null);
 		System.out.print("강의ID>>");
-		classchedules.setCourseId(sc.nextInt());
+		classShedule.setCourseId(sc.nextInt());
 		System.out.print("요일>>");
-		classchedules.setDayOfWeek(sc.next());
+		classShedule.setDayOfWeek(sc.next());
 		System.out.print("시작시간>>");
-		classchedules.setStartTime(sc.next());
+		classShedule.setStartTime(sc.next());
 		System.out.print("종료시간>>");
-		classchedules.setEndTime(sc.next());
+		classShedule.setEndTime(sc.next());
 		System.out.println("1.등록 2.취소");
 		int input = sc.nextInt();
 		sc.nextLine();
 		switch (input) {
 		case 1:
-			if (insertClassScheduleInfo(classchedules) == null) {
+			if (insertClassScheduleInfo(classShedule) == null) {
 				System.out.println("등록실패");
 			} else {
 				System.out.println("등록성공");
@@ -286,7 +317,37 @@ public class ManagerController {
 			break;
 		}
 	}
-
+	//시간표 삭제
+	public void deleteClassSchedule(Scanner sc) {
+		System.out.println("삭제하시겠습니까? 1. 삭제 2. 취소");
+		switch (sc.nextInt()){
+		case 1: 
+			Connection conn = null;
+			PreparedStatement pstmt = null;
+			System.out.print("시간표 ID>> ");
+			int inputClassScheduleID = sc.next().charAt(0) - '0';
+			try {
+				conn = DBConnector.getConnection();
+				String DeleteclassSchedule="DELETE FROM class_schedules WHERE schedule_id = ?";
+				pstmt = conn.prepareStatement(DeleteclassSchedule);
+				pstmt.setInt(1, inputClassScheduleID);
+				int affectedRows = pstmt.executeUpdate();
+				if(affectedRows > 0) {
+					System.out.println("삭제되었습니다");
+				}
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}finally {
+				DBConnector.close(conn, pstmt);
+			}
+			break;
+		case 2:
+			System.out.println("취소했습니다");
+			break;
+		}
+	}
 	public ClassSchedule insertClassScheduleInfo(ClassSchedule newClassSchedule) {
 		return classScheduledao.insertClassSchedule(newClassSchedule) ? newClassSchedule : null;
 

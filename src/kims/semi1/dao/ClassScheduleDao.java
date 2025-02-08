@@ -22,10 +22,6 @@ public class ClassScheduleDao {
 		try {
 			conn = DBConnector.getConnection();
 			pstmt = conn.prepareStatement(sql);
-//			Statement st = conn.createStatement();
-//			ResultSet rs =st.executeQuery("select seq_class_schedules_num.nextval from dual");
-//			rs.next();
-//			pstmt.setInt(1, rs.getInt(1));
 			pstmt.setInt(1, classSchedule.getCourseId());
 			pstmt.setString(2, classSchedule.getDayOfWeek());
 			pstmt.setString(3, classSchedule.getStartTime());
