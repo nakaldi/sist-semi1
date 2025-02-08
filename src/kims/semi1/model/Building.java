@@ -3,6 +3,9 @@ package kims.semi1.model;
 public class Building {
 	private int buildingId;
 	private String name;
+	
+	public Building() {
+	}
 
 	public Building(int buildingId, String name) {
 		super();

@@ -26,7 +26,7 @@ public class GenericDao {
 	 * 
 	 * @return {@code List<targetModel>} if the results exist; {@code null} if the
 	 *         result does not exists.
-	 */
+	 */	
 	public <T> List<T> findModels(Class<T> targetModel, String targetColumn, String targetString) {
 
 		String sql = "SELECT * FROM " + targetModel.getSimpleName() + "s WHERE " + targetColumn + " = ?";
@@ -57,6 +57,14 @@ public class GenericDao {
 		return null;
 	}
 
+	public <T> T findModel(Class<T> targetModel, String targetColumn, int targetInt) {
+		return findModels(targetModel, targetColumn, targetInt).get(0);
+	}
+
+	public <T> T findModel(Class<T> targetModel, String targetColumn, String targetString) {
+		return findModels(targetModel, targetColumn, targetString).get(0);
+	}
+
 	/**
 	 * ResultSet 결과를 List<targetModel> 형식으로 반환함.
 	 */
@@ -64,8 +72,14 @@ public class GenericDao {
 		List<T> models = new ArrayList<>();
 		// ResultSet에 자료가 하나도 없는 경우 null 반환
 		if (rs.isBeforeFirst() == false) {
-			System.out.println("ResultSet에 결과 없음");
-			return null;
+			try {
+				models.add(targetModel.newInstance());
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			return models;
 		}
 		if (targetModel == Building.class) {
 			while (rs.next()) {

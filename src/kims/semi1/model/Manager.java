@@ -4,6 +4,9 @@ public class Manager {
 	private int managerId;
 	private String password;
 
+	public Manager() {
+	}
+
 	public Manager(int managerId, String password) {
 		super();
 		this.managerId = managerId;

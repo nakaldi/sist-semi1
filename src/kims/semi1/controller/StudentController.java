@@ -1,8 +1,13 @@
 package kims.semi1.controller;
 
+import java.util.List;
 import java.util.Scanner;
 
+import kims.semi1.model.ClassSchedule;
+import kims.semi1.model.Course;
+import kims.semi1.model.CourseInfo;
 import kims.semi1.model.Department;
+import kims.semi1.model.Professor;
 import kims.semi1.model.Student;
 import kims.semi1.service.StudentService;
 
@@ -70,6 +75,8 @@ public class StudentController {
 			System.out.print(">>");
 
 			int input = sc.next().charAt(0) - '0';
+			sc.nextLine();
+
 			switch (input) {
 			case 1:
 				System.out.print("이름>>");
@@ -118,10 +125,11 @@ public class StudentController {
 			System.out.print(">>");
 
 			int input = sc.next().charAt(0) - '0';
+			sc.nextLine();
+
 			switch (input) {
 			case 1:
-				
-
+				searchCourses(sc);
 				break;
 			case 2:
 
@@ -134,5 +142,32 @@ public class StudentController {
 				return;
 			}
 		}
+	}
+
+	public void searchCourses(Scanner sc) {
+		System.out.print("학기 선택 1 or 2 \n >>");
+		String input = sc.next();
+		sc.nextLine();
+
+		System.out.println("----------------------- " + input + " 학기 강의 정보--------------------------");
+		System.out.println("강의번호     강의명                                  교수명     학과            요일    시작교시  종료교시  ");
+		List<CourseInfo> courseInfos = studentService.getCourseInfoBySemester(input);
+		courseInfos.stream().forEach(t -> {
+			Course c = t.getCourse();
+			Department d = t.getDepartment();
+			Professor p = t.getProfessor();
+			ClassSchedule s = t.getClassSchedule();
+			System.out.println(c.getCourseId() + "\t"
+					+ (c.getName().length() < 33 ? c.getName() + (" ").repeat(33 - c.getName().length()) : c.getName())
+					+ "\t" + p.getName() + "\t"
+					+ (d.getName().length() < 10 ? d.getName() + (" ").repeat(10 - d.getName().length()) : d.getName())
+					+ "\t" + s.getDayOfWeek() + "\t" + s.getStartTime() + " - " + s.getEndTime());
+		});
+	}
+
+	public void registerEnrollment(Scanner sc) {
+		System.out.print("수강 신청할 강의 번호 입력 >>");
+		int input = sc.nextInt();
+		sc.nextLine();
 	}
 }

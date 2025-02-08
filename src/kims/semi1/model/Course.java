@@ -9,6 +9,9 @@ public class Course {
 	private String semester;
 	private String syllabus;
 
+	public Course() {
+	}
+
 	public Course(int courseId, String name, int professorId, int departmentId, String credit, String semester,
 			String syllabus) {
 		super();

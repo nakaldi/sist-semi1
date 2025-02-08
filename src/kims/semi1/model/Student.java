@@ -12,6 +12,9 @@ public class Student {
 	private int departmentId;
 	private int enrollmentYear;
 
+	public Student() {
+	}
+
 	public Student(int studentId, String name, String phone, LocalDate birthDate, String email, String password,
 			int departmentId, int enrollmentYear) {
 		super();

@@ -6,8 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import kims.semi1.config.DBConnector;
+import kims.semi1.model.ClassSchedule;
+import kims.semi1.model.Course;
+import kims.semi1.model.CourseInfo;
+import kims.semi1.model.Department;
+import kims.semi1.model.Professor;
 import kims.semi1.model.Student;
 
 public class StudentDao {
@@ -143,6 +150,33 @@ public class StudentDao {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	public List<CourseInfo> findCourseInfosBySemester(String semester) {
+		String sql = "select *  from (((courses c inner join professors p on c.professor_id = p.professor_id) "
+				+ "inner join departments d on c.department_id = d.department_id) "
+				+ "full outer join class_schedules s on c.course_id = s.course_id) where c.semester = ?";
+
+		List<CourseInfo> courseInfos = new ArrayList<CourseInfo>();
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, semester);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					Course c = new Course(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getString(5),
+							rs.getString(6), rs.getString(7));
+					Professor p = new Professor(rs.getInt(8), rs.getString(9), rs.getString(10),
+							rs.getDate(11).toLocalDate(), rs.getString(12), rs.getString(13), rs.getInt(14),
+							rs.getDate(15).toLocalDate());
+					Department d = new Department(rs.getInt(16), rs.getString(17), rs.getString(18), rs.getInt(19));
+					ClassSchedule s = new ClassSchedule(rs.getInt(20), rs.getInt(21), rs.getString(22),
+							rs.getString(23), rs.getString(24));
+					courseInfos.add(new CourseInfo(c, d, s, p));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return courseInfos;
 	}
 
 }

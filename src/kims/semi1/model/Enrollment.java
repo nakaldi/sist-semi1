@@ -5,6 +5,9 @@ public class Enrollment {
 	private int studentId;
 	private int courseId;
 
+	public Enrollment() {
+	}
+
 	public Enrollment(int enrollmentId, int studentId, int courseId) {
 		super();
 		this.enrollmentId = enrollmentId;

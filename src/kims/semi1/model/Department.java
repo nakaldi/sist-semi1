@@ -6,6 +6,9 @@ public class Department {
 	private String phone;
 	private int buildingId;
 
+	public Department() {
+	}
+
 	public Department(int departmentId, String name, String phone, int buildingId) {
 		super();
 		this.departmentId = departmentId;

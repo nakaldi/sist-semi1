@@ -12,6 +12,9 @@ public class Professor {
 	private int departmentId;
 	private LocalDate hireDate;
 
+	public Professor() {
+	}
+
 	public Professor(int professorId, String name, String phone, LocalDate birthDate, String email, String password,
 			int departmentId, LocalDate hireDate) {
 		super();
