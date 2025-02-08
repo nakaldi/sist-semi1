@@ -12,18 +12,18 @@ import kims.semi1.dao.ProfessorDao;
 import kims.semi1.model.ClassSchedule;
 
 public class ManagerController {
-	ClassScheduleDao classScheduledao;
+	ClassScheduleDao classScheduleDao;
 
 	public ManagerController() {
-		this.classScheduledao = new ClassScheduleDao();
+		this.classScheduleDao = new ClassScheduleDao();
 	}
 
 	public ManagerController(int currentUserId) {
-		this.classScheduledao = new ClassScheduleDao();
+		this.classScheduleDao = new ClassScheduleDao();
 	}
 
 	public void selectManagertMenu(Scanner sc) {
-		while(true) {
+		while (true) {
 			System.out.println("1. 시간표 관리");
 			System.out.println("2. 교수정보 관리");
 			System.out.println("3. 학생 정보 관리");
@@ -32,7 +32,7 @@ public class ManagerController {
 			System.out.print("메뉴>");
 			int input = sc.next().charAt(0) - '0';
 			sc.nextLine();
-			
+
 			switch (input) {
 			case 1:
 				selectClassScheduleMenu(sc);
@@ -93,13 +93,12 @@ public class ManagerController {
 
 				// 2.교수정보등록
 				case 2:
-					
-					System.out
-							.println("-----------교수 정보 등록-----------");
+
+					System.out.println("-----------교수 정보 등록-----------");
 					String professorSaveSql = "insert into professors(professor_id,name,phone,birth_date,email,password,department_id,hire_date )\r\n"
 							+ "values(to_char(sysdate,'yyyy')||LPAD(seq_professor_num.nextval,6,'0'),?,?,?,?,?,?,to_char(sysdate,'yyyy-mm-dd'))";
 					ps = conn.prepareStatement(professorSaveSql);
-	
+
 					System.out.print("이름>> ");
 					String saveName = sc.nextLine();
 					ps.setString(1, saveName);
@@ -124,15 +123,15 @@ public class ManagerController {
 					ps.setString(6, saveDepartmentId);
 
 					System.out.println("등록이 완료되었습니다.");
-					
+
 					ps.executeUpdate();
-					
+
 					break;
 
 				case 3:
 					System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
 					return;
-					
+
 				default:
 					System.out.println("올바른 메뉴를 선택해주세요.");
 					break;
@@ -140,7 +139,7 @@ public class ManagerController {
 
 			} catch (Exception e) {
 				e.printStackTrace();
-			}finally {
+			} finally {
 				DBConnector.close(conn, ps);
 			}
 		}
@@ -218,7 +217,7 @@ public class ManagerController {
 				case 3:
 					System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
 					return;
-					
+
 				default:
 					System.out.println("올바른 메뉴를 선택해주세요.");
 					break;
@@ -242,6 +241,8 @@ public class ManagerController {
 			System.out.println("4.나가기");
 			System.out.print(">>");
 			int input = sc.next().charAt(0) - '0';
+			sc.nextLine();
+
 			switch (input) {
 			case 1:
 				printClassScheduleInofo();
@@ -259,33 +260,34 @@ public class ManagerController {
 		}
 	}
 
-	// 데이터베이스에 저장되어있는 전체시간표를 보여주는 메소드
+	// 데이터베이스에 저장되어있는 전체시간표 를 보여주는 메소드
 	public void printClassScheduleInofo() {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		
+
 		try {
 			conn = DBConnector.getConnection();
 			String classScheduleInofo = "SELECT schedule_id,courses.name,day_of_week,start_time,end_time,professors.name AS professorname "
-					  +"FROM class_schedules,courses,professors "
-				      +"WHERE class_schedules.course_id = courses.course_id "
-				      + "AND professors.professor_id = courses.professor_id";
+					+ "FROM class_schedules,courses,professors "
+					+ "WHERE class_schedules.course_id = courses.course_id "
+					+ "AND professors.professor_id = courses.professor_id";
 			pstmt = conn.prepareStatement(classScheduleInofo);
 			rs = pstmt.executeQuery();
 			System.out.println("시간표ID	|강의명	|요일	|시작시간	|종료시간	|교수이름");
-			while(rs.next()) {
+			while (rs.next()) {
 				int schdeuleID = rs.getInt("schedule_id");
 				String courseName = rs.getString("name");
 				String dayOfWeek = rs.getString("day_of_week");
 				String startTime = rs.getString("start_time");
 				String endTime = rs.getString("end_time");
 				String professorName = rs.getString("professorname");
-				System.out.println(schdeuleID +"\t"+"|"+courseName+"\t"+"|"+dayOfWeek+"\t"+"|"+startTime+"\t"+"|"+endTime+"\t"+"|"+professorName);
+				System.out.println(schdeuleID + "\t" + "|" + courseName + "\t" + "|" + dayOfWeek + "\t" + "|"
+						+ startTime + "\t" + "|" + endTime + "\t" + "|" + professorName);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}finally {
+		} finally {
 			DBConnector.close(conn, pstmt, rs);
 		}
 	}
@@ -302,8 +304,9 @@ public class ManagerController {
 		System.out.print("종료시간>>");
 		classShedule.setEndTime(sc.next());
 		System.out.println("1.등록 2.취소");
-		int input = sc.nextInt();
+		int input = sc.next().charAt(0) - '0';
 		sc.nextLine();
+
 		switch (input) {
 		case 1:
 			if (insertClassScheduleInfo(classShedule) == null) {
@@ -317,29 +320,34 @@ public class ManagerController {
 			break;
 		}
 	}
-	//시간표 삭제
+
+	// 시간표 삭제
 	public void deleteClassSchedule(Scanner sc) {
 		System.out.println("삭제하시겠습니까? 1. 삭제 2. 취소");
-		switch (sc.nextInt()){
-		case 1: 
+		System.out.print("선택>>");
+		int input = sc.next().charAt(0) - '0';
+		sc.nextLine();
+
+		switch (input) {
+		case 1:
 			Connection conn = null;
 			PreparedStatement pstmt = null;
 			System.out.print("시간표 ID>> ");
 			int inputClassScheduleID = sc.next().charAt(0) - '0';
 			try {
 				conn = DBConnector.getConnection();
-				String DeleteclassSchedule="DELETE FROM class_schedules WHERE schedule_id = ?";
+				String DeleteclassSchedule = "DELETE FROM class_schedules WHERE schedule_id = ?";
 				pstmt = conn.prepareStatement(DeleteclassSchedule);
 				pstmt.setInt(1, inputClassScheduleID);
 				int affectedRows = pstmt.executeUpdate();
-				if(affectedRows > 0) {
+				if (affectedRows > 0) {
 					System.out.println("삭제되었습니다");
 				}
-				
+
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}finally {
+			} finally {
 				DBConnector.close(conn, pstmt);
 			}
 			break;
@@ -348,9 +356,135 @@ public class ManagerController {
 			break;
 		}
 	}
-	public ClassSchedule insertClassScheduleInfo(ClassSchedule newClassSchedule) {
-		return classScheduledao.insertClassSchedule(newClassSchedule) ? newClassSchedule : null;
 
+	public ClassSchedule insertClassScheduleInfo(ClassSchedule newClassSchedule) {
+		return classScheduleDao.insertClassSchedule(newClassSchedule) ? newClassSchedule : null;
 	}
 
+	// 학생정보조회 학생정보등록 나가기 화면을 보여주면서 선택할 수 있는 메소드
+	public void selectStudentMenu(Scanner sc) {
+		while (true) {
+			System.out.println("1.학생정보조회 2.학생정보등록 3. 나가기");
+			System.out.print("선택>>");
+			int input = sc.next().charAt(0) - '0';
+			sc.nextLine();
+			switch (input) {
+			case 1:
+				searchStudentInfo(sc);
+				break;
+			case 2:
+				insertStudentInfo(sc);
+				break;
+			case 3:
+				return;
+			}
+		}
+	}
+
+	// 특정학생을 찾는 기능
+	public void searchStudentInfo(Scanner sc) {
+		System.out.println("학번을 입력해주세요");
+		System.out.print(">> ");
+		int studentID = sc.nextInt();
+		sc.nextLine();
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			conn = DBConnector.getConnection();
+			String studentInofo = "SELECT student_id , name , phone , birth_date , email , password , enrollment_year  "
+					+ "FROM students " + "WHERE student_id = ? ";
+			pstmt = conn.prepareStatement(studentInofo);
+			pstmt.setInt(1, studentID);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					String studentName = rs.getString("name");
+					String phone = rs.getString("phone");
+					String birthDate = rs.getString("birth_date");
+					String email = rs.getString("email");
+					String password = rs.getString("password");
+					String enrollmentYear = rs.getString("enrollment_year");
+					System.out.println(studentID + studentName + phone + birthDate + email + password + enrollmentYear);
+				} while (rs.next());
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, pstmt, rs);
+		}
+	}
+
+	// 전체학생 출력 메서드
+	public void printAllStudentInfo() {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			conn = DBConnector.getConnection();
+			String studentInofo = "SELECT student_id , name , phone , to_char(birth_date,'yyyy-mm-dd') , email , password , enrollment_year  "
+					+ "FROM students ";
+			pstmt = conn.prepareStatement(studentInofo);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					int studentID = rs.getInt("student_id");
+					String studentName = rs.getString("name");
+					String phone = rs.getString("phone");
+					String birthDate = rs.getString("birth_date");
+					String email = rs.getString("email");
+					String password = rs.getString("password");
+					String enrollmentYear = rs.getString("enrollment_year");
+					System.out.println(studentID + "|" + studentName + "|" + phone + "|" + birthDate + "|" + email + "|"
+							+ password + "|" + enrollmentYear);
+				} while (rs.next());
+			} else {
+				System.out.println("학생정보가 없습니다");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, pstmt, rs);
+		}
+	}
+
+	// 학생등록하는 메서드
+	public void insertStudentInfo(Scanner sc) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		System.out.println("---------------------------------학 생 등 록---------------------------------------");
+		String insertStudentInfo = "insert into students values(to_char(sysdate,'yyyy')||LPAD(seq_student_num.nextval,6,'0'), ?, ?, ?, ?, ?, ?, to_char(sysdate,'yyyy'))";
+		System.out.print("학생이름>>");
+		String studentName = sc.next();
+		System.out.print("전화번호>>");
+		String phone = sc.next();
+		System.out.print("생년월일>>");
+		String birthDate = sc.next();
+		System.out.print("이메일>>");
+		String email = sc.next();
+		System.out.print("학과번호>>");
+		String department_id = sc.next();
+		sc.nextLine();
+		try {
+			conn = DBConnector.getConnection();
+			pstmt = conn.prepareStatement(insertStudentInfo);
+			pstmt.setString(1, studentName);
+			pstmt.setString(2, phone);
+			pstmt.setString(3, birthDate);
+			pstmt.setString(4, email);
+			pstmt.setString(5, birthDate);
+			pstmt.setString(6, department_id);
+			int affectedRows = pstmt.executeUpdate();
+			if (affectedRows > 0) {
+				System.out.println("등록되었습니다");
+			} else {
+				System.out.println("등록이 안되었습니다");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, pstmt);
+		}
+	}
 }
