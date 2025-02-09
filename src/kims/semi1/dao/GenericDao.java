@@ -26,43 +26,34 @@ public class GenericDao {
 	 * 
 	 * @return {@code List<targetModel>} if the results exist; {@code null} if the
 	 *         result does not exists.
-	 */	
+	 */
 	public <T> List<T> findModels(Class<T> targetModel, String targetColumn, String targetString) {
-
-		String sql = "SELECT * FROM " + targetModel.getSimpleName() + "s WHERE " + targetColumn + " = ?";
-
-		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setString(1, targetString);
-			try (ResultSet rs = pstmt.executeQuery()) {
-				return convertResultSetToList(targetModel, rs);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return null;
+		String sql = "SELECT * FROM " + mapToTableName(targetModel) + " WHERE " + targetColumn + " = ?";
+		return executeAndConvertResultSet(targetModel, sql, targetString);
 	}
 
 	public <T> List<T> findModels(Class<T> targetModel, String targetColumn, int targetInt) {
+		String sql = "SELECT * FROM " + mapToTableName(targetModel) + " WHERE " + targetColumn + " = ?";
+		return executeAndConvertResultSet(targetModel, sql, targetInt);
+	}
 
-		String sql = "SELECT * FROM " + targetModel.getSimpleName() + "s WHERE " + targetColumn + " = ?";
-
-		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setInt(1, targetInt);
-			try (ResultSet rs = pstmt.executeQuery()) {
-				return convertResultSetToList(targetModel, rs);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return null;
+	public <T> List<T> findModels(Class<T> targetModel) {
+		String sql = "SELECT * FROM " + mapToTableName(targetModel);
+		return executeAndConvertResultSet(targetModel, sql, null);
 	}
 
 	public <T> T findModel(Class<T> targetModel, String targetColumn, int targetInt) {
-		return findModels(targetModel, targetColumn, targetInt).get(0);
+		List<T> models = findModels(targetModel, targetColumn, targetInt);
+		return models.size() != 0 ? models.get(0) : null;
 	}
 
 	public <T> T findModel(Class<T> targetModel, String targetColumn, String targetString) {
-		return findModels(targetModel, targetColumn, targetString).get(0);
+		List<T> models = findModels(targetModel, targetColumn, targetString);
+		return models.size() != 0 ? models.get(0) : null;
+	}
+
+	private <T> String mapToTableName(Class<T> targetModel) {
+		return targetModel == ClassSchedule.class ? "Class_schedules" : targetModel + "s";
 	}
 
 	/**
@@ -126,6 +117,24 @@ public class GenericDao {
 		} else {
 			System.out.println("타겟 클래스와 매칭되는 모델이 없습니다.");
 			return null;
+		}
+		return models;
+	}
+
+	private <T> List<T> executeAndConvertResultSet(Class<T> targetModel, String sql, Object parameter) {
+		List<T> models = new ArrayList<>();
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			if (parameter instanceof String) {
+				pstmt.setString(1, (String) parameter);
+			} else if (parameter instanceof Integer) {
+				pstmt.setInt(1, (Integer) parameter);
+			}
+			try (ResultSet rs = pstmt.executeQuery()) {
+				models = convertResultSetToList(targetModel, rs);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return models;
 	}

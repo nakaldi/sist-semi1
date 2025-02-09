@@ -6,6 +6,7 @@ public class ClassSchedule {
 	private String dayOfWeek;
 	private String startTime;
 	private String endTime;
+	private String unit;
 
 	public ClassSchedule() {
 	}
@@ -17,6 +18,25 @@ public class ClassSchedule {
 		this.dayOfWeek = dayOfWeek;
 		this.startTime = startTime;
 		this.endTime = endTime;
+	}
+
+	public ClassSchedule(int scheduleId, int courseId, String dayOfWeek, String startTime, String endTime,
+			String unit) {
+		super();
+		this.scheduleId = scheduleId;
+		this.courseId = courseId;
+		this.dayOfWeek = dayOfWeek;
+		this.startTime = startTime;
+		this.endTime = endTime;
+		this.unit = unit;
+	}
+
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
 	}
 
 	public int getScheduleId() {

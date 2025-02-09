@@ -4,6 +4,8 @@ public class Enrollment {
 	private int enrollmentId;
 	private int studentId;
 	private int courseId;
+	private CourseInfo courseInfo;
+	private Grade grade;
 
 	public Enrollment() {
 	}
@@ -13,6 +15,31 @@ public class Enrollment {
 		this.enrollmentId = enrollmentId;
 		this.studentId = studentId;
 		this.courseId = courseId;
+	}
+
+	public Enrollment(int enrollmentId, int studentId, int courseId, CourseInfo courseInfo, Grade grade) {
+		super();
+		this.enrollmentId = enrollmentId;
+		this.studentId = studentId;
+		this.courseId = courseId;
+		this.courseInfo = courseInfo;
+		this.grade = grade;
+	}
+
+	public Grade getGrade() {
+		return grade;
+	}
+
+	public void setGrade(Grade grade) {
+		this.grade = grade;
+	}
+
+	public CourseInfo getCourseInfo() {
+		return courseInfo;
+	}
+
+	public void setCourseInfo(CourseInfo courseInfo) {
+		this.courseInfo = courseInfo;
 	}
 
 	public int getEnrollmentId() {

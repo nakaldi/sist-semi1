@@ -10,12 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kims.semi1.config.DBConnector;
+import kims.semi1.model.Building;
 import kims.semi1.model.ClassSchedule;
 import kims.semi1.model.Course;
 import kims.semi1.model.CourseInfo;
 import kims.semi1.model.Department;
+import kims.semi1.model.Enrollment;
+import kims.semi1.model.Grade;
 import kims.semi1.model.Professor;
 import kims.semi1.model.Student;
+import kims.semi1.model.Unit;
 
 public class StudentDao {
 
@@ -153,9 +157,11 @@ public class StudentDao {
 	}
 
 	public List<CourseInfo> findCourseInfosBySemester(String semester) {
-		String sql = "select *  from (((courses c inner join professors p on c.professor_id = p.professor_id) "
-				+ "inner join departments d on c.department_id = d.department_id) "
-				+ "full outer join class_schedules s on c.course_id = s.course_id) where c.semester = ?";
+		String sql = "select *  from (((((courses c inner join professors p on c.professor_id = p.professor_id) \r\n"
+				+ "   inner join departments d on c.department_id = d.department_id) \r\n"
+				+ "   left outer join class_schedules s on c.course_id = s.course_id) \r\n"
+				+ "   left outer join buildings b on d.building_id = b.building_id) "
+				+ "   left outer join units u on b.building_id = u.building_id)" + "   where c.semester = ?";
 
 		List<CourseInfo> courseInfos = new ArrayList<CourseInfo>();
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -169,8 +175,10 @@ public class StudentDao {
 							rs.getDate(15).toLocalDate());
 					Department d = new Department(rs.getInt(16), rs.getString(17), rs.getString(18), rs.getInt(19));
 					ClassSchedule s = new ClassSchedule(rs.getInt(20), rs.getInt(21), rs.getString(22),
-							rs.getString(23), rs.getString(24));
-					courseInfos.add(new CourseInfo(c, d, s, p));
+							rs.getString(23), rs.getString(24), rs.getString(25));
+					Building b = new Building(rs.getInt(26), rs.getString(27));
+					Unit u = new Unit(rs.getString(28), rs.getInt(29));
+					courseInfos.add(new CourseInfo(c, d, s, p, b, u));
 				}
 			}
 		} catch (SQLException e) {
@@ -179,4 +187,55 @@ public class StudentDao {
 		return courseInfos;
 	}
 
+	public List<Enrollment> findEnrollmentInfosByStudentIdAndSemester(int studentId, String semester) {
+		String sql = "select *  from ((((((courses c inner join professors p on c.professor_id = p.professor_id) \r\n"
+				+ "   inner join departments d on c.department_id = d.department_id) \r\n"
+				+ "   left outer join class_schedules s on c.course_id = s.course_id) \r\n"
+				+ "   left outer join buildings b on d.building_id = b.building_id) \r\n"
+				+ "   inner join enrollments e on c.course_id = e.course_id) \r\n"
+				+ "   left outer join grades g on e.enrollment_id = g.grade_id) \r\n"
+				+ "   where e.student_id = ? and c.semester = ?";
+
+		List<Enrollment> enrollmentInfos = new ArrayList<Enrollment>();
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, studentId);
+			pstmt.setString(2, semester);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					Course c = new Course(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getString(5),
+							rs.getString(6), rs.getString(7));
+					Professor p = new Professor(rs.getInt(8), rs.getString(9), rs.getString(10),
+							rs.getDate(11).toLocalDate(), rs.getString(12), rs.getString(13), rs.getInt(14),
+							rs.getDate(15).toLocalDate());
+					Department d = new Department(rs.getInt(16), rs.getString(17), rs.getString(18), rs.getInt(19));
+					ClassSchedule s = new ClassSchedule(rs.getInt(20), rs.getInt(21), rs.getString(22),
+							rs.getString(23), rs.getString(24), rs.getString(25));
+					Building b = new Building(rs.getInt(26), rs.getString(27));
+					Unit u = new Unit(rs.getString(28), rs.getInt(29));
+					CourseInfo courseInfo = new CourseInfo(c, d, s, p, b, u);
+					enrollmentInfos.add(new Enrollment(rs.getInt(28), rs.getInt(29), rs.getInt(30), courseInfo,
+							new Grade(rs.getInt(31), rs.getInt(32), rs.getDouble(33), rs.getString(34))));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return enrollmentInfos;
+	}
+
+	// Enrollments 테이블에 저장
+	public boolean insultEnrollment(int studentId, int courseId) {
+		String sql = "INSERT INTO " + "enrollments (enrollment_id, student_id, course_id)"
+				+ "VALUES (seq_enrollments_num.nextval, ?, ?)";
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, studentId);
+			pstmt.setInt(2, courseId);
+			pstmt.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 }

@@ -7,6 +7,7 @@ import kims.semi1.dao.GenericDao;
 import kims.semi1.dao.StudentDao;
 import kims.semi1.model.CourseInfo;
 import kims.semi1.model.Department;
+import kims.semi1.model.Enrollment;
 import kims.semi1.model.Student;
 
 public class StudentService {
@@ -41,5 +42,18 @@ public class StudentService {
 			return null;
 		}
 		return studentDao.findCourseInfosBySemester(semester);
+	}
+
+	public List<Enrollment> getEnrollmentInfosByStudentIdAndSemester(int studentId, String semester) {
+
+		if ((semester.equals("1") || semester.equals("2")) == false) {
+			System.out.println("학기는 1, 2만 입력 가능합니다");
+			return null;
+		}
+		return studentDao.findEnrollmentInfosByStudentIdAndSemester(studentId, semester);
+	}
+
+	public boolean registerEnrollment(int studentId, int courseId) {
+		return studentDao.insultEnrollment(studentId, courseId);
 	}
 }
