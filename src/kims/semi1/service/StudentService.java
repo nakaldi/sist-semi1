@@ -3,7 +3,6 @@ package kims.semi1.service;
 import java.util.List;
 
 import kims.semi1.dao.DepartmentDao;
-import kims.semi1.dao.GenericDao;
 import kims.semi1.dao.StudentDao;
 import kims.semi1.model.CourseInfo;
 import kims.semi1.model.Department;
@@ -13,12 +12,10 @@ import kims.semi1.model.Student;
 public class StudentService {
 	private final StudentDao studentDao;
 	private final DepartmentDao departmentDao;
-	private final GenericDao genericDao;
 
 	public StudentService() {
 		studentDao = new StudentDao();
 		departmentDao = new DepartmentDao();
-		genericDao = new GenericDao();
 	}
 
 	public Object[] getStudentAndDepartmentInfo(int studentId) {
