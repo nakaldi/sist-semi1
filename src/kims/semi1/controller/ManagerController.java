@@ -28,7 +28,7 @@ public class ManagerController {
 			System.out.println("3. 학생 정보 관리");
 			System.out.println("4. 강의 조회");
 			System.out.println("5. 로그아웃");
-			System.out.print("메뉴>");
+			System.out.print("메뉴>> ");
 			int input = sc.next().charAt(0) - '0';
 			sc.nextLine();
 
@@ -75,7 +75,7 @@ public class ManagerController {
 				case 1:
 					System.out
 							.println("-----------------------------------교수 정보 조회-----------------------------------");
-					String professorInfoSql = "select professor_id,name,phone,to_char(birth_date,'yyyy-mm-dd'),email,to_char(hire_date,'yy-mm-dd') from professors";
+					String professorInfoSql = "select professor_id,name,phone,to_char(birth_date,'yyyy-mm-dd'),email,to_char(hire_date,'yyyy-mm-dd') from professors";
 					ps = conn.prepareStatement(professorInfoSql);
 					rs = ps.executeQuery();
 
@@ -85,7 +85,7 @@ public class ManagerController {
 						String professorPhone = rs.getString("phone");
 						String professorBirth = rs.getString("to_char(birth_date,'yyyy-mm-dd')");
 						String professorEmail = rs.getString("email");
-						String professorHiredate = rs.getString("to_char(hire_date,'yy-mm-dd')");
+						String professorHiredate = rs.getString("to_char(hire_date,'yyyy-mm-dd')");
 
 						System.out.println(professorID + "|" + professorName + "|" + professorPhone + "|"
 								+ professorBirth + "|" + professorEmail + "|" + professorHiredate);
@@ -97,7 +97,7 @@ public class ManagerController {
 
 					System.out.println("-----------교수 정보 등록-----------");
 					String professorSaveSql = "insert into professors(professor_id,name,phone,birth_date,email,password,department_id,hire_date )\r\n"
-							+ "values(to_char(sysdate,'yyyy')||LPAD(seq_professor_num.nextval,6,'0'),?,?,?,?,?,?,to_char(sysdate,'yyyy-mm-dd'))";
+							+ "values(to_char(sysdate,'yyyy')||LPAD(seq_professor_num.nextval,6,'0'),?,?,?,?,to_char(to_date(?,'yyyy/mm/dd'),'yyyymmdd'),?,to_char(sysdate,'yyyy-mm-dd'))";
 					ps = conn.prepareStatement(professorSaveSql);
 
 					System.out.print("이름>> ");
@@ -240,7 +240,7 @@ public class ManagerController {
 			System.out.println("2.시간표 등록");
 			System.out.println("3.시간표 삭제");
 			System.out.println("4.메뉴로 돌아가기");
-			System.out.print(">>");
+			System.out.print("메뉴>> ");
 			int input = sc.next().charAt(0) - '0';
 			sc.nextLine();
 
@@ -387,7 +387,7 @@ public class ManagerController {
 	public void searchStudentMain(Scanner sc) {
 		while (true) {
 			System.out.println("1.학생정보전체조회 2.학생학번조회 3.학생정보등록 메뉴로 돌아가기");
-			System.out.print(">>");
+			System.out.print("메뉴>> ");
 			int input = sc.next().charAt(0) - '0';
 			sc.nextLine();
 			switch (input) {
@@ -408,7 +408,7 @@ public class ManagerController {
 	// 특정학생을 찾는 기능
 	public void searchStudentInfo(Scanner sc) {
 		System.out.println("학번을 입력해주세요");
-		System.out.print(">> ");
+		System.out.print("메뉴>> ");
 		int studentID = sc.nextInt();
 		sc.nextLine();
 		Connection conn = null;
@@ -479,7 +479,7 @@ public class ManagerController {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		System.out.println("---------------------------------학 생 등 록---------------------------------------");
-		String insertStudentInfo = "insert into students values(to_char(sysdate,'yyyy')||LPAD(seq_student_num.nextval,6,'0'), ?, ?, ?, ?, ?, ?, to_char(sysdate,'yyyy'))";
+		String insertStudentInfo = "insert into students values(to_char(sysdate,'yyyy')||LPAD(seq_student_num.nextval,6,'0'), ?, ?, ?, ?, to_char(to_date(?,'yyyy/mm/dd'),'yyyymmdd'), ?, to_char(sysdate,'yyyy'))";
 		System.out.print("학생이름>>");
 		String studentName = sc.next();
 		System.out.print("전화번호>>");
