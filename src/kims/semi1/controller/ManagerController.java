@@ -48,6 +48,9 @@ public class ManagerController {
 			case 5:
 				System.out.println("로그아웃 되었습니다");
 				return;
+			default:
+				System.out.println("올바른 메뉴를 선택해주세요.");
+				break;
 			}
 		}
 	}
@@ -379,6 +382,8 @@ public class ManagerController {
 			case 3:
 				System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
 				return;
+			default:
+				System.out.println("올바른 메뉴를 선택해주세요.");
 			}
 		}
 	}
@@ -400,7 +405,7 @@ public class ManagerController {
 			case 3:
 				return;
 			default:
-				System.out.println("1~2사이에 숫자를 입력해주세요");
+				System.out.println("올바른 메뉴를 선택해주세요.");
 			}
 		}
 	}
