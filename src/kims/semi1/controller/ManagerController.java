@@ -156,7 +156,8 @@ public class ManagerController {
 			System.out.println("====강의 조회====");
 			System.out.println("1.전체 강의 조회");
 			System.out.println("2.특정 강의 조회");
-			System.out.println("3.메뉴로 돌아가기");
+			System.out.println("3.강의실 관리");
+			System.out.println("4.메뉴로 돌아가기");
 			System.out.print("메뉴>> ");
 			int coursesInfoInput = sc.next().charAt(0) - '0';
 			sc.nextLine();
@@ -217,10 +218,15 @@ public class ManagerController {
 						System.out.println("검색된 강의 ID가 없습니다. 다시 입력해주세요.");
 					}
 					break;
-
+					
 				case 3:
+					unitandBuildingManage(sc);
+					break;
+
+				case 4:
 					System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
 					return;
+				
 
 				default:
 					System.out.println("올바른 메뉴를 선택해주세요.");
@@ -236,6 +242,87 @@ public class ManagerController {
 
 		}
 	}
+		//강의실 관리 메소드
+		public void unitandBuildingManage(Scanner sc) {
+			while(true) {
+				System.out.println("1.건물 조회");
+				System.out.println("2.건물 등록");
+				System.out.println("3.강의실 조회");
+				System.out.println("4.강의실 등록");
+				System.out.println("5.강의실 삭제");
+				System.out.println("6.이전 메뉴로 돌아가기");
+				System.out.print("메뉴 >> ");
+				int ubMenuInput = sc.next().charAt(0) - '0';
+				sc.nextLine();
+				
+				Connection conn = null;
+				PreparedStatement ps = null;
+				ResultSet rs = null;
+				
+				try {
+					conn = DBConnector.getConnection();
+					
+					switch (ubMenuInput) {
+					
+					case 1: //건물조회
+						String buildingSearchsql = "select * from buildings";
+						ps = conn.prepareStatement(buildingSearchsql);
+						rs = ps.executeQuery();
+						
+						System.out.println("건물 번호	|건물 이름");
+						while(rs.next()) {
+							int buildingId = rs.getInt("building_id");
+							String buildingname = rs.getString("name");
+							System.out.println(buildingId + "\t" + "|" +  buildingname);
+						}
+						
+						
+						break;
+					case 2: //건물등록 - 건물 번호가 이미 있으면 다시 입력
+						
+						String buildingIDSearch = "select building_id from buildings where building_id = ?";
+						ps = conn.prepareStatement(buildingIDSearch);
+						
+						
+						System.out.print("건물 번호 : ");
+						int buildingId = sc.next().charAt(0) - '0';	
+						sc.nextLine();
+						
+						ps.setInt(1, buildingId);
+						rs = ps.executeQuery();
+						
+						if(rs.next()) {
+							System.out.println("이미 존재하는 건물 번호 입니다. 다른 번호로 입력해주세요.");
+						}else {
+							String buildingSavesql = "insert into buildings values(?,?)";
+							ps = conn.prepareStatement(buildingSavesql);
+							
+							ps.setInt(1, buildingId);
+							
+							System.out.print("건물 이름 : ");
+							String buildingName = sc.nextLine();
+							ps.setString(2, buildingName);
+						
+							ps.executeUpdate();
+							}
+						
+						
+						break;
+						
+					default: 
+						break;
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					DBConnector.close(conn, ps, rs);
+				}
+				
+			}
+			
+			
+		}
 
 	public void selectClassScheduleMenu(Scanner sc) {
 		while (true) {
