@@ -45,6 +45,7 @@ public class StudentController {
 				manageEnrollment(sc);
 				break;
 			case 3:
+				searchGrades(student.getStudentId(), sc);
 				break;
 			case 4:
 				return;
@@ -142,8 +143,8 @@ public class StudentController {
 		}
 	}
 
-	public void searchCourses(Scanner sc) {
-		String input;
+	private String selectSemester(Scanner sc) {
+		String input = "";
 		while (true) {
 			System.out.print("학기 선택 1 or 2 \n>>");
 			input = sc.next();
@@ -152,6 +153,12 @@ public class StudentController {
 				break;
 			}
 		}
+		return input;
+	}
+
+	public void searchCourses(Scanner sc) {
+		String input = selectSemester(sc);
+
 		System.out.println("----------------------- " + input + " 학기 강의 정보--------------------------");
 		System.out.println("강의번호     강의명                                  교수명     학과            요일    시작교시  종료교시");
 		List<CourseInfo> courseInfos = studentService.getCourseInfoBySemester(input);
@@ -216,7 +223,16 @@ public class StudentController {
 			System.out.println("수강 정보가 없습니다.");
 			return;
 		}
-		enrollmentInfos.stream().forEach(t -> System.out.println("강의명 : " + t.getCourseInfo().getCourse().getName()
-				+ "\t 학기 : " + t.getCourseInfo().getCourse().getSemester()));
+		enrollmentInfos.stream()
+				.forEach(t -> System.out.println("강의명 : " + t.getCourseInfo().getCourse().getName() + "\t 학기 : "
+						+ t.getCourseInfo().getCourse().getSemester() + "\t 건물 : "
+						+ t.getCourseInfo().getBuilding().getName() + " " + t.getCourseInfo().getUnit().getUnitId()));
+	}
+
+	private void searchGrades(int studentId, Scanner sc) {
+		String input = selectSemester(sc);
+		List<Enrollment> grades = studentService.getEnrollmentInfosByStudentIdAndSemester(studentId, input);
+		grades.stream().forEach(
+				t -> System.out.println(t.getCourseInfo().getCourse().getName() + "  " + t.getGrade().getGrade()));
 	}
 }

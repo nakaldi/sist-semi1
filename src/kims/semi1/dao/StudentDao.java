@@ -160,8 +160,8 @@ public class StudentDao {
 		String sql = "select *  from (((((courses c inner join professors p on c.professor_id = p.professor_id) \r\n"
 				+ "   inner join departments d on c.department_id = d.department_id) \r\n"
 				+ "   left outer join class_schedules s on c.course_id = s.course_id) \r\n"
-				+ "   left outer join buildings b on d.building_id = b.building_id) "
-				+ "   left outer join units u on b.building_id = u.building_id)" + "   where c.semester = ?";
+				+ "   inner join buildings b on d.building_id = b.building_id) "
+				+ "   left outer join units u on s.unit = u.unit)" + "   where c.semester = ?";
 
 		List<CourseInfo> courseInfos = new ArrayList<CourseInfo>();
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -188,13 +188,14 @@ public class StudentDao {
 	}
 
 	public List<Enrollment> findEnrollmentInfosByStudentIdAndSemester(int studentId, String semester) {
-		String sql = "select *  from ((((((courses c inner join professors p on c.professor_id = p.professor_id) \r\n"
-				+ "   inner join departments d on c.department_id = d.department_id) \r\n"
-				+ "   left outer join class_schedules s on c.course_id = s.course_id) \r\n"
-				+ "   left outer join buildings b on d.building_id = b.building_id) \r\n"
-				+ "   inner join enrollments e on c.course_id = e.course_id) \r\n"
-				+ "   left outer join grades g on e.enrollment_id = g.grade_id) \r\n"
-				+ "   where e.student_id = ? and c.semester = ?";
+		String sql = "select * from (((((((courses c inner join enrollments e on c.course_id = e.course_id) "
+				+ "inner join professors p on c.professor_id = p.professor_id) "
+				+ "inner join departments d on c.department_id = d.department_id) "
+				+ "left outer join class_schedules s on c.course_id = s.course_id) "
+				+ "left outer join buildings b on d.building_id = b.building_id) "
+				+ "left outer join grades g on e.enrollment_id = g.enrollment_id) "
+				+ "left outer join units u on u.unit = s.unit) "
+				+ "where e.student_id = ? and c.semester = ? ";
 
 		List<Enrollment> enrollmentInfos = new ArrayList<Enrollment>();
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -202,20 +203,26 @@ public class StudentDao {
 			pstmt.setString(2, semester);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				while (rs.next()) {
-					Course c = new Course(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getString(5),
-							rs.getString(6), rs.getString(7));
-					Professor p = new Professor(rs.getInt(8), rs.getString(9), rs.getString(10),
-							rs.getDate(11).toLocalDate(), rs.getString(12), rs.getString(13), rs.getInt(14),
-							rs.getDate(15).toLocalDate());
-					Department d = new Department(rs.getInt(16), rs.getString(17), rs.getString(18), rs.getInt(19));
-					ClassSchedule s = new ClassSchedule(rs.getInt(20), rs.getInt(21), rs.getString(22),
-							rs.getString(23), rs.getString(24), rs.getString(25));
-					Building b = new Building(rs.getInt(26), rs.getString(27));
-					Unit u = new Unit(rs.getString(28), rs.getInt(29));
+					Course c = new Course(rs.getInt("course_id"), rs.getString("name"), rs.getInt("professor_id"),
+							rs.getInt("department_id"), rs.getString("credits"), rs.getString("semester"),
+							rs.getString("syllabus"));
+					Professor p = new Professor(rs.getInt("professor_id"), rs.getString("name"), rs.getString("phone"),
+							rs.getDate("birth_date").toLocalDate(), rs.getString("email"), rs.getString("password"),
+							rs.getInt("department_id"), rs.getDate("hire_date").toLocalDate());
+					Department d = new Department(rs.getInt("department_id"), rs.getString("name"),
+							rs.getString("phone"), rs.getInt("building_id"));
+					ClassSchedule s = new ClassSchedule(rs.getInt("schedule_id"), rs.getInt("course_id"),
+							rs.getString("day_of_week"), rs.getString("start_time"), rs.getString("end_time"),
+							rs.getString("unit"));
+					Building b = new Building(rs.getInt("building_id"), rs.getString("name"));
+					Unit u = new Unit(rs.getString("unit"), rs.getInt("building_id"));
+					Grade g = new Grade(rs.getInt("grade_id"), rs.getInt("enrollment_id"), rs.getDouble("grade"),
+							rs.getString("student_review"));
 					CourseInfo courseInfo = new CourseInfo(c, d, s, p, b, u);
-					enrollmentInfos.add(new Enrollment(rs.getInt(28), rs.getInt(29), rs.getInt(30), courseInfo,
-							new Grade(rs.getInt(31), rs.getInt(32), rs.getDouble(33), rs.getString(34))));
+					enrollmentInfos.add(new Enrollment(rs.getInt("enrollment_id"), rs.getInt("student_id"),
+							rs.getInt("course_id"), courseInfo, g));
 				}
+
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
