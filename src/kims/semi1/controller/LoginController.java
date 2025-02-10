@@ -6,6 +6,10 @@ import java.util.Scanner;
 import kims.semi1.service.FindingIdService;
 import kims.semi1.service.LoginService;
 import kims.semi1.util.DateUtils;
+import kims.semi1.view.LoginFrame;
+import kims.semi1.view.ManagerFrame;
+import kims.semi1.view.ProfessorFrame;
+import kims.semi1.view.StudentFrame;
 
 public class LoginController {
 
@@ -16,10 +20,54 @@ public class LoginController {
 	ProfessorController professorControlloer;
 	private StudentController studentController;
 	private ManagerController managerController;
+	private LoginFrame loginFrame;
 
 	public LoginController() {
+		this.loginService = new LoginService();
+		this.findingIdService = new FindingIdService();
+	}
+
+	public LoginController(LoginFrame loginFrame) {
 		loginService = new LoginService();
 		findingIdService = new FindingIdService();
+		this.loginFrame = loginFrame;
+	}
+
+	public void handleLoginButtonClick(String userIdStr, String password) {
+		int userId = 0;
+		try {
+			userId = Integer.parseInt(userIdStr);
+		} catch (NumberFormatException e) {
+			loginFrame.showMessage("아이디는 숫자만 입력 가능합니다.");
+			return;
+		}
+		int loggedInUserId = loginService.loginUser(userId, password);
+
+		if (loggedInUserId == -1) {
+			System.out.println("아이디가 없습니다. 최초화면으로 돌아갑니다.");
+			loginFrame.showMessage("아이디가 없습니다.");
+		} else if (loggedInUserId == -2) {
+			System.out.println("비밀번호가 일치하지 않습니다. 최초화면으로 돌아갑니다.");
+			loginFrame.showMessage("비밀번호가 다릅니다.");
+		} else {
+			currentUserId = loggedInUserId;
+			System.out.println("로그인 성공");
+
+			if (Integer.toString(currentUserId).charAt(4) == '1') {
+				loginFrame.dispose();
+				StudentFrame sf = new StudentFrame();
+				new StudentController(currentUserId, sf);
+			} else if (Integer.toString(currentUserId).charAt(4) == '2') {
+				loginFrame.dispose();
+				ProfessorFrame pf = new ProfessorFrame();
+				new ProfessorController(currentUserId, pf);
+			} else if (Integer.toString(currentUserId).charAt(4) == '3') {
+				loginFrame.dispose();
+				ManagerFrame mf = new ManagerFrame();
+				new ManagerController(currentUserId, mf);
+			}
+		}
+		return;
 	}
 
 	public void handleUserInput(Scanner sc) {

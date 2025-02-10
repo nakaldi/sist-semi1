@@ -11,6 +11,7 @@ import kims.semi1.config.DBConnector;
 import kims.semi1.dao.ProfessorDao;
 import kims.semi1.model.Professor;
 import kims.semi1.service.ProfessorService;
+import kims.semi1.view.ProfessorFrame;
 
 public class ProfessorController {
 
@@ -19,6 +20,7 @@ public class ProfessorController {
 	int currentUserId;
 	Professor professor;
 	ProfessorDao professorDao;
+	ProfessorFrame professorFrame;
 	// 변경 값 저장 변수
 	String typeName = "name";
 	String typePhone = "phone";
@@ -31,6 +33,16 @@ public class ProfessorController {
 	}
 
 	public ProfessorController(int currentUserId) {
+		this.currentUserId = currentUserId;
+		this.professorDao = new ProfessorDao();
+
+		this.professorService = new ProfessorService();
+		Object[] temps = professorService.getProfessorInfo(currentUserId);
+		professor = (Professor) temps[0];
+	}
+
+	public ProfessorController(int currentUserId, ProfessorFrame professorFrame) {
+		this.professorFrame = professorFrame;
 		this.currentUserId = currentUserId;
 		this.professorDao = new ProfessorDao();
 
