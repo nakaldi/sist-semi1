@@ -22,6 +22,11 @@ public class LoginController {
 	private ManagerController managerController;
 	private LoginFrame loginFrame;
 
+	public LoginController() {
+		this.loginService = new LoginService();
+		this.findingIdService = new FindingIdService();
+	}
+
 	public LoginController(LoginFrame loginFrame) {
 		loginService = new LoginService();
 		findingIdService = new FindingIdService();
