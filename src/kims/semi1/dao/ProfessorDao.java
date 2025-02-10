@@ -180,7 +180,8 @@ public class ProfessorDao {
 		sc.nextLine();
 
 		String idGradeSql = "SELECT distinct " + "    s.student_id AS student_id, " + "    s.name AS student_name, "
-				+ "    d.name AS department_name, " + "    c.name as course_name, " + "	   g.grade AS grade " + "FROM "
+				+ "    d.name AS department_name, " + "    c.course_id as course_id, "+ "    c.name as course_name, " 
+				+ "	   g.grade AS grade " + "FROM "
 				+ "    students s, enrollments e, courses c, professors p, departments d, grades g " + "WHERE  "
 				+ "    p.professor_id = ? " + "    AND p.professor_id = c.professor_id "
 				+ "    AND c.course_id = e.course_id " + "    AND e.student_id = s.student_id "
@@ -198,10 +199,11 @@ public class ProfessorDao {
 					int studentId = rs.getInt("student_id");
 					String studentName = rs.getString("student_name");
 					String departmentName = rs.getString("department_name");
+					int courseId = rs.getInt("course_id");
 					int studentGrade = rs.getInt("grade");
 
 					System.out.println(
-							studentId + "	|	" + studentName + "	|	" + departmentName + "	|	" + studentGrade);
+							studentId + "	|	" + studentName + "	|	"+ courseId + "	|	" + departmentName + "	|	" + studentGrade);
 				}
 
 				if (!hasResults) {
@@ -226,7 +228,8 @@ public class ProfessorDao {
 		String nameInput = sc.nextLine();
 
 		String nameGradeSql = "SELECT distinct " + "    s.student_id AS student_id, " + "    s.name AS student_name, "
-				+ "    d.name AS department_name, " + "    c.name as course_name, " + "	   g.grade AS grade " + "FROM "
+				+ "    d.name AS department_name, " +"	c.course_id AS course_id," + "    c.name as course_name, " 
+				+ "	   g.grade AS grade " + "FROM "
 				+ "    students s, enrollments e, courses c, professors p, departments d, grades g " + "WHERE  "
 				+ "    p.professor_id = ? " + "    AND p.professor_id = c.professor_id "
 				+ "    AND c.course_id = e.course_id " + "    AND e.student_id = s.student_id "
@@ -244,10 +247,11 @@ public class ProfessorDao {
 					int studentId = rs.getInt("student_id");
 					String studentName = rs.getString("student_name");
 					String departmentName = rs.getString("department_name");
+					int courseId = rs.getInt("course_id");
 					int studentGrade = rs.getInt("grade");
 
 					System.out.println(
-							studentId + "	|	" + studentName + "	|	" + departmentName + "	|	" + studentGrade);
+							studentId + "	|	" + studentName + "	|	"+ courseId + "	|	" + departmentName + "	|	" + studentGrade);
 				}
 
 				if (!hasResults) {
@@ -269,7 +273,8 @@ public class ProfessorDao {
 		System.out.println("전체 성적 조회");
 
 		String allGradeSql = "SELECT distinct " + "    s.student_id AS student_id, " + "    s.name AS student_name, "
-				+ "    d.name AS department_name, " + "    c.name as course_name, " + "	   g.grade AS grade " + "FROM "
+				+ "    d.name AS department_name, " +"	c.course_id AS course_id,"+ "    c.name as course_name, " 
+				+ "	   g.grade AS grade " + "FROM "
 				+ "    students s, enrollments e, courses c, professors p, departments d, grades g " + "WHERE  "
 				+ "    p.professor_id = ? " + "    AND p.professor_id = c.professor_id "
 				+ "    AND c.course_id = e.course_id " + "    AND e.student_id = s.student_id "
@@ -285,10 +290,11 @@ public class ProfessorDao {
 					int studentId = rs.getInt("student_id");
 					String studentName = rs.getString("student_name");
 					String departmentName = rs.getString("department_name");
+					int courseId = rs.getInt("course_id");
 					int studentGrade = rs.getInt("grade");
 
 					System.out.println(
-							studentId + "	|	" + studentName + "	|	" + departmentName + "	|	" + studentGrade);
+							studentId + "	|	" + studentName + "	|	"+ courseId + "	|	" + departmentName + "	|	" + studentGrade);
 				}
 
 				if (!hasResults) {
@@ -351,7 +357,7 @@ public class ProfessorDao {
 		// 이거 무조건 고쳐라 시퀀스 들고와서 같은값으로 넣는거
 		System.out.print("1.강의명 : ");
 		String courseName = sc.nextLine();
-		System.out.println("2. 진행할 강의 건물 : ");
+		System.out.print("2. 진행할 강의 건물 : ");
 		int departmentId = sc.nextInt();
 		sc.nextLine();
 		System.out.print("2.학기 : ");
@@ -360,14 +366,14 @@ public class ProfessorDao {
 		String credits = sc.nextLine();
 		System.out.print("4.강의설명 : ");
 		String coursePlan = sc.nextLine();
-		System.out.println("5. 강의 요일 : ");
+		System.out.print("5. 강의 요일 : ");
 		String courseDay = sc.nextLine();
-		System.out.println("6. 시작시간 : ");
+		System.out.print("6. 시작시간 : ");
 		String courseStart = sc.nextLine();
-		System.out.println("7. 종료시간 : ");
+		System.out.print("7. 종료시간 : ");
 		String courseEnd = sc.nextLine();
 
-		String insertCourseSql = "insert into courses values(seq_course_id.nextval,?,?,?,?,?,?)";
+		String insertCourseSql = "insert into courses (course_id,name,professor_id,department_id,credits,semester,syllabus)values(seq_course_id.nextval,?,?,?,?,?,?)";
 		try (Connection conn = DBConnector.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(insertCourseSql)) {
 			pstmt.setString(1, courseName);
@@ -448,7 +454,7 @@ public class ProfessorDao {
 	// 교수 강의 현황 조회
 	public int printCourseInfo(int currentUserId) {
 
-		String selectSql = "SELECT course_id, name, department_id ,semester, credits ,courseplan  FROM courses WHERE professor_id = ?";
+		String selectSql = "SELECT course_id, name, department_id ,semester, credits ,syllabus  FROM courses WHERE professor_id = ?";
 		try (Connection conn = DBConnector.getConnection();
 				PreparedStatement selectps = conn.prepareStatement(selectSql)) {
 			selectps.setInt(1, currentUserId);
@@ -460,7 +466,7 @@ public class ProfessorDao {
 					int departmentId = rs.getInt("department_id");
 					String courseSemester = rs.getString("semester");
 					String courseCredit = rs.getString("credits");
-					String coursePlan = rs.getString("courseplan");
+					String coursePlan = rs.getString("syllabus");
 
 					System.out.println(courseId + "	|	" + courseName + "	|	" + departmentId + "	|	"
 							+ courseSemester + "	|	" + courseCredit + "	|	" + coursePlan);
@@ -481,7 +487,7 @@ public class ProfessorDao {
 
 		System.out.println("==강의 등록 메뉴==");
 		System.out.println("강의명" + "	|	" + "강의 장소" + "	|	" + "강의 학기" + "	|	" + "학점" + "	|	" + "강의 설명");
-		String selectSql = "SELECT name, department_id ,semester, credits ,courseplan  FROM courses WHERE professor_id = ?";
+		String selectSql = "SELECT name, department_id ,semester, credits ,syllabus FROM courses WHERE professor_id = ?";
 		try (Connection conn = DBConnector.getConnection();
 				PreparedStatement selectps = conn.prepareStatement(selectSql)) {
 			selectps.setInt(1, currentUserId);
@@ -492,7 +498,7 @@ public class ProfessorDao {
 					int departmentId = rs.getInt("department_id");
 					String courseSemester = rs.getString("semester");
 					String courseCredit = rs.getString("credits");
-					String coursePlan = rs.getString("courseplan");
+					String coursePlan = rs.getString("syllabus");
 
 					System.out.println(courseName + "	|	" + departmentId + "관" + "	|	" + courseSemester
 							+ "	|	" + courseCredit + "	|	" + coursePlan);
