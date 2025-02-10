@@ -45,7 +45,7 @@ public class StudentController {
 				manageEnrollment(sc);
 				break;
 			case 3:
-				searchGrades(student.getStudentId(), sc);
+				searchGrades(sc);
 				break;
 			case 4:
 				return;
@@ -229,9 +229,10 @@ public class StudentController {
 						+ t.getCourseInfo().getBuilding().getName() + " " + t.getCourseInfo().getUnit().getUnitId()));
 	}
 
-	private void searchGrades(int studentId, Scanner sc) {
+	private void searchGrades(Scanner sc) {
 		String input = selectSemester(sc);
-		List<Enrollment> grades = studentService.getEnrollmentInfosByStudentIdAndSemester(studentId, input);
+		List<Enrollment> grades = studentService.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(),
+				input);
 		grades.stream().forEach(
 				t -> System.out.println(t.getCourseInfo().getCourse().getName() + "  " + t.getGrade().getGrade()));
 	}
