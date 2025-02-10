@@ -163,7 +163,8 @@ public class ManagerController {
 			System.out.println("====강의 조회====");
 			System.out.println("1.전체 강의 조회");
 			System.out.println("2.특정 강의 조회");
-			System.out.println("3.메뉴로 돌아가기");
+			System.out.println("3.강의실 관리");
+			System.out.println("4.메뉴로 돌아가기");
 			System.out.print("메뉴>> ");
 			int coursesInfoInput = sc.next().charAt(0) - '0';
 			sc.nextLine();
@@ -224,8 +225,11 @@ public class ManagerController {
 						System.out.println("검색된 강의 ID가 없습니다. 다시 입력해주세요.");
 					}
 					break;
-
 				case 3:
+					unitandBuildingManage(sc);
+					break;
+
+				case 4:
 					System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
 					return;
 
@@ -241,6 +245,94 @@ public class ManagerController {
 
 			}
 
+		}
+	}
+
+	// 강의실 관리 메소드
+	public void unitandBuildingManage(Scanner sc) {
+		while (true) {
+			System.out.println("1.건물 조회");
+			System.out.println("2.건물 등록");
+			System.out.println("3.강의실 조회");
+			System.out.println("4.강의실 등록");
+			System.out.println("5.강의실 삭제");
+			System.out.println("6.이전 메뉴로 돌아가기");
+			System.out.print("메뉴 >> ");
+			int ubMenuInput = sc.next().charAt(0) - '0';
+			sc.nextLine();
+
+			Connection conn = null;
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+
+			try {
+				conn = DBConnector.getConnection();
+
+				switch (ubMenuInput) {
+
+				case 1: // 건물조회
+					String buildingSearchsql = "select * from buildings";
+					ps = conn.prepareStatement(buildingSearchsql);
+					rs = ps.executeQuery();
+
+					System.out.println("건물 번호	|건물 이름");
+					while (rs.next()) {
+						int buildingId = rs.getInt("building_id");
+						String buildingname = rs.getString("name");
+						System.out.println(buildingId + "\t" + "|" + buildingname);
+					}
+
+					break;
+				case 2: // 건물등록 - 건물 번호가 이미 있으면 다시 입력
+
+					String buildingIDSearch = "select building_id from buildings where building_id = ?";
+					ps = conn.prepareStatement(buildingIDSearch);
+
+					System.out.print("건물 번호 : ");
+					int buildingId = sc.next().charAt(0) - '0';
+					sc.nextLine();
+
+					ps.setInt(1, buildingId);
+					rs = ps.executeQuery();
+
+					if (rs.next()) {
+						System.out.println("이미 존재하는 건물 번호 입니다. 다른 번호로 입력해주세요.");
+					} else {
+						String buildingSavesql = "insert into buildings values(?,?)";
+						ps = conn.prepareStatement(buildingSavesql);
+
+						ps.setInt(1, buildingId);
+
+						System.out.print("건물 이름 : ");
+						String buildingName = sc.nextLine();
+						ps.setString(2, buildingName);
+
+						ps.executeUpdate();
+					}
+
+					break;
+				case 3:
+					searchUnitInfo();
+					break;
+				case 4:
+					insertUnit(sc);
+					break;
+				case 5:
+					deleteUnit(sc);
+					break;
+				case 6:
+					System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
+					return;
+				default:
+					System.out.println("올바른 메뉴를 선택해주세요.");
+					break;
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				DBConnector.close(conn, ps, rs);
+			}
 		}
 	}
 
@@ -372,6 +464,112 @@ public class ManagerController {
 		return classScheduleDao.insertClassSchedule(newClassSchedule) ? newClassSchedule : null;
 	}
 
+	// 강의실 조회 메소드
+	public void searchUnitInfo() {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			conn = DBConnector.getConnection();
+			String searchUnitInofo = "SELECT units.building_id,name,unit " + "FROM units,buildings "
+					+ "WHERE units.building_id=buildings.building_id ";
+			pstmt = conn.prepareStatement(searchUnitInofo);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					System.out.println("건물번호	|건물명	|강의실번호	");
+					int buildingId = rs.getInt("building_id");
+					String buildingName = rs.getString("name");
+					String unitName = rs.getString("unit");
+					System.out.println(buildingId + "\t" + "|" + buildingName + "\t" + "|" + unitName + "\t" + "|");
+				} while (rs.next());
+			} else {
+				System.out.println("강의실을 등록해주세요.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, pstmt, rs);
+		}
+	}
+
+	// 강의실 추가 메소드
+	public void insertUnit(Scanner sc) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String searchUnitInofo = "SELECT * FROM buildings ";
+		
+		try {
+			conn = DBConnector.getConnection();
+			pstmt = conn.prepareStatement(searchUnitInofo);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				System.out.println("---------------------------------강 의 실 등 록---------------------------------------");
+				String insertUnit = "insert into units values(?, ?))";
+				System.out.print("건물번호>>");
+				int buildingId = sc.nextInt();
+				System.out.print("강의실ID>>");
+				String unitName = buildingId + "-" + sc.next();
+				sc.nextLine();
+				conn = DBConnector.getConnection();
+				pstmt = conn.prepareStatement(insertUnit);
+				pstmt.setInt(1, buildingId);
+				pstmt.setString(2, unitName);
+				int affectedRows = pstmt.executeUpdate();
+				if (affectedRows > 0) {
+					System.out.println("등록되었습니다");
+				} else {
+					System.out.println("등록이 안되었습니다");
+				}
+			} else {
+				System.out.println("건물을 등록해주세요.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, pstmt, rs);
+		}
+	}
+
+	// 강의실 삭제 메소드
+	public void deleteUnit(Scanner sc) {
+		System.out.println("삭제하시겠습니까? 1. 삭제 2. 취소");
+		System.out.print("선택>>");
+		int input = sc.next().charAt(0) - '0';
+		sc.nextLine();
+
+		switch (input) {
+		case 1:
+			Connection conn = null;
+			PreparedStatement pstmt = null;
+			System.out.print("강의실ID>> ");
+			int inputUnit = sc.nextInt();
+			try {
+				conn = DBConnector.getConnection();
+				String DeleteUnit = "DELETE FROM units WHERE unit = ?";
+				pstmt = conn.prepareStatement(DeleteUnit);
+				pstmt.setInt(1, inputUnit);
+				int affectedRows = pstmt.executeUpdate();
+				if (affectedRows > 0) {
+					System.out.println("삭제되었습니다");
+				} else {
+					System.out.println("삭제가 안되었습니다");
+				}
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				DBConnector.close(conn, pstmt);
+			}
+			break;
+		case 2:
+			System.out.println("취소했습니다");
+			break;
+		}
+	}
+
 	// 학생정보조회 학생정보등록 나가기 화면을 보여주면서 선택할 수 있는 메소드
 	public void selectStudentMenu(Scanner sc) {
 		while (true) {
@@ -491,7 +689,8 @@ public class ManagerController {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		System.out.println("---------------------------------학 생 등 록---------------------------------------");
-		String insertStudentInfo = "insert into students values(to_char(sysdate,'yyyy')||LPAD(seq_student_num.nextval,6,'0'), ?, ?, ?, ?, to_char(to_date(?,'yyyy/mm/dd'),'yyyymmdd'), ?, to_char(sysdate,'yyyy'))";
+		String insertStudentInfo = "insert into students (student_id, name, phone, birth_date, email, password, department_id, enrollment_year)"
+				+ "values(to_char(sysdate,'yyyy')||LPAD(seq_student_num.nextval,6,'0'), ?, ?, ?, ?, to_char(to_date(?,'yyyy/mm/dd'),'yyyymmdd') , ?, to_char(sysdate,'yyyy'))";
 		System.out.print("학생이름>>");
 		String studentName = sc.next();
 		System.out.print("전화번호>>");

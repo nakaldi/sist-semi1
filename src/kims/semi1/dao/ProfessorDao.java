@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import kims.semi1.config.DBConnector;
@@ -88,33 +89,32 @@ public class ProfessorDao {
 		return professor;
 	}
 
-	//시간표 조회
+	// 시간표 조회
 	public int selectSchedule(int currentUserId) {
 		System.out.println("==시간표 출력 메뉴==");
 		String printSchedulesSql = "select c.name as course_name,p.name as professor_name,s.day_of_week,s.start_time,s.end_time "
-				+ "from courses c, class_schedules s, professors p "
-				+ "where c.professor_id = ? "
-				+ "and c.course_id = s.course_id "
-				+ "and c.professor_id = p.professor_id ";
+				+ "from courses c, class_schedules s, professors p " + "where c.professor_id = ? "
+				+ "and c.course_id = s.course_id " + "and c.professor_id = p.professor_id ";
 
 		try (Connection conn = DBConnector.getConnection();
 				PreparedStatement schedulsps = conn.prepareStatement(printSchedulesSql)) {
 			schedulsps.setInt(1, currentUserId);
-			
+
 			try (ResultSet rs = schedulsps.executeQuery()) {
-				while(rs.next()) {
-					
+				while (rs.next()) {
+
 					String courseName = rs.getString("course_name");
 					String professorName = rs.getString("professor_name");
 					String courseDay = rs.getString("day_of_week");
 					String courseStart = rs.getString("start_time");
 					String courseEnd = rs.getString("end_time");
-					
-					System.out.println("강의명" +"	|	"+"교수 이름"+"	|	"+"요일"+"	|	"+"시작 시간"+"	|	"+"종료시간");
-					System.out.println(courseName +"	|	"+professorName+"	|	"+courseDay+"	|	"+courseStart+"	|	"+courseEnd);
+
+					System.out.println(
+							"강의명" + "	|	" + "교수 이름" + "	|	" + "요일" + "	|	" + "시작 시간" + "	|	" + "종료시간");
+					System.out.println(courseName + "	|	" + professorName + "	|	" + courseDay + "	|	"
+							+ courseStart + "	|	" + courseEnd);
 
 				}
-				
 
 			}
 
@@ -123,21 +123,232 @@ public class ProfessorDao {
 		}
 
 		return currentUserId;
-		
-		
-		
-	}  
-	//학생 기본 정보 조회
-	public void selectStudentInfo(int currentUserId) {
-		
-		
+
 	}
-	
+
+	// 성적 수정
+
+	public int correctionGrade(int currentUserId, Scanner sc) {
+
+		System.out.println("성적 수정");
+
+		System.out.println("수정할 학번 : ");
+		int studentIdInput = sc.nextInt();
+		sc.nextLine();
+
+		System.out.println("수정할 강의번호 : ");
+		int courseIdInput = sc.nextInt();
+		sc.nextLine();
+
+		System.out.println("수정할 학점 : ");
+		double correctionGrade = sc.nextDouble();
+		sc.nextLine();
+
+		String correctionSql = "    UPDATE grades g " + "SET g.grade = ? " + "WHERE g.enrollment_id = ( "
+				+ "    SELECT e.enrollment_id " + "    FROM enrollments e, courses c "
+				+ "    WHERE e.course_id = c.course_id " + "    AND e.student_id = ?" + "    AND e.course_id = ?"
+				+ "    AND c.professor_id = ? " + ") ";
+		try (Connection conn = DBConnector.getConnection();
+				PreparedStatement ps = conn.prepareStatement(correctionSql)) {
+			ps.setDouble(1, correctionGrade);
+			ps.setInt(2, studentIdInput);
+			ps.setInt(3, courseIdInput);
+			ps.setInt(4, currentUserId);
+
+			int resultOutput = ps.executeUpdate();
+
+			if (resultOutput > 0) {
+				System.out.println("등록 완료");
+			} else {
+				System.out.println("등록 실패");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (InputMismatchException m) {
+			System.out.println("올바른 형식의 학점을 입력해주세요. ex)4.5");
+		}
+		return currentUserId;
+	}
+
+	// 학번 조회
+
+	public int studentIdSelectGrade(int currentUserId, Scanner sc) {
+		System.out.println("학번 조회");
+
+		System.out.println("학번 : ");
+		int studentIdInput = sc.nextInt();
+		sc.nextLine();
+
+		String idGradeSql = "SELECT distinct " + "    s.student_id AS student_id, " + "    s.name AS student_name, "
+				+ "    d.name AS department_name, " + "    c.name as course_name, " + "	   g.grade AS grade " + "FROM "
+				+ "    students s, enrollments e, courses c, professors p, departments d, grades g " + "WHERE  "
+				+ "    p.professor_id = ? " + "    AND p.professor_id = c.professor_id "
+				+ "    AND c.course_id = e.course_id " + "    AND e.student_id = s.student_id "
+				+ "    AND s.department_id = d.department_id " + "    AND e.enrollment_id = g.enrollment_id "
+				+ "    AND s.student_id = ? ";
+
+		try (Connection conn = DBConnector.getConnection();
+				PreparedStatement selectidGradeps = conn.prepareStatement(idGradeSql)) {
+			selectidGradeps.setInt(1, currentUserId);
+			selectidGradeps.setInt(2, studentIdInput);
+			try (ResultSet rs = selectidGradeps.executeQuery()) {
+				boolean hasResults = false;
+				while (rs.next()) {
+					hasResults = true;
+					int studentId = rs.getInt("student_id");
+					String studentName = rs.getString("student_name");
+					String departmentName = rs.getString("department_name");
+					int studentGrade = rs.getInt("grade");
+
+					System.out.println(
+							studentId + "	|	" + studentName + "	|	" + departmentName + "	|	" + studentGrade);
+				}
+
+				if (!hasResults) {
+					System.out.println("조회된 성적 데이터가 없습니다.");
+				}
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return currentUserId;
+	}
+
+	// 이름 조회
+
+	public int studentNameGrade(int currentUserId, Scanner sc) {
+
+		System.out.println("이름 조회");
+
+		System.out.println("이름 : ");
+		String nameInput = sc.nextLine();
+
+		String nameGradeSql = "SELECT distinct " + "    s.student_id AS student_id, " + "    s.name AS student_name, "
+				+ "    d.name AS department_name, " + "    c.name as course_name, " + "	   g.grade AS grade " + "FROM "
+				+ "    students s, enrollments e, courses c, professors p, departments d, grades g " + "WHERE  "
+				+ "    p.professor_id = ? " + "    AND p.professor_id = c.professor_id "
+				+ "    AND c.course_id = e.course_id " + "    AND e.student_id = s.student_id "
+				+ "    AND s.department_id = d.department_id " + "    AND e.enrollment_id = g.enrollment_id "
+				+ "    AND s.name = ? ";
+
+		try (Connection conn = DBConnector.getConnection();
+				PreparedStatement selectNameGradeps = conn.prepareStatement(nameGradeSql)) {
+			selectNameGradeps.setInt(1, currentUserId);
+			selectNameGradeps.setString(2, nameInput);
+			try (ResultSet rs = selectNameGradeps.executeQuery()) {
+				boolean hasResults = false;
+				while (rs.next()) {
+					hasResults = true;
+					int studentId = rs.getInt("student_id");
+					String studentName = rs.getString("student_name");
+					String departmentName = rs.getString("department_name");
+					int studentGrade = rs.getInt("grade");
+
+					System.out.println(
+							studentId + "	|	" + studentName + "	|	" + departmentName + "	|	" + studentGrade);
+				}
+
+				if (!hasResults) {
+					System.out.println("조회된 성적 데이터가 없습니다.");
+				}
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return currentUserId;
+	}
+
+	// 성적 전체 조회
+
+	public int selectAllGrade(int currentUserId) {
+
+		System.out.println("전체 성적 조회");
+
+		String allGradeSql = "SELECT distinct " + "    s.student_id AS student_id, " + "    s.name AS student_name, "
+				+ "    d.name AS department_name, " + "    c.name as course_name, " + "	   g.grade AS grade " + "FROM "
+				+ "    students s, enrollments e, courses c, professors p, departments d, grades g " + "WHERE  "
+				+ "    p.professor_id = ? " + "    AND p.professor_id = c.professor_id "
+				+ "    AND c.course_id = e.course_id " + "    AND e.student_id = s.student_id "
+				+ "    AND s.department_id = d.department_id " + "    AND e.enrollment_id = g.enrollment_id ";
+
+		try (Connection conn = DBConnector.getConnection();
+				PreparedStatement selectGradeps = conn.prepareStatement(allGradeSql)) {
+			selectGradeps.setInt(1, currentUserId);
+			try (ResultSet rs = selectGradeps.executeQuery()) {
+				boolean hasResults = false;
+				while (rs.next()) {
+					hasResults = true;
+					int studentId = rs.getInt("student_id");
+					String studentName = rs.getString("student_name");
+					String departmentName = rs.getString("department_name");
+					int studentGrade = rs.getInt("grade");
+
+					System.out.println(
+							studentId + "	|	" + studentName + "	|	" + departmentName + "	|	" + studentGrade);
+				}
+
+				if (!hasResults) {
+					System.out.println("조회된 성적 데이터가 없습니다.");
+				}
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return currentUserId;
+	}
+
+	// 학생 성적 입력
+	public int selectStudentInfo(int currentUserId, Scanner sc) {
+
+		System.out.println("현재 강의 목록");
+		printCourseInfo(currentUserId);
+
+		System.out.println("학생 성적 입력");
+		System.out.println("학번 입력 : ");
+		int studentId = sc.nextInt();
+		sc.nextLine();
+
+		System.out.println("성적 입력 : ");
+		int studentGrade = sc.nextInt();
+		sc.nextLine();
+
+		System.out.println("강의ID 입력 : ");
+		int courseId = sc.nextInt();
+		sc.nextLine();
+
+		String insertGradeSql = "INSERT INTO grades (grade_id, enrollment_id, grade, student_review)"
+				+ "SELECT seq_grade_id.NEXTVAL, e.enrollment_id, ? , null "
+				+ "FROM enrollments e, students s, courses c " + "WHERE s.student_id = ? " + "AND c.course_id = ? "
+				+ "AND e.student_id = s.student_id " + "AND e.course_id = c.course_id ";
+		try (Connection conn = DBConnector.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(insertGradeSql)) {
+			pstmt.setInt(1, studentGrade);
+			pstmt.setInt(2, studentId);
+			pstmt.setInt(3, courseId);
+
+			int result = pstmt.executeUpdate();
+
+			if (result > 0) {
+				System.out.println("등록 완료");
+			} else {
+				System.out.println("등록 실패");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return currentUserId;
+	}
+
 	// 강의 등록
 	public int registCourse(int currentUserId, Scanner sc) {
 
-		
-		//이거 무조건 고쳐라 시퀀스 들고와서 같은값으로 넣는거
+		// 이거 무조건 고쳐라 시퀀스 들고와서 같은값으로 넣는거
 		System.out.print("1.강의명 : ");
 		String courseName = sc.nextLine();
 		System.out.println("2. 진행할 강의 건물 : ");
@@ -155,8 +366,6 @@ public class ProfessorDao {
 		String courseStart = sc.nextLine();
 		System.out.println("7. 종료시간 : ");
 		String courseEnd = sc.nextLine();
-		
-		
 
 		String insertCourseSql = "insert into courses values(seq_course_id.nextval,?,?,?,?,?,?)";
 		try (Connection conn = DBConnector.getConnection();
@@ -167,39 +376,37 @@ public class ProfessorDao {
 			pstmt.setString(4, credits);
 			pstmt.setString(5, semester);
 			pstmt.setString(6, coursePlan);
-			
+
 			int result = pstmt.executeUpdate();
 
-			if(result > 0) {
+			if (result > 0) {
 				System.out.println("등록 완료");
-			}else {
+			} else {
 				System.out.println("등록 실패");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		registCourseTime(currentUserId,courseDay,courseStart,courseEnd);
+
+		registCourseTime(currentUserId, courseDay, courseStart, courseEnd);
 		return currentUserId;
 	}
-	
-		public int registCourseTime(int currentUserId, String courseDay, String courseStart, String courseEnd) {
-			
-		
-		String insertScheduleSql = "INSERT INTO class_schedules VALUES(" +
-			    "(SELECT MAX(course_id) FROM courses), " +
-			    "seq_schedule_id.nextval, ?, ?, ?)";
+
+	public int registCourseTime(int currentUserId, String courseDay, String courseStart, String courseEnd) {
+
+		String insertScheduleSql = "INSERT INTO class_schedules VALUES(" + "(SELECT MAX(course_id) FROM courses), "
+				+ "seq_schedule_id.nextval, ?, ?, ?)";
 		try (Connection conn = DBConnector.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(insertScheduleSql)) {
 			pstmt.setString(1, courseDay);
 			pstmt.setString(2, courseStart);
 			pstmt.setString(3, courseEnd);
-			
+
 			int result = pstmt.executeUpdate();
 
-			if(result > 0) {
+			if (result > 0) {
 				System.out.println("등록 완료");
-			}else {
+			} else {
 				System.out.println("등록 실패");
 			}
 		} catch (SQLException e) {
@@ -207,30 +414,27 @@ public class ProfessorDao {
 		}
 
 		return currentUserId;
-}
+	}
 
-	
-	//강의평가 조회
+	// 강의평가 조회
 	public int printStudentRivew(int currentUserId) {
-		
+
 		String reviewSql = "SELECT c.name AS course_name, g.student_review "
-				+ "FROM courses c, enrollments e, grades g "
-				+ "WHERE c.professor_id = ? "
-				+ "AND c.course_id = e.course_id "
-				+ "AND e.enrollment_id = g.enrollment_id "
+				+ "FROM courses c, enrollments e, grades g " + "WHERE c.professor_id = ? "
+				+ "AND c.course_id = e.course_id " + "AND e.enrollment_id = g.enrollment_id "
 				+ "AND g.student_review IS NOT NULL ";
 		try (Connection conn = DBConnector.getConnection();
 				PreparedStatement reviewps = conn.prepareStatement(reviewSql)) {
 			reviewps.setInt(1, currentUserId);
-			
+
 			try (ResultSet rs = reviewps.executeQuery()) {
-				while(rs.next()) {
+				while (rs.next()) {
 					System.out.println("rs 진입");
 					String c_name = rs.getString("course_name");
 					String studentRiview = rs.getString("student_review");
-					
+
 					System.out.println("강의명\t|\t학생리뷰");
-					System.out.println(c_name +"	|	"+studentRiview);
+					System.out.println(c_name + "	|	" + studentRiview);
 				}
 			}
 		} catch (SQLException e) {
@@ -238,26 +442,28 @@ public class ProfessorDao {
 		}
 
 		return currentUserId;
-		
+
 	}
-	
-	//교수 강의 현황 조회
+
+	// 교수 강의 현황 조회
 	public int printCourseInfo(int currentUserId) {
-		
-		String selectSql = "SELECT name, department_id ,semester, credits ,courseplan  FROM courses WHERE professor_id = ?";
+
+		String selectSql = "SELECT course_id, name, department_id ,semester, credits ,courseplan  FROM courses WHERE professor_id = ?";
 		try (Connection conn = DBConnector.getConnection();
 				PreparedStatement selectps = conn.prepareStatement(selectSql)) {
 			selectps.setInt(1, currentUserId);
 			try (ResultSet rs = selectps.executeQuery()) {
 				while (rs.next()) {
 
+					int courseId = rs.getInt("course_id");
 					String courseName = rs.getString("name");
 					int departmentId = rs.getInt("department_id");
 					String courseSemester = rs.getString("semester");
 					String courseCredit = rs.getString("credits");
 					String coursePlan = rs.getString("courseplan");
-					
-					System.out.println(courseName +"	|	"+departmentId+ "	|	" + courseSemester + "	|	" + courseCredit + "	|	" + coursePlan);
+
+					System.out.println(courseId + "	|	" + courseName + "	|	" + departmentId + "	|	"
+							+ courseSemester + "	|	" + courseCredit + "	|	" + coursePlan);
 
 				}
 
@@ -272,9 +478,9 @@ public class ProfessorDao {
 
 	// 교수 강의 등록시 정보 출력
 	public int printCourseInfoInRegistCourse(int currentUserId) {
-		
+
 		System.out.println("==강의 등록 메뉴==");
-		System.out.println("강의명" +"	|	"+"강의 장소"+ "	|	" + "강의 학기" + "	|	" + "학점" + "	|	" + "강의 설명");
+		System.out.println("강의명" + "	|	" + "강의 장소" + "	|	" + "강의 학기" + "	|	" + "학점" + "	|	" + "강의 설명");
 		String selectSql = "SELECT name, department_id ,semester, credits ,courseplan  FROM courses WHERE professor_id = ?";
 		try (Connection conn = DBConnector.getConnection();
 				PreparedStatement selectps = conn.prepareStatement(selectSql)) {
@@ -288,7 +494,8 @@ public class ProfessorDao {
 					String courseCredit = rs.getString("credits");
 					String coursePlan = rs.getString("courseplan");
 
-					System.out.println(courseName +"	|	"+departmentId+"관"+ "	|	" + courseSemester + "	|	" + courseCredit + "	|	" + coursePlan);
+					System.out.println(courseName + "	|	" + departmentId + "관" + "	|	" + courseSemester
+							+ "	|	" + courseCredit + "	|	" + coursePlan);
 
 				}
 
@@ -300,7 +507,7 @@ public class ProfessorDao {
 
 		return currentUserId;
 	}
-	
+
 	// 교수 정보 변경
 	public int modifyProfessorInfo(String typeInfo, String modifyInfo, int currentUserId, Scanner sc) {
 

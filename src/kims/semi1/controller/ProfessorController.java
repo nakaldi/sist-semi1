@@ -15,6 +15,7 @@ import kims.semi1.view.ProfessorFrame;
 
 public class ProfessorController {
 
+	LoginController loginController;
 	private final ProfessorService professorService;
 	int currentUserId;
 	Professor professor;
@@ -55,9 +56,8 @@ public class ProfessorController {
 		System.out.println("==교수 정보 메뉴==");
 		System.out.println("1.교수 정보 수정");
 		System.out.println("2.강의 관리");
-		System.out.println("3.학생 출결 관리");
-		System.out.println("4.학생 성적 관리");
-		System.out.println("5.로그아웃");
+		System.out.println("3.학생 성적 관리");
+		System.out.println("4.로그아웃");
 		System.out.println("메뉴 > ");
 
 		int input = sc.next().charAt(0) - '0';
@@ -70,7 +70,65 @@ public class ProfessorController {
 
 		case 2:
 			managementCourse(sc);
+		case 3:
+			studentGradeManagement(sc);
+		case 4:
+			loginController = new LoginController();
+			loginController.handleUserInput(sc);
+		}
 
+	}
+
+	public void studentGradeManagement(Scanner sc) {
+
+		while (true) {
+			System.out.println("학생 성적 관리");
+			System.out.println("1. 학생 성적 기입");
+			System.out.println("2. 학생 성적 조회");
+			System.out.println("3. 학생 성적 수정");
+			System.out.println("4. 나가기");
+
+			int gradeInput = sc.nextInt();
+			sc.nextLine();
+
+			switch (gradeInput) {
+
+			case 1:
+				professorDao.selectStudentInfo(currentUserId, sc);
+			case 2:
+				System.out.println("학생 성적 조회");
+				System.out.println("1. 전체 조회");
+				System.out.println("2. 검색 조회");
+				System.out.println("3. 나가기");
+				int selectInput = sc.nextInt();
+				sc.nextLine();
+
+				switch (selectInput) {
+
+				case 1:
+					professorDao.selectAllGrade(currentUserId);
+					studentGradeManagement(sc);
+				case 2:
+					System.out.println("1. 학번 조회");
+					System.out.println("2. 이름 조회");
+
+					int input = sc.nextInt();
+					sc.nextLine();
+
+					if (input == 1) {
+						professorDao.studentIdSelectGrade(currentUserId, sc);
+					} else if (input == 2) {
+						professorDao.studentNameGrade(currentUserId, sc);
+					}
+					studentGradeManagement(sc);
+				}
+			case 3:
+				professorDao.correctionGrade(currentUserId, sc);
+				studentGradeManagement(sc);
+			case 4:
+				System.out.println("나가기");
+				printProfessorMenu(sc);
+			}
 		}
 
 	}
