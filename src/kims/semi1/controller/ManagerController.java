@@ -492,37 +492,28 @@ public class ManagerController {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String searchUnitInofo = "SELECT * FROM buildings ";
-		
 		try {
+			System.out.println("---------------------------------강 의 실 등 록---------------------------------------");
+			String insertUnit = "insert into units(unit,building_id) values(?,?)";
+			System.out.print("건물번호>>");
+			int buildingId = sc.nextInt();
+			System.out.print("강의실ID>>");
+			String unitName = buildingId + "-" + sc.next();
+			sc.nextLine();
 			conn = DBConnector.getConnection();
-			pstmt = conn.prepareStatement(searchUnitInofo);
-			rs = pstmt.executeQuery();
-			if (rs.next()) {
-				System.out.println("---------------------------------강 의 실 등 록---------------------------------------");
-				String insertUnit = "insert into units values(?, ?))";
-				System.out.print("건물번호>>");
-				int buildingId = sc.nextInt();
-				System.out.print("강의실ID>>");
-				String unitName = buildingId + "-" + sc.next();
-				sc.nextLine();
-				conn = DBConnector.getConnection();
-				pstmt = conn.prepareStatement(insertUnit);
-				pstmt.setInt(1, buildingId);
-				pstmt.setString(2, unitName);
-				int affectedRows = pstmt.executeUpdate();
-				if (affectedRows > 0) {
-					System.out.println("등록되었습니다");
-				} else {
-					System.out.println("등록이 안되었습니다");
-				}
+			pstmt = conn.prepareStatement(insertUnit);
+			pstmt.setString(1, unitName);
+			pstmt.setInt(2, buildingId);
+			int affectedRows = pstmt.executeUpdate();
+			if (affectedRows > 0) {
+				System.out.println("등록되었습니다");
 			} else {
-				System.out.println("건물을 등록해주세요.");
+				System.out.println("등록이 안되었습니다");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			DBConnector.close(conn, pstmt, rs);
+			DBConnector.close(conn, pstmt);
 		}
 	}
 
@@ -538,19 +529,19 @@ public class ManagerController {
 			Connection conn = null;
 			PreparedStatement pstmt = null;
 			System.out.print("강의실ID>> ");
-			int inputUnit = sc.nextInt();
+			String inputUnit = sc.next();
+			sc.nextLine();
 			try {
 				conn = DBConnector.getConnection();
 				String DeleteUnit = "DELETE FROM units WHERE unit = ?";
 				pstmt = conn.prepareStatement(DeleteUnit);
-				pstmt.setInt(1, inputUnit);
+				pstmt.setString(1, inputUnit);
 				int affectedRows = pstmt.executeUpdate();
 				if (affectedRows > 0) {
 					System.out.println("삭제되었습니다");
 				} else {
 					System.out.println("삭제가 안되었습니다");
 				}
-
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
