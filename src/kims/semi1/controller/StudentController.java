@@ -208,7 +208,7 @@ public class StudentController {
 			return;
 		}
 	}
-//TODO 중복 강의 수강 불가하게 해야함.
+
 	private void searchEnrollments(int studentId, String input) {
 		System.out.println("-----------------------" + input + "학기 수강 목록 --------------------------");
 		List<Enrollment> enrollmentInfos = studentService.getEnrollmentInfosByStudentIdAndSemester(studentId, input);
@@ -216,7 +216,7 @@ public class StudentController {
 			System.out.println("수강 정보가 없습니다.");
 			return;
 		}
-		enrollmentInfos.stream().forEach(t -> System.out.println(t.getCourseInfo().getCourse().getName()));
-		
+		enrollmentInfos.stream().forEach(t -> System.out.println("강의명 : " + t.getCourseInfo().getCourse().getName()
+				+ "\t 학기 : " + t.getCourseInfo().getCourse().getSemester()));
 	}
 }

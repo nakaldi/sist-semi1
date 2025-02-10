@@ -238,4 +238,23 @@ public class StudentDao {
 		}
 		return false;
 	}
+
+	// Enrollments 테이블에 저장
+	public boolean existsEnrollmentByStudentIdAndCourseId(int studentId, int courseId) {
+		String sql = "select * from enrollments where student_id = ? AND course_id = ?";
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, studentId);
+			pstmt.setInt(2, courseId);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return true;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 }

@@ -51,6 +51,10 @@ public class StudentService {
 	}
 
 	public boolean registerEnrollment(int studentId, int courseId) {
+		if (studentDao.existsEnrollmentByStudentIdAndCourseId(studentId, courseId)) {
+			System.out.println("이미 강의가 존재합니다.");
+			return false;
+		}
 		return studentDao.insultEnrollment(studentId, courseId);
 	}
 }
