@@ -9,15 +9,22 @@ import java.util.Scanner;
 import kims.semi1.config.DBConnector;
 import kims.semi1.dao.ClassScheduleDao;
 import kims.semi1.model.ClassSchedule;
+import kims.semi1.view.ManagerFrame;
 
 public class ManagerController {
 	ClassScheduleDao classScheduleDao;
+	ManagerFrame managerFrame;
 
 	public ManagerController() {
 		this.classScheduleDao = new ClassScheduleDao();
 	}
 
 	public ManagerController(int currentUserId) {
+		this.classScheduleDao = new ClassScheduleDao();
+	}
+
+	public ManagerController(int currentUserId, ManagerFrame managerFrame) {
+		this.managerFrame = managerFrame;
 		this.classScheduleDao = new ClassScheduleDao();
 	}
 

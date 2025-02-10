@@ -11,15 +11,24 @@ import kims.semi1.model.Enrollment;
 import kims.semi1.model.Professor;
 import kims.semi1.model.Student;
 import kims.semi1.service.StudentService;
+import kims.semi1.view.StudentFrame;
 
 public class StudentController {
 	private final StudentService studentService;
 	private Student student;
 	private Department department;
+	StudentFrame studentFrame;
 
 	public StudentController(int currentUserId) {
 		this.studentService = new StudentService();
+		Object[] temps = studentService.getStudentAndDepartmentInfo(currentUserId);
+		student = (Student) temps[0];
+		department = (Department) temps[1];
+	}
 
+	public StudentController(int currentUserId, StudentFrame studentFrame) {
+		this.studentService = new StudentService();
+		this.studentFrame = studentFrame;
 		Object[] temps = studentService.getStudentAndDepartmentInfo(currentUserId);
 		student = (Student) temps[0];
 		department = (Department) temps[1];
