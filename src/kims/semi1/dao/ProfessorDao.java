@@ -180,7 +180,7 @@ public class ProfessorDao {
 		sc.nextLine();
 
 		String idGradeSql = "SELECT distinct " + "    s.student_id AS student_id, " + "    s.name AS student_name, "
-				+ "    d.name AS department_name, " + "    c.course_id as course_id, "+ "    c.name as course_name, " 
+				+ "    d.name AS department_name, " + "    c.course_id as course_id, " + "    c.name as course_name, "
 				+ "	   g.grade AS grade " + "FROM "
 				+ "    students s, enrollments e, courses c, professors p, departments d, grades g " + "WHERE  "
 				+ "    p.professor_id = ? " + "    AND p.professor_id = c.professor_id "
@@ -202,8 +202,8 @@ public class ProfessorDao {
 					int courseId = rs.getInt("course_id");
 					int studentGrade = rs.getInt("grade");
 
-					System.out.println(
-							studentId + "	|	" + studentName + "	|	"+ courseId + "	|	" + departmentName + "	|	" + studentGrade);
+					System.out.println(studentId + "	|	" + studentName + "	|	" + courseId + "	|	"
+							+ departmentName + "	|	" + studentGrade);
 				}
 
 				if (!hasResults) {
@@ -228,7 +228,7 @@ public class ProfessorDao {
 		String nameInput = sc.nextLine();
 
 		String nameGradeSql = "SELECT distinct " + "    s.student_id AS student_id, " + "    s.name AS student_name, "
-				+ "    d.name AS department_name, " +"	c.course_id AS course_id," + "    c.name as course_name, " 
+				+ "    d.name AS department_name, " + "	c.course_id AS course_id," + "    c.name as course_name, "
 				+ "	   g.grade AS grade " + "FROM "
 				+ "    students s, enrollments e, courses c, professors p, departments d, grades g " + "WHERE  "
 				+ "    p.professor_id = ? " + "    AND p.professor_id = c.professor_id "
@@ -250,8 +250,8 @@ public class ProfessorDao {
 					int courseId = rs.getInt("course_id");
 					int studentGrade = rs.getInt("grade");
 
-					System.out.println(
-							studentId + "	|	" + studentName + "	|	"+ courseId + "	|	" + departmentName + "	|	" + studentGrade);
+					System.out.println(studentId + "	|	" + studentName + "	|	" + courseId + "	|	"
+							+ departmentName + "	|	" + studentGrade);
 				}
 
 				if (!hasResults) {
@@ -273,7 +273,7 @@ public class ProfessorDao {
 		System.out.println("전체 성적 조회");
 
 		String allGradeSql = "SELECT distinct " + "    s.student_id AS student_id, " + "    s.name AS student_name, "
-				+ "    d.name AS department_name, " +"	c.course_id AS course_id,"+ "    c.name as course_name, " 
+				+ "    d.name AS department_name, " + "	c.course_id AS course_id," + "    c.name as course_name, "
 				+ "	   g.grade AS grade " + "FROM "
 				+ "    students s, enrollments e, courses c, professors p, departments d, grades g " + "WHERE  "
 				+ "    p.professor_id = ? " + "    AND p.professor_id = c.professor_id "
@@ -293,8 +293,8 @@ public class ProfessorDao {
 					int courseId = rs.getInt("course_id");
 					int studentGrade = rs.getInt("grade");
 
-					System.out.println(
-							studentId + "	|	" + studentName + "	|	"+ courseId + "	|	" + departmentName + "	|	" + studentGrade);
+					System.out.println(studentId + "	|	" + studentName + "	|	" + courseId + "	|	"
+							+ departmentName + "	|	" + studentGrade);
 				}
 
 				if (!hasResults) {
@@ -435,7 +435,7 @@ public class ProfessorDao {
 
 			try (ResultSet rs = reviewps.executeQuery()) {
 				while (rs.next()) {
-					System.out.println("rs 진입");
+					// System.out.println("rs 진입");
 					String c_name = rs.getString("course_name");
 					String studentRiview = rs.getString("student_review");
 

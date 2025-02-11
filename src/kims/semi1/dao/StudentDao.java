@@ -194,8 +194,7 @@ public class StudentDao {
 				+ "left outer join class_schedules s on c.course_id = s.course_id) "
 				+ "left outer join buildings b on d.building_id = b.building_id) "
 				+ "left outer join grades g on e.enrollment_id = g.enrollment_id) "
-				+ "left outer join units u on u.unit = s.unit) "
-				+ "where e.student_id = ? and c.semester = ? ";
+				+ "left outer join units u on u.unit = s.unit) " + "where e.student_id = ? and c.semester = ? ";
 
 		List<Enrollment> enrollmentInfos = new ArrayList<Enrollment>();
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
