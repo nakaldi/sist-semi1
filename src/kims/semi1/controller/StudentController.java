@@ -1,8 +1,10 @@
 package kims.semi1.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import kims.semi1.model.Building;
 import kims.semi1.model.ClassSchedule;
 import kims.semi1.model.Course;
 import kims.semi1.model.CourseInfo;
@@ -11,27 +13,43 @@ import kims.semi1.model.Enrollment;
 import kims.semi1.model.Professor;
 import kims.semi1.model.Student;
 import kims.semi1.service.StudentService;
-import kims.semi1.view.StudentFrame;
+import kims.semi1.util.DateUtils;
 
 public class StudentController {
 	private final StudentService studentService;
 	private Student student;
 	private Department department;
-	StudentFrame studentFrame;
+	private Building building;
 
 	public StudentController(int currentUserId) {
 		this.studentService = new StudentService();
-		Object[] temps = studentService.getStudentAndDepartmentInfo(currentUserId);
+		Object[] temps = studentService.getStudentAndDepartmentAndBuildingInfo(currentUserId);
 		student = (Student) temps[0];
 		department = (Department) temps[1];
+		building = (Building) temps[2];
 	}
 
-	public StudentController(int currentUserId, StudentFrame studentFrame) {
-		this.studentService = new StudentService();
-		this.studentFrame = studentFrame;
-		Object[] temps = studentService.getStudentAndDepartmentInfo(currentUserId);
-		student = (Student) temps[0];
-		department = (Department) temps[1];
+	public String[] loadStudentMypageInfo() {
+		List<String> infos = new ArrayList<String>();
+		infos.add(student.getName());
+		infos.add(student.getBirthDate().toString());
+		infos.add(Integer.toString(student.getStudentId()));
+		infos.add(student.getPhone());
+		infos.add(student.getEmail());
+		infos.add(student.getPassword());
+		infos.add(department.getName());
+		infos.add(building.getName());
+		return infos.toArray(new String[0]);
+	}
+
+	public void updateStudentInfo(String name, String birthDate, String phone, String email, String password) {
+		Student updatedStudent = new Student(student);
+		updatedStudent.setName(name);
+		updatedStudent.setBirthDate(DateUtils.convertStringToLocalDate(birthDate));
+		updatedStudent.setPhone(phone);
+		updatedStudent.setEmail(email);
+		updatedStudent.setPassword(password);
+		studentService.updateStudentInfo(updatedStudent);
 	}
 
 	public void selectStudentMenu(Scanner sc) {
@@ -268,10 +286,10 @@ public class StudentController {
 				t -> System.out.println(t.getCourseInfo().getCourse().getName() + "  " + t.getGrade().getGrade()));
 	}
 
-	//한 학기 취득학점 , 성적 평균 조회
+	// 한 학기 취득학점 , 성적 평균 조회
 	private void searchPrintGrades(Scanner sc) {
 		String input = selectSemester(sc);
-		double sum = 0.0 ;
+		double sum = 0.0;
 		double avg = 0.0;
 		List<Enrollment> grades = studentService.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(),
 				input);

@@ -33,8 +33,15 @@ public class StudentFrame {
 	ImageIcon icon = new ImageIcon("/resources/button_white.png");
 	ImageIcon selectedIcon = new ImageIcon("/resources/button_clicked.png");
 	JPanel sidePanel;
+	public StudentEnrollmentPanel studentEnrollmentPanel;
+	public StudentMypagePanel studentMypagePanel;
 
-	public StudentFrame() {
+	public StudentFrame(StudentController studentController) {
+		this.studentController = studentController;
+		createStudentFrame();
+	}
+	
+	public void createStudentFrame() {
 		frame = new JFrame();
 		frame.setBounds(50, 50, 1200, 800);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -87,12 +94,14 @@ public class StudentFrame {
 		Font newFont = new Font("Malgun Gothic", Font.PLAIN, 15);
 		setFontForAllComponents(sidePanel, newFont);
 
+		studentMypagePanel = new StudentMypagePanel(studentController);
+		studentEnrollmentPanel = new StudentEnrollmentPanel(frame, studentController);
 		// 메인 패널 (CardLayout 사용)
 		cardLayout = new CardLayout();
 		mainPanel = new Panel(cardLayout);
 		mainPanel.setBackground(new Color(245, 245, 245));
-		mainPanel.add(new StudentMypagePanel(studentController).createMyPagePanel(), "마이페이지");
-		mainPanel.add(new StudentEnrollmentPanel(frame, studentController).createEnrollmentPanel(), "수강신청");
+		mainPanel.add(studentMypagePanel.createMyPagePanel(), "마이페이지");
+		mainPanel.add(studentEnrollmentPanel.createEnrollmentPanel(), "수강신청");
 		mainPanel.add(new Label("출결관리 화면 (추후 구현)"), "수강현황");
 		mainPanel.add(new Label("성적관리 화면 (추후 구현)"), "성적확인");
 		frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
@@ -136,10 +145,6 @@ public class StudentFrame {
 		});
 
 		frame.setVisible(true);
-	}
-
-	public void setStudentController(StudentController studentController) {
-		this.studentController = studentController;
 	}
 
 	public static void setBackgroundDisableForAllComponents(Container container) {

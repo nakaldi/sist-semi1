@@ -55,9 +55,8 @@ public class LoginController {
 
 			if (Integer.toString(currentUserId).charAt(4) == '1') {
 				loginFrame.dispose();
-				StudentFrame sf = new StudentFrame();
-				StudentController studentController = new StudentController(currentUserId, sf);
-				sf.setStudentController(studentController);
+				StudentController studentController = new StudentController(currentUserId);
+				StudentFrame sf = new StudentFrame(studentController);
 			} else if (Integer.toString(currentUserId).charAt(4) == '2') {
 				loginFrame.dispose();
 				ProfessorFrame pf = new ProfessorFrame(loginFrame, currentUserId);

@@ -53,7 +53,7 @@ public class GenericDao {
 	}
 
 	private <T> String mapToTableName(Class<T> targetModel) {
-		return targetModel == ClassSchedule.class ? "Class_schedules" : targetModel + "s";
+		return targetModel == ClassSchedule.class ? "Class_schedules" : targetModel.getSimpleName() + "s";
 	}
 
 	/**

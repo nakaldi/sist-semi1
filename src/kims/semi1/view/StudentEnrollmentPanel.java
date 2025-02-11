@@ -29,6 +29,10 @@ import kims.semi1.controller.StudentController;
 public class StudentEnrollmentPanel {
 	JFrame frame;
 	StudentController studentController;
+	public JLabel titleLabel1;
+	public JTable table1;
+	public JLabel titleLabel2;
+	public JTable table2;
 	public StudentEnrollmentPanel(JFrame frame, StudentController studentController) {
 		this.studentController = studentController;
 		this.frame = frame;
@@ -92,7 +96,7 @@ public class StudentEnrollmentPanel {
 	        innerPanel.add(centerPanel, gbc_centerPanel);
 		
 			// 1. 첫 번째 라벨
-	        JLabel titleLabel1 = new JLabel("2학기 강의 목록");
+	        titleLabel1 = new JLabel("2학기 강의 목록");
 	        titleLabel1.setFont(new Font("맑은 고딕", Font.PLAIN, 20));
 	        GridBagConstraints gbc_titleLabel1 = new GridBagConstraints();
 	        gbc_titleLabel1.anchor = GridBagConstraints.WEST;
@@ -103,7 +107,7 @@ public class StudentEnrollmentPanel {
 
 	        // 2. 첫 번째 테이블
 	        String[] columnNames = {"강의번호", "강의명", "교수명", "학과", "학점", "요일", "강의시간"};
-	        JTable table1 = new JTable(new Object[10][7], columnNames);
+	        table1 = new JTable(new Object[10][7], columnNames);
 	        table1.setGridColor(new Color(192,192,192));
 	        table1.setShowVerticalLines(false);
 	        table1.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
@@ -185,7 +189,7 @@ public class StudentEnrollmentPanel {
 	        centerPanel.add(filterPanel, gbc_filterPanel);
 
 	        // 4. 두 번째 라벨
-	        JLabel titleLabel2 = new JLabel("2학기 수강 목록");
+	        titleLabel2 = new JLabel("2학기 수강 목록");
 	        GridBagConstraints gbc_titleLabel2 = new GridBagConstraints();
 	        gbc_titleLabel2.anchor = GridBagConstraints.WEST;
 	        gbc_titleLabel2.gridx = 0;
@@ -194,7 +198,7 @@ public class StudentEnrollmentPanel {
 	        centerPanel.add(titleLabel2, gbc_titleLabel2);
 
 	        // 5. 두 번째 테이블
-	        JTable table2 = new JTable(new Object[10][7], columnNames);
+	        table2 = new JTable(new Object[10][7], columnNames);
 	        table2.setGridColor(new Color(192,192,192));
 	        table2.setShowVerticalLines(false);
 	        table2.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
@@ -218,6 +222,7 @@ public class StudentEnrollmentPanel {
 	                }
 	            }
 	        });
+	        
 
 		StudentFrame.setBackgroundDisableForAllComponents(innerPanel);
 		return innerPanel;
@@ -225,7 +230,7 @@ public class StudentEnrollmentPanel {
 	
     // 강의계획서 팝업 창
     private void showSyllabusDialog(JFrame parent, String courseName) {
-        String syllabus = "하하 히히하핳 하하하하 깔깔깔깔";
+        String syllabus = "강의계획서";
 
         JDialog dialog = new JDialog(parent, "강의계획서 - " + courseName, true);
         dialog.setSize(500, 400);
@@ -238,7 +243,9 @@ public class StudentEnrollmentPanel {
 
         JScrollPane scrollPane = new JScrollPane(textArea);
         JButton closeButton = new JButton("닫기");
+        JButton saveButton = new JButton("닫기");
         closeButton.addActionListener(e -> dialog.dispose());
+//        saveButton.addActionListener(e -> courseName);
 
         JPanel panel = new JPanel();
         panel.add(closeButton);
