@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Scanner;
 
 import kims.semi1.config.DBConnector;
@@ -367,7 +368,6 @@ public class ManagerController {
 			DBConnector.close(conn, pstmt, rs);
 		}
 	}
-
 	// 강의실 추가 메소드
 	public void insertUnit(Scanner sc) {
 		Connection conn = null;
@@ -620,6 +620,33 @@ public class ManagerController {
 	public ClassSchedule insertClassScheduleInfo(ClassSchedule newClassSchedule) {
 		return classScheduleDao.insertClassSchedule(newClassSchedule) ? newClassSchedule : null;
 	}
+	
+	public void saveViewProfessorInfo(int professorId, String name, String phone, String birthDate, String email, int departmentId) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String professorSaveSql = "insert into professors(professor_id,name,phone,birth_date,email,password,department_id,hire_date )\r\n"
+				+ "values(to_char(sysdate,'yyyy')||LPAD(seq_professor_num.nextval,6,'0'),?,?,?,?,to_char(to_date(?,'yyyy/mm/dd'),'yyyymmdd'),?,to_char(sysdate,'yyyy-mm-dd'))";
+		try {
+			conn = DBConnector.getConnection();
+			pstmt = conn.prepareStatement(professorSaveSql);
+			pstmt.setString(1, name);
+			pstmt.setString(2, phone);
+			pstmt.setString(3, birthDate);
+			pstmt.setString(4, email);
+			pstmt.setString(5, birthDate);
+			pstmt.setInt(6, departmentId);
+			int affectedRows = pstmt.executeUpdate();
+			if (affectedRows > 0) {
+				System.out.println("등록되었습니다");
+			} else {
+				System.out.println("등록이 안되었습니다");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, pstmt);
+		}
+	}
 
 	// 학생정보조회 학생정보등록 나가기 화면을 보여주면서 선택할 수 있는 메소드
 	public void selectStudentMenu(Scanner sc) {
@@ -777,7 +804,6 @@ public class ManagerController {
 	public void insertViewStudentInfo(String studentName,String phone,String birthDate,String email,int department_id ) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
-		System.out.println("---------------------------------학 생 등 록---------------------------------------");
 		String insertStudentInfo = "insert into students values(to_char(sysdate,'yyyy')||LPAD(seq_student_num.nextval,6,'0'), ?, ?, ?, ?, to_char(to_date(?,'yyyy/mm/dd'),'yyyymmdd'), ?, to_char(sysdate,'yyyy'))";
 		try {
 			conn = DBConnector.getConnection();

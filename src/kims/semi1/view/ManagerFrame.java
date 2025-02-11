@@ -9,7 +9,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -20,19 +19,18 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import kims.semi1.controller.ManagerController;
 import kims.semi1.dao.ClassScheduleDao;
-import kims.semi1.dao.StudentDao;
 import kims.semi1.model.ClassSchedule;
 import kims.semi1.model.Course;
 import kims.semi1.model.CourseInfo;
-import kims.semi1.model.Enrollment;
+import kims.semi1.model.Department;
 import kims.semi1.model.Professor;
 import kims.semi1.model.Student;
+import kims.semi1.model.Unit;
 
 // 1. 매니저관리 홈화면 
 public class ManagerFrame extends JFrame {
@@ -85,6 +83,10 @@ public class ManagerFrame extends JFrame {
 		homePanel.add(buttonPanel, BorderLayout.CENTER);
 
 		// 버튼 이벤트 (시간표 관리 화면으로 이동)
+		btnLogout.addActionListener(e -> {
+			new LoginFrame();
+			dispose();
+		});
 		btnSchedule.addActionListener(e -> {
 			new ManagerScheduleFrame();
 			dispose();
@@ -243,6 +245,11 @@ public class ManagerFrame extends JFrame {
 			schedulePanel.add(buttonPanel, BorderLayout.SOUTH);
 
 			// 버튼 이벤트 추가
+			btnLogout.addActionListener(e -> {
+				new LoginFrame();
+				dispose();
+			});
+
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
 				dispose();
@@ -262,15 +269,15 @@ public class ManagerFrame extends JFrame {
 				new ManagerCourseFrame();
 				dispose();
 			});
-			
-			btnDelete.addActionListener(e->{
-	            int selectedRow = scheduleTable.getSelectedRow(); // 선택된 행 가져오기
 
-                if (selectedRow != -1) { // 선택된 행이 있다면
-                	int classScheduleId =(int) tableModel.getValueAt(selectedRow, 0);
-                	managerController.deleteClassSchedule(classScheduleId);
-                    tableModel.removeRow(selectedRow); // 행 삭제
-                }
+			btnDelete.addActionListener(e -> {
+				int selectedRow = scheduleTable.getSelectedRow(); // 선택된 행 가져오기
+
+				if (selectedRow != -1) { // 선택된 행이 있다면
+					int classScheduleId = (int) tableModel.getValueAt(selectedRow, 0);
+					managerController.deleteClassSchedule(classScheduleId);
+					tableModel.removeRow(selectedRow); // 행 삭제
+				}
 			});
 			btnViewAll.addActionListener(e -> {
 				tableModel.setRowCount(0);
@@ -284,7 +291,7 @@ public class ManagerFrame extends JFrame {
 					tableModel.addRow(row);
 				});
 			});
-			//저장기능
+			// 저장기능
 			btnRegister.addActionListener(e -> {
 				int courseID = Integer.parseInt(txtLectureID.getText());
 				String dayOfWeek = txtDay.getText();
@@ -296,15 +303,19 @@ public class ManagerFrame extends JFrame {
 			add(schedulePanel);
 			setVisible(true);
 		}
+
 	}
 
 	/// 3.교수정보관리(조회/등록)
 	public class ManagerProfessorFrame extends JFrame {
+		private final ClassScheduleDao classScheduleDao;
 		private DefaultTableModel tableModel;
 		private JTable professorTable;
 		private JTextField txtName, txtPhone, txtBirthday, txtEmail, txtDepartmentID;
 
 		public ManagerProfessorFrame() { // 상단고정
+			classScheduleDao = new ClassScheduleDao();
+			managerController = new ManagerController();
 			setTitle("학사관리시스템(교직원)");
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			setSize(1200, 800); // 크기 유지
@@ -414,13 +425,13 @@ public class ManagerFrame extends JFrame {
 			// 전체조회 & 삭제 버튼
 			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			JButton btnViewAll = new JButton("전체교수조회");
-			JButton btnDelete = new JButton("삭제");
+			// JButton btnDelete = new JButton("삭제");
 
 			btnViewAll.setFont(labelFont);
-			btnDelete.setFont(labelFont);
+			// btnDelete.setFont(labelFont);
 
 			buttonPanel.add(btnViewAll);
-			buttonPanel.add(btnDelete);
+			// buttonPanel.add(btnDelete);
 
 			// 정렬 조정
 			JPanel centerPanel = new JPanel(new BorderLayout());
@@ -431,6 +442,11 @@ public class ManagerFrame extends JFrame {
 			professorPanel.add(buttonPanel, BorderLayout.SOUTH);
 
 			// 버튼 이벤트 추가
+			btnLogout.addActionListener(e -> {
+				new LoginFrame();
+				dispose();
+			});
+
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
 				dispose();
@@ -450,17 +466,26 @@ public class ManagerFrame extends JFrame {
 				new ManagerCourseFrame();
 				dispose();
 			});
-			//전체조회
-			btnViewAll.addActionListener(e ->{
-				
+			// 전체조회
+			btnViewAll.addActionListener(e -> {
+				tableModel.setRowCount(0);
+				List<Professor> professorInfos = classScheduleDao.findProfessorInfos();
+				professorInfos.stream().forEach(t -> {
+					Object[] row = { t.getProfessorId(), t.getName(), t.getPhone(), t.getBirthDate(), t.getEmail(),
+							t.getHireDate() };
+					tableModel.addRow(row);
+				});
 			});
-			//삭제기능
-			btnDelete.addActionListener(e ->{
-				
-			});
-			//등록기능
-			btnRegister.addActionListener(e ->{
-				
+			// 등록기능
+			btnRegister.addActionListener(e -> {
+				String professorName = txtName.getText();
+				String phone = txtPhone.getText();
+				String birthDate = txtBirthday.getText();
+				String email = txtEmail.getText();
+				int department_id = Integer.parseInt(txtDepartmentID.getText());
+				managerController.saveViewProfessorInfo(department_id, professorName, phone, birthDate, email,
+						department_id);
+
 			});
 			add(professorPanel);
 			setVisible(true);
@@ -586,13 +611,13 @@ public class ManagerFrame extends JFrame {
 			// 전체조회 & 삭제 버튼
 			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			JButton btnViewAll = new JButton("전체학생조회");
-			JButton btnDelete = new JButton("삭제");
+			// JButton btnDelete = new JButton("삭제");
 
 			btnViewAll.setFont(labelFont);
-			btnDelete.setFont(labelFont);
+			// btnDelete.setFont(labelFont);
 
 			buttonPanel.add(btnViewAll);
-			buttonPanel.add(btnDelete);
+			// buttonPanel.add(btnDelete);
 
 			// 정렬 조정
 			JPanel centerPanel = new JPanel(new BorderLayout());
@@ -603,6 +628,11 @@ public class ManagerFrame extends JFrame {
 			studentPanel.add(buttonPanel, BorderLayout.SOUTH);
 
 			// 버튼 이벤트 추가
+			btnLogout.addActionListener(e -> {
+				new LoginFrame();
+				dispose();
+			});
+
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
 				dispose();
@@ -622,25 +652,25 @@ public class ManagerFrame extends JFrame {
 				new ManagerCourseFrame();
 				dispose();
 			});
-			//전체조회
-			btnViewAll.addActionListener(e ->{
+			// 전체조회
+			btnViewAll.addActionListener(e -> {
 				tableModel.setRowCount(0);
 				List<Student> studentInfos = classScheduleDao.findStudentInfos();
 				studentInfos.stream().forEach(t -> {
-					Object[] row = { t.getStudentId(),t.getName(), t.getPhone(), t.getBirthDate(), t.getEmail(),
+					Object[] row = { t.getStudentId(), t.getName(), t.getPhone(), t.getBirthDate(), t.getEmail(),
 							t.getEnrollmentYear() };
-					tableModel.addRow(row);	
+					tableModel.addRow(row);
 				});
 			});
-			//등록기능
-			btnRegister.addActionListener(e ->{
+			// 등록기능
+			btnRegister.addActionListener(e -> {
 				String studentName = txtName.getText();
 				String phone = txtPhone.getText();
 				String birthDate = txtBirthDay.getText();
 				String email = txtEmail.getText();
 				int department_id = Integer.parseInt(txtDepartmentID.getText());
 				managerController.insertViewStudentInfo(studentName, phone, birthDate, email, department_id);
-				
+
 			});
 
 			add(studentPanel);
@@ -650,11 +680,14 @@ public class ManagerFrame extends JFrame {
 
 	/// 5.강의정보관리
 	public class ManagerCourseFrame extends JFrame {
+		private final ClassScheduleDao classScheduleDao;
 		private DefaultTableModel tableModel;
 		private JTable CourseTable;
 		private JTextField txtLectureID, txtDay, txtStartTime, txtEndTime;
 
 		public ManagerCourseFrame() {// 상단고정
+			classScheduleDao = new ClassScheduleDao();
+			managerController = new ManagerController();
 			setTitle("학사관리시스템(교직원)");
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			setSize(1200, 800); // 크기 유지
@@ -756,6 +789,11 @@ public class ManagerFrame extends JFrame {
 			coursePanel.add(buttonPanel, BorderLayout.SOUTH);
 
 			// 버튼 이벤트 추가
+			btnLogout.addActionListener(e -> {
+				new LoginFrame();
+				dispose();
+			});
+
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
 				dispose();
@@ -780,7 +818,31 @@ public class ManagerFrame extends JFrame {
 				new ManagerBuildingFrame();
 				dispose();
 			});
-
+			btnViewAll.addActionListener(e -> {
+				tableModel.setRowCount(0);
+				List<CourseInfo> courseInfos = classScheduleDao.findCourseInfos();
+				courseInfos.stream().forEach(t -> {
+					Unit u = t.getUnit();
+					Department d = t.getDepartment();
+					Professor p = t.getProfessor();
+					Course c = t.getCourse();
+					Object[] row = { u.getUnitId(), c.getName(), p.getName(), d.getName() };
+					tableModel.addRow(row);
+				});
+			});
+			btnSearch.addActionListener(e ->{
+				tableModel.setRowCount(0);
+				List<CourseInfo> courseInfos = classScheduleDao.findUnitInfos(txtLectureID.getText());
+				courseInfos.stream().forEach(t -> {
+					Unit u = t.getUnit();
+					Department d = t.getDepartment();
+					Professor p = t.getProfessor();
+					Course c = t.getCourse();
+					Object[] row = { u.getUnitId(), c.getName(), p.getName(), d.getName() };
+					tableModel.addRow(row);
+				});
+				
+			});
 			add(coursePanel);
 			setVisible(true);
 		}
@@ -901,6 +963,10 @@ public class ManagerFrame extends JFrame {
 
 			btnUnit.addActionListener(e -> {
 				new ManagerUnitFrame();
+				dispose();
+			});
+			btnLogout.addActionListener(e -> {
+				new LoginFrame();
 				dispose();
 			});
 
@@ -1029,6 +1095,11 @@ public class ManagerFrame extends JFrame {
 
 			btnBuilding.addActionListener(e -> {
 				new ManagerBuildingFrame();
+				dispose();
+			});
+
+			btnLogout.addActionListener(e -> {
+				new LoginFrame();
 				dispose();
 			});
 
