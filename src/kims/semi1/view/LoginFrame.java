@@ -1,54 +1,74 @@
 package kims.semi1.view;
 
+import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Label;
+import java.awt.Panel;
 import java.awt.TextField;
+import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import kims.semi1.controller.LoginController;
 
 public class LoginFrame extends Frame {
-	private TextField tfId, tfPassword;
+	private LoginController loginController;
+	private TextField tfId;
+	private TextField tfPassword;
 	private Label lblMessage;
-	Button btnLogin = new Button("로그인");
+	private Button btnLogin;
+	private Button btnFindId;
+	private Panel panel;
 
 	public LoginFrame() {
-
 		setTitle("학사관리시스템 로그인");
-		setSize(400, 300);
-		setLayout(null);
+		setSize(1200, 800);
+		setLayout(new BorderLayout());
 
-		Label lblTitle = new Label("학사관리시스템", Label.CENTER);
-		lblTitle.setBounds(100, 50, 200, 30);
-		add(lblTitle);
+		// 배경 이미지 추가
+		Image backgroundImage = Toolkit.getDefaultToolkit().getImage("resources/background_sky.jpg");
+		BackgroundPanel backgroundPanel = new BackgroundPanel(backgroundImage);
 
-		Label lblId = new Label("아이디:");
-		lblId.setBounds(80, 100, 50, 20);
-		add(lblId);
+		add(backgroundPanel);
+		backgroundPanel.setLayout(new GridBagLayout());
+		{
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.gridx = 0;
+			gbc.gridy = 0;
 
-		tfId = new TextField();
-		tfId.setBounds(150, 100, 150, 20);
-		add(tfId);
+			panel = new Panel();
+			panel.setLayout(new GridLayout(5, 2, 10, 10)); // 5행 2열의 그리드 레이아웃{
+			panel.setBackground(new Color(200, 200, 200, 255)); // 투명 배경
+			{
 
-		Label lblPassword = new Label("비밀번호:");
-		lblPassword.setBounds(80, 140, 60, 20);
-		add(lblPassword);
+				lblMessage = new Label();
+				tfId = new TextField(15);
+				tfPassword = new TextField(15);
+				tfPassword.setEchoChar('*');
+				btnLogin = new Button("로그인");
+				btnFindId = new Button("아이디 찾기");
 
-		tfPassword = new TextField();
-		tfPassword.setEchoChar('*');
-		tfPassword.setBounds(150, 140, 150, 20);
-		add(tfPassword);
+				panel.add(new Label("아이디:"));
+				panel.add(tfId);
 
-		btnLogin.setBounds(150, 180, 80, 30);
-		add(btnLogin);
+				panel.add(new Label("비밀번호:"));
+				panel.add(tfPassword);
 
-		lblMessage = new Label("", Label.CENTER);
-		lblMessage.setBounds(100, 220, 200, 20);
-		lblMessage.setForeground(Color.RED);
-		add(lblMessage);
+				panel.add(btnLogin);
+				panel.add(btnFindId);
+
+				panel.add(lblMessage);
+
+				backgroundPanel.add(panel, gbc);
+			}
+		}
 
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -56,19 +76,32 @@ public class LoginFrame extends Frame {
 			}
 		});
 
-		setVisible(true);
-	}
-
-	public void setLoginController(LoginController loginController) {
 		btnLogin.addActionListener(e -> {
 			String id = tfId.getText();
 			String password = tfPassword.getText();
 
 			loginController.handleLoginButtonClick(id, password);
 		});
+		setVisible(true);
+	}
+
+	public void setLoginController(LoginController loginController) {
+		this.loginController = loginController;
 	}
 
 	public void showMessage(String message) {
 		lblMessage.setText(message);
+	}
+}
+
+class BackgroundPanel extends Panel {
+	private Image backgroundImage;
+
+	public BackgroundPanel(Image backgroundImage) {
+		this.backgroundImage = backgroundImage;
+	}
+
+	public void paint(Graphics g) {
+		g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
 	}
 }
