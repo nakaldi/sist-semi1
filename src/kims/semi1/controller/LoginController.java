@@ -59,7 +59,7 @@ public class LoginController {
 				new StudentController(currentUserId, sf);
 			} else if (Integer.toString(currentUserId).charAt(4) == '2') {
 				loginFrame.dispose();
-				ProfessorFrame pf = new ProfessorFrame();
+				ProfessorFrame pf = new ProfessorFrame(loginFrame,currentUserId);
 				new ProfessorController(currentUserId, pf);
 			} else if (Integer.toString(currentUserId).charAt(4) == '3') {
 				loginFrame.dispose();
