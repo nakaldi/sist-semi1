@@ -12,7 +12,7 @@ public class Main {
 		LoginFrame lf = new LoginFrame();
 		LoginController lc = new LoginController(lf);
 		lf.setLoginController(lc);
-		
+
 		lc.handleUserInput(sc);
 	}
 

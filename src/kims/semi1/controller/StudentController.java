@@ -54,7 +54,7 @@ public class StudentController {
 				manageEnrollment(sc);
 				break;
 			case 3:
-				searchGrades(sc);
+				manageGrades(sc);
 				break;
 			case 4:
 				return;
@@ -140,12 +140,34 @@ public class StudentController {
 				searchCourses(sc);
 				break;
 			case 2:
-
+				statusCourses(student.getStudentId(), sc);
 				break;
 			case 3:
 
 				break;
 			case 4:
+
+				return;
+			}
+		}
+	}
+
+	public void manageGrades(Scanner sc) {
+		while (true) {
+			System.out.println("------------------수강 관리------------------");
+			System.out.println("1. 성적조회 \t 2. 석차  \t 3. 나가기 ");
+			System.out.print(">>");
+
+			int input = sc.next().charAt(0) - '0';
+			sc.nextLine();
+
+			switch (input) {
+			case 1:
+				searchGrades(sc);
+				break;
+			case 2:
+				break;
+			case 3:
 
 				return;
 			}
@@ -244,5 +266,39 @@ public class StudentController {
 				input);
 		grades.stream().forEach(
 				t -> System.out.println(t.getCourseInfo().getCourse().getName() + "  " + t.getGrade().getGrade()));
+	}
+
+	//한 학기 취득학점 , 성적 평균 조회
+	private void searchPrintGrades(Scanner sc) {
+		String input = selectSemester(sc);
+		double sum = 0.0 ;
+		double avg = 0.0;
+		List<Enrollment> grades = studentService.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(),
+				input);
+		sum = grades.stream().mapToDouble(t -> Double.parseDouble(t.getCourseInfo().getCourse().getCredit())).sum();
+		avg = grades.stream().mapToDouble(t -> t.getGrade().getGrade()).average().orElse(0.0);
+		System.out.println("학기:" + input + "학기|" + "취득학점:" + sum + "|평균평점:" + avg + "|");
+	}
+
+	public void statusCourses(int studentId, Scanner sc) {
+		String input = selectSemester(sc);
+
+		System.out.println("----------------------- " + input + " 학기 강의 정보--------------------------");
+		System.out.println("강의번호     강의명                                  교수명     학과            요일    시작교시  종료교시");
+		List<Enrollment> EnrollmentInfos = studentService.getEnrollmentInfosByStudentIdAndSemester(studentId, input);
+		if (EnrollmentInfos.size() == 0) {
+			System.out.println("강의 정보가 없습니다.");
+		}
+		EnrollmentInfos.stream().forEach(t -> {
+			Course c = t.getCourseInfo().getCourse();
+			Department d = t.getCourseInfo().getDepartment();
+			Professor p = t.getCourseInfo().getProfessor();
+			ClassSchedule s = t.getCourseInfo().getClassSchedule();
+			System.out.println(c.getCourseId() + "\t"
+					+ (c.getName().length() < 33 ? c.getName() + (" ").repeat(33 - c.getName().length()) : c.getName())
+					+ "\t" + p.getName() + "\t"
+					+ (d.getName().length() < 10 ? d.getName() + (" ").repeat(10 - d.getName().length()) : d.getName())
+					+ "\t" + s.getDayOfWeek() + "\t" + s.getStartTime() + " - " + s.getEndTime());
+		});
 	}
 }

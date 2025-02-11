@@ -58,7 +58,7 @@ public class ProfessorController {
 		System.out.println("2.강의 관리");
 		System.out.println("3.학생 성적 관리");
 		System.out.println("4.로그아웃");
-		System.out.println("메뉴 > ");
+		System.out.print("메뉴 >> ");
 
 		int input = sc.next().charAt(0) - '0';
 		sc.nextLine();
@@ -67,11 +67,14 @@ public class ProfessorController {
 
 		case 1:
 			modifyProfessorInfo(sc);
+			break;
 
 		case 2:
 			managementCourse(sc);
+			break;
 		case 3:
 			studentGradeManagement(sc);
+			break;
 		case 4:
 			loginController = new LoginController();
 			loginController.handleUserInput(sc);
@@ -87,6 +90,7 @@ public class ProfessorController {
 			System.out.println("2. 학생 성적 조회");
 			System.out.println("3. 학생 성적 수정");
 			System.out.println("4. 나가기");
+			System.out.print("메뉴 >> ");
 
 			int gradeInput = sc.nextInt();
 			sc.nextLine();
@@ -95,11 +99,14 @@ public class ProfessorController {
 
 			case 1:
 				professorDao.selectStudentInfo(currentUserId, sc);
+				break;
 			case 2:
 				System.out.println("학생 성적 조회");
 				System.out.println("1. 전체 조회");
 				System.out.println("2. 검색 조회");
 				System.out.println("3. 나가기");
+				System.out.print("메뉴 >> ");
+				
 				int selectInput = sc.nextInt();
 				sc.nextLine();
 
@@ -111,6 +118,7 @@ public class ProfessorController {
 				case 2:
 					System.out.println("1. 학번 조회");
 					System.out.println("2. 이름 조회");
+					System.out.print("메뉴 >> ");
 
 					int input = sc.nextInt();
 					sc.nextLine();
@@ -141,6 +149,7 @@ public class ProfessorController {
 			System.out.println("3. 강의 평가 조회");
 			System.out.println("4. 시간표 조회");
 			System.out.println("5. 나가기");
+			System.out.print("메뉴>>");
 
 			int professorInfoInput = sc.next().charAt(0) - '0';
 			sc.nextLine();
@@ -149,12 +158,16 @@ public class ProfessorController {
 			case 1:
 				professorDao.printCourseInfoInRegistCourse(currentUserId);
 				professorDao.registCourse(currentUserId, sc);
+				break;
 			case 2:
 				professorDao.printCourseInfo(currentUserId);
+				break;
 			case 3:
 				professorDao.printStudentRivew(currentUserId);
+				break;
 			case 4:
 				professorDao.selectSchedule(currentUserId);
+				break;
 			case 5:
 				printProfessorMenu(sc);
 
@@ -174,6 +187,7 @@ public class ProfessorController {
 			System.out.println("4.비밀번호 수정");
 			System.out.println("5.등록");
 			System.out.println("6.나가기");
+			System.out.print("메뉴>>");
 
 			int professorInfoInput = sc.next().charAt(0) - '0';
 			sc.nextLine();
@@ -206,12 +220,12 @@ public class ProfessorController {
 				} else {
 					professor = updateProfessorInfo;
 					System.out.println("등록 성공!");
-					managementCourse(sc);
+					printProfessorMenu(sc);
 					return;
 				}
 			case 6:
 				System.out.println("취소되었습니다.");
-				managementCourse(sc);
+				printProfessorMenu(sc);
 				return;
 			default:
 				System.out.println("다시 입력해주세요.");
