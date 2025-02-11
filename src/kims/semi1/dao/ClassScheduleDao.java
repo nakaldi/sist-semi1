@@ -14,6 +14,7 @@ import kims.semi1.model.Course;
 import kims.semi1.model.CourseInfo;
 import kims.semi1.model.Department;
 import kims.semi1.model.Professor;
+import kims.semi1.model.Student;
 import kims.semi1.model.Unit;
 
 public class ClassScheduleDao {
@@ -49,6 +50,22 @@ public class ClassScheduleDao {
 		return courseInfo;
 	}
 
+	public List<Student> findStudentInfos() {
+		String sql = "SELECT * FROM students ";
+		List<Student> studnetInfo = new ArrayList<Student>();
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					Student s = new Student(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getDate(4).toLocalDate(), rs.getString(5), rs.getString(6), rs.getInt(7), rs.getInt(8));
+					studnetInfo.add(s);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return studnetInfo;
+	}
+	
 	public boolean insertClassSchedule(ClassSchedule classSchedule) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;

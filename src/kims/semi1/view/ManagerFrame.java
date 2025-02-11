@@ -26,11 +26,13 @@ import javax.swing.table.DefaultTableModel;
 
 import kims.semi1.controller.ManagerController;
 import kims.semi1.dao.ClassScheduleDao;
+import kims.semi1.dao.StudentDao;
 import kims.semi1.model.ClassSchedule;
 import kims.semi1.model.Course;
 import kims.semi1.model.CourseInfo;
 import kims.semi1.model.Enrollment;
 import kims.semi1.model.Professor;
+import kims.semi1.model.Student;
 
 // 1. 매니저관리 홈화면 
 public class ManagerFrame extends JFrame {
@@ -260,6 +262,7 @@ public class ManagerFrame extends JFrame {
 				new ManagerCourseFrame();
 				dispose();
 			});
+			
 			btnDelete.addActionListener(e->{
 	            int selectedRow = scheduleTable.getSelectedRow(); // 선택된 행 가져오기
 
@@ -281,13 +284,14 @@ public class ManagerFrame extends JFrame {
 					tableModel.addRow(row);
 				});
 			});
+			//저장기능
 			btnRegister.addActionListener(e -> {
 				int courseID = Integer.parseInt(txtLectureID.getText());
 				String dayOfWeek = txtDay.getText();
 				String startTime = txtStartTime.getText();
 				String endTime = txtEndTime.getText();
 				String unit = txtUnit.getText();
-				managerController.saveClassScheduleInfo(courseID, dayOfWeek, startTime, endTime, unit);
+				managerController.saveVeiwClassScheduleInfo(courseID, dayOfWeek, startTime, endTime, unit);
 			});
 			add(schedulePanel);
 			setVisible(true);
@@ -446,7 +450,18 @@ public class ManagerFrame extends JFrame {
 				new ManagerCourseFrame();
 				dispose();
 			});
-
+			//전체조회
+			btnViewAll.addActionListener(e ->{
+				
+			});
+			//삭제기능
+			btnDelete.addActionListener(e ->{
+				
+			});
+			//등록기능
+			btnRegister.addActionListener(e ->{
+				
+			});
 			add(professorPanel);
 			setVisible(true);
 		}
@@ -454,11 +469,14 @@ public class ManagerFrame extends JFrame {
 
 	/// 4.학생정보관리(조회/등록)
 	public class ManagerStudentFrame extends JFrame {
+		private final ClassScheduleDao classScheduleDao;
 		private DefaultTableModel tableModel;
 		private JTable studentTable;
 		private JTextField txtName, txtPhone, txtBirthDay, txtEmail, txtDepartmentID;
 
 		public ManagerStudentFrame() {// 상단고정
+			classScheduleDao = new ClassScheduleDao();
+			managerController = new ManagerController();
 			setTitle("학사관리시스템(교직원)");
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			setSize(1200, 800); // 크기 유지
@@ -503,7 +521,7 @@ public class ManagerFrame extends JFrame {
 			// 입력 폼 패널
 			JPanel formPanel = new JPanel(new GridBagLayout());
 			formPanel.setBorder(BorderFactory.createTitledBorder("학생 등록"));
-			formPanel.setPreferredSize(new Dimension(320, 300)); // 크기 확장
+			formPanel.setPreferredSize(new Dimension(350, 300)); // 크기 확장
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.insets = new Insets(20, 10, 10, 30); // 간격 조정
 			gbc.anchor = GridBagConstraints.WEST;
@@ -555,8 +573,8 @@ public class ManagerFrame extends JFrame {
 			gbc.gridx = 1;
 			formPanel.add(txtDepartmentID, gbc);
 
-			gbc.gridx = 1;
-			gbc.gridy = 5;
+			gbc.gridx = 0;
+			gbc.gridy = 6;
 			formPanel.add(btnRegister, gbc);
 
 			// 테이블 및 버튼 추가
@@ -603,6 +621,26 @@ public class ManagerFrame extends JFrame {
 			btnCourse.addActionListener(e -> {// 강의 관리 화면으로 이동
 				new ManagerCourseFrame();
 				dispose();
+			});
+			//전체조회
+			btnViewAll.addActionListener(e ->{
+				tableModel.setRowCount(0);
+				List<Student> studentInfos = classScheduleDao.findStudentInfos();
+				studentInfos.stream().forEach(t -> {
+					Object[] row = { t.getStudentId(),t.getName(), t.getPhone(), t.getBirthDate(), t.getEmail(),
+							t.getEnrollmentYear() };
+					tableModel.addRow(row);	
+				});
+			});
+			//등록기능
+			btnRegister.addActionListener(e ->{
+				String studentName = txtName.getText();
+				String phone = txtPhone.getText();
+				String birthDate = txtBirthDay.getText();
+				String email = txtEmail.getText();
+				int department_id = Integer.parseInt(txtDepartmentID.getText());
+				managerController.insertViewStudentInfo(studentName, phone, birthDate, email, department_id);
+				
 			});
 
 			add(studentPanel);

@@ -535,7 +535,7 @@ public class ManagerController {
 	}
 
 	// view용 등록
-	public void saveClassScheduleInfo(int courseId, String dayOfWeek, String startTime, String endTime, String unit) {
+	public void saveVeiwClassScheduleInfo(int courseId, String dayOfWeek, String startTime, String endTime, String unit) {
 		ClassSchedule classShedule = new ClassSchedule(0, 0, null, null, null, null);
 		classShedule.setCourseId(courseId);
 		classShedule.setDayOfWeek(dayOfWeek);
@@ -773,4 +773,32 @@ public class ManagerController {
 			DBConnector.close(conn, pstmt);
 		}
 	}
+	// view용
+	public void insertViewStudentInfo(String studentName,String phone,String birthDate,String email,int department_id ) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		System.out.println("---------------------------------학 생 등 록---------------------------------------");
+		String insertStudentInfo = "insert into students values(to_char(sysdate,'yyyy')||LPAD(seq_student_num.nextval,6,'0'), ?, ?, ?, ?, to_char(to_date(?,'yyyy/mm/dd'),'yyyymmdd'), ?, to_char(sysdate,'yyyy'))";
+		try {
+			conn = DBConnector.getConnection();
+			pstmt = conn.prepareStatement(insertStudentInfo);
+			pstmt.setString(1, studentName);
+			pstmt.setString(2, phone);
+			pstmt.setString(3, birthDate);
+			pstmt.setString(4, email);
+			pstmt.setString(5, birthDate);
+			pstmt.setInt(6, department_id);
+			int affectedRows = pstmt.executeUpdate();
+			if (affectedRows > 0) {
+				System.out.println("등록되었습니다");
+			} else {
+				System.out.println("등록이 안되었습니다");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, pstmt);
+		}
+	}
+
 }
