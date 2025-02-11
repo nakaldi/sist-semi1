@@ -1,39 +1,196 @@
 package kims.semi1.view;
 
-import java.awt.BorderLayout;
-import java.awt.Button;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.Panel;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class ManagerFrame extends Frame {
-	public ManagerFrame() {
-		setTitle("í•™ì‚¬ê´€ë¦¬ì‹œìŠ¤í…œ");
-		setSize(600, 400);
-		setLayout(new BorderLayout());
+    private CardLayout cardLayout;
+    private Panel mainPanel;
 
-		Panel topPanel = new Panel();
-		topPanel.setLayout(new FlowLayout());
-		Button btnMyPage = new Button("ë§ˆì´íŽ˜ì´ì§€");
-		Button btnCourseReg = new Button("ìˆ˜ê°•ì‹ ì²­");
-		Button btnCourseStatus = new Button("ìˆ˜ê°•í˜„í™©");
-		Button btnGrades = new Button("ì„±ì ê´€ë¦¬");
+    public ManagerFrame() { // ÀüÃ¼È­¸é ÇÁ·¹ÀÓ
+        setTitle("ÇÐ»ç°ü¸®½Ã½ºÅÛ(±³Á÷¿ø)");
+        setSize(400, 400);  // Ã¢ Å©±â Á¶Á¤
+        setLayout(new BorderLayout());
+        setLocationRelativeTo(null);
 
-		topPanel.add(btnMyPage);
-		topPanel.add(btnCourseReg);
-		topPanel.add(btnCourseStatus);
-		topPanel.add(btnGrades);
+        cardLayout = new CardLayout();
+        mainPanel = new Panel(cardLayout);
 
-		add(topPanel, BorderLayout.NORTH);
+        // È¨ È­¸é ¹× ½Ã°£Ç¥ °ü¸® È­¸é Ãß°¡
+        mainPanel.add(createHomePanel(), "HOME");
+        mainPanel.add(createSchedulePanel(), "SCHEDULE"); //  ¹Ì¸® Ãß°¡ÇØ³õ±â
 
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				System.exit(0);
-			}
-		});
+        add(mainPanel);
+        setVisible(true);
 
-		setVisible(true);
-	}
+        // À©µµ¿ì Á¾·á ÀÌº¥Æ® Ãß°¡
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                System.exit(0);
+            }
+        });
+    }
+
+    /// ¸Å´ÏÀú È¨È­¸é
+    private Panel createHomePanel() {
+        Panel homePanel = new Panel(new BorderLayout());
+
+        // »ó´Ü Á¦¸ñ + ·Î±×¾Æ¿ô ¹öÆ°
+        Panel topPanel = new Panel(new BorderLayout());
+        topPanel.setBackground(Color.BLACK);
+        topPanel.setPreferredSize(new Dimension(500, 50));
+
+        Label titleLabel = new Label("ÇÐ»ç°ü¸®½Ã½ºÅÛ(±³Á÷¿ø)", Label.LEFT);
+        titleLabel.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 15));
+        titleLabel.setForeground(Color.WHITE);
+
+        Button btnLogout = new Button("·Î±×¾Æ¿ô");
+        btnLogout.setFont(new Font("¸¼Àº °íµñ", Font.PLAIN, 14));
+        btnLogout.setBackground(Color.white);
+
+        topPanel.add(titleLabel, BorderLayout.WEST);
+        topPanel.add(btnLogout, BorderLayout.EAST);
+
+        homePanel.add(topPanel, BorderLayout.NORTH);
+
+        // ¹öÆ° ÆÐ³Î (¹Ù±ùÂÊ ¿©¹é Ãß°¡)
+        Panel outerPanel = new Panel(new FlowLayout(FlowLayout.CENTER, 30, 35));
+        Panel buttonPanel = new Panel(new GridLayout(4, 1, 10, 15));
+
+        // ¹öÆ° »ý¼º ¹× ½ºÅ¸ÀÏ Àû¿ë
+        Button btnSchedule = createStyledButton("½Ã°£Ç¥ °ü¸®");
+        Button btnProfessor = createStyledButton("±³¼ö Á¤º¸ °ü¸®");
+        Button btnStudent = createStyledButton("ÇÐ»ý Á¤º¸ °ü¸®");
+        Button btnLecture = createStyledButton("°­ÀÇ Á¶È¸");
+
+        buttonPanel.add(btnSchedule);
+        buttonPanel.add(btnProfessor);
+        buttonPanel.add(btnStudent);
+        buttonPanel.add(btnLecture);
+
+        outerPanel.add(buttonPanel);
+        homePanel.add(outerPanel, BorderLayout.CENTER);
+
+        // "½Ã°£Ç¥ °ü¸®" ¹öÆ° Å¬¸¯ ½Ã ÆÐ³Î º¯°æ
+        btnSchedule.addActionListener(e -> {
+            cardLayout.show(mainPanel, "SCHEDULE"); // ±âÁ¸ ÆÐ³ÎÀ» º¸¿©ÁÖ±â¸¸ ÇÔ
+        });
+
+        return homePanel;
+    }
+
+    // ¹öÆ° ½ºÅ¸ÀÏ Àû¿ë ÇÔ¼ö
+    private Button createStyledButton(String text) {
+        Button button = new Button(text);
+        button.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 13));
+        button.setPreferredSize(new Dimension(300, 50));
+        return button;
+    }
+
+    // ½Ã°£Ç¥ °ü¸® È­¸é »ý¼º
+    private Panel createSchedulePanel() {
+        Panel panel = new Panel(new BorderLayout());
+        panel.setPreferredSize(new Dimension(1200, 800));
+
+        // »ó´Ü ¹Ù (¸Þ´º + ·Î±×¾Æ¿ô ¹öÆ°)
+        Panel topPanel = new Panel(new BorderLayout());
+        topPanel.setBackground(Color.BLACK);
+
+        Label titleLabel = new Label("½Ã°£Ç¥ °ü¸®", Label.LEFT);
+        titleLabel.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 16));
+        titleLabel.setForeground(Color.WHITE);
+
+        Button btnLogout = new Button("·Î±×¾Æ¿ô");
+        btnLogout.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 12));
+
+        topPanel.add(titleLabel, BorderLayout.WEST);
+        topPanel.add(btnLogout, BorderLayout.EAST);
+        panel.add(topPanel, BorderLayout.NORTH);
+
+        // ¸ÞÀÎ ÆÐ³Î (¿ÞÂÊ: µî·Ï ÆÐ³Î, ¿À¸¥ÂÊ: ½Ã°£Ç¥ °ü¸® ÆÐ³Î)
+        Panel mainPanel = new Panel(new GridLayout(1, 2, 10, 10));
+
+        // ¿ÞÂÊ: °­ÀÇ µî·Ï ÆÐ³Î
+        Panel registerPanel = new Panel(new GridBagLayout());
+        registerPanel.setBackground(Color.LIGHT_GRAY);
+        registerPanel.setPreferredSize(new Dimension(300, 400));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        TextField txtLectureID = new TextField(12);
+        TextField txtDay = new TextField(12);
+        TextField txtStartTime = new TextField(12);
+        TextField txtEndTime = new TextField(12);
+        Button btnRegister = new Button("µî·Ï");
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        registerPanel.add(new Label("°­ÀÇ ID:"), gbc);
+        gbc.gridx = 1;
+        registerPanel.add(txtLectureID, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        registerPanel.add(new Label("¿äÀÏ:"), gbc);
+        gbc.gridx = 1;
+        registerPanel.add(txtDay, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 2;
+        registerPanel.add(new Label("½ÃÀÛ½Ã°£:"), gbc);
+        gbc.gridx = 1;
+        registerPanel.add(txtStartTime, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 3;
+        registerPanel.add(new Label("Á¾·á½Ã°£:"), gbc);
+        gbc.gridx = 1;
+        registerPanel.add(txtEndTime, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 4;
+        registerPanel.add(btnRegister, gbc);
+
+        mainPanel.add(registerPanel);
+
+        // ¿À¸¥ÂÊ: ½Ã°£Ç¥ °ü¸® ÆÐ³Î
+        Panel tablePanel = new Panel(new BorderLayout());
+
+        // ¹öÆ° ÆÐ³Î
+        Panel buttonPanel = new Panel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        Button btnViewAll = new Button("ÀüÃ¼½Ã°£Ç¥Á¶È¸");
+        Button btnUpdate = new Button("½Ã°£Ç¥ ¼öÁ¤");
+        Button btnDelete = new Button("½Ã°£Ç¥ »èÁ¦");
+
+        buttonPanel.add(btnViewAll);
+        buttonPanel.add(btnUpdate);
+        buttonPanel.add(btnDelete);
+
+        tablePanel.add(buttonPanel, BorderLayout.NORTH);
+
+        // ½Ã°£Ç¥ Å×ÀÌºí
+        Panel gridTable = new Panel(new GridLayout(5, 5, 2, 2));
+        String[] headers = {"½Ã°£Ç¥ID", "°­ÀÇ¸í", "¿äÀÏ", "½ÃÀÛ½Ã°£", "Á¾·á½Ã°£"};
+
+        for (String header : headers) {
+            Label label = new Label(header, Label.CENTER);
+            label.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 12));
+            label.setBackground(Color.DARK_GRAY);
+            label.setForeground(Color.WHITE);
+            gridTable.add(label);
+        }
+
+        for (int i = 0; i < 20; i++) {
+            gridTable.add(new Label(" ", Label.CENTER));
+        }
+
+        tablePanel.add(gridTable, BorderLayout.CENTER);
+        mainPanel.add(tablePanel);
+
+        panel.add(mainPanel, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    public static void main(String[] args) {
+        new ManagerFrame();
+    }
 }

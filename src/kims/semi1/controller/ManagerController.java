@@ -28,6 +28,7 @@ public class ManagerController {
 		this.classScheduleDao = new ClassScheduleDao();
 	}
 
+
 	public void selectManagertMenu(Scanner sc) {
 		while (true) {
 			System.out.println("1. 시간표 관리");
@@ -225,6 +226,7 @@ public class ManagerController {
 						System.out.println("검색된 강의 ID가 없습니다. 다시 입력해주세요.");
 					}
 					break;
+
 				case 3:
 					unitandBuildingManage(sc);
 					break;
@@ -311,20 +313,8 @@ public class ManagerController {
 					}
 
 					break;
-				case 3:
-					searchUnitInfo();
-					break;
-				case 4:
-					insertUnit(sc);
-					break;
-				case 5:
-					deleteUnit(sc);
-					break;
-				case 6:
-					System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
-					return;
+
 				default:
-					System.out.println("올바른 메뉴를 선택해주세요.");
 					break;
 				}
 
@@ -333,7 +323,9 @@ public class ManagerController {
 			} finally {
 				DBConnector.close(conn, ps, rs);
 			}
+
 		}
+
 	}
 
 	public void selectClassScheduleMenu(Scanner sc) {
@@ -464,103 +456,6 @@ public class ManagerController {
 		return classScheduleDao.insertClassSchedule(newClassSchedule) ? newClassSchedule : null;
 	}
 
-	// 강의실 조회 메소드
-	public void searchUnitInfo() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-
-		try {
-			conn = DBConnector.getConnection();
-			String searchUnitInofo = "SELECT units.building_id,name,unit " + "FROM units,buildings "
-					+ "WHERE units.building_id=buildings.building_id ";
-			pstmt = conn.prepareStatement(searchUnitInofo);
-			rs = pstmt.executeQuery();
-			if (rs.next()) {
-				do {
-					System.out.println("건물번호	|건물명	|강의실번호	");
-					int buildingId = rs.getInt("building_id");
-					String buildingName = rs.getString("name");
-					String unitName = rs.getString("unit");
-					System.out.println(buildingId + "\t" + "|" + buildingName + "\t" + "|" + unitName + "\t" + "|");
-				} while (rs.next());
-			} else {
-				System.out.println("강의실을 등록해주세요.");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			DBConnector.close(conn, pstmt, rs);
-		}
-	}
-
-	// 강의실 추가 메소드
-	public void insertUnit(Scanner sc) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try {
-			System.out.println("---------------------------------강 의 실 등 록---------------------------------------");
-			String insertUnit = "insert into units(unit,building_id) values(?,?)";
-			System.out.print("건물번호>>");
-			int buildingId = sc.nextInt();
-			System.out.print("강의실ID>>");
-			String unitName = buildingId + "-" + sc.next();
-			sc.nextLine();
-			conn = DBConnector.getConnection();
-			pstmt = conn.prepareStatement(insertUnit);
-			pstmt.setString(1, unitName);
-			pstmt.setInt(2, buildingId);
-			int affectedRows = pstmt.executeUpdate();
-			if (affectedRows > 0) {
-				System.out.println("등록되었습니다");
-			} else {
-				System.out.println("등록이 안되었습니다");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			DBConnector.close(conn, pstmt);
-		}
-	}
-
-	// 강의실 삭제 메소드
-	public void deleteUnit(Scanner sc) {
-		System.out.println("삭제하시겠습니까? 1. 삭제 2. 취소");
-		System.out.print("선택>>");
-		int input = sc.next().charAt(0) - '0';
-		sc.nextLine();
-
-		switch (input) {
-		case 1:
-			Connection conn = null;
-			PreparedStatement pstmt = null;
-			System.out.print("강의실ID>> ");
-			String inputUnit = sc.next();
-			sc.nextLine();
-			try {
-				conn = DBConnector.getConnection();
-				String DeleteUnit = "DELETE FROM units WHERE unit = ?";
-				pstmt = conn.prepareStatement(DeleteUnit);
-				pstmt.setString(1, inputUnit);
-				int affectedRows = pstmt.executeUpdate();
-				if (affectedRows > 0) {
-					System.out.println("삭제되었습니다");
-				} else {
-					System.out.println("삭제가 안되었습니다");
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				DBConnector.close(conn, pstmt);
-			}
-			break;
-		case 2:
-			System.out.println("취소했습니다");
-			break;
-		}
-	}
-
 	// 학생정보조회 학생정보등록 나가기 화면을 보여주면서 선택할 수 있는 메소드
 	public void selectStudentMenu(Scanner sc) {
 		while (true) {
@@ -680,8 +575,7 @@ public class ManagerController {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		System.out.println("---------------------------------학 생 등 록---------------------------------------");
-		String insertStudentInfo = "insert into students (student_id, name, phone, birth_date, email, password, department_id, enrollment_year)"
-				+ "values(to_char(sysdate,'yyyy')||LPAD(seq_student_num.nextval,6,'0'), ?, ?, ?, ?, to_char(to_date(?,'yyyy/mm/dd'),'yyyymmdd') , ?, to_char(sysdate,'yyyy'))";
+		String insertStudentInfo = "insert into students values(to_char(sysdate,'yyyy')||LPAD(seq_student_num.nextval,6,'0'), ?, ?, ?, ?, to_char(to_date(?,'yyyy/mm/dd'),'yyyymmdd'), ?, to_char(sysdate,'yyyy'))";
 		System.out.print("학생이름>>");
 		String studentName = sc.next();
 		System.out.print("전화번호>>");
