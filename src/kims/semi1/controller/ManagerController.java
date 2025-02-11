@@ -28,7 +28,6 @@ public class ManagerController {
 		this.classScheduleDao = new ClassScheduleDao();
 	}
 
-
 	public void selectManagertMenu(Scanner sc) {
 		while (true) {
 			System.out.println("1. 시간표 관리");
@@ -338,6 +337,7 @@ public class ManagerController {
 		}
 
 	}
+
 	// 강의실 조회 메소드
 	public void searchUnitInfo() {
 		Connection conn = null;
@@ -374,22 +374,22 @@ public class ManagerController {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-				System.out.println("---------------------------------강 의 실 등 록---------------------------------------");
-				String insertUnit = "insert into units (building_id, unit) values (?, ?)";
-				System.out.print("건물번호>>");
-				int buildingId = sc.nextInt();
-				System.out.print("강의실ID>>");
-				String unitName = buildingId + "-" + sc.next();
-				conn = DBConnector.getConnection();
-				pstmt = conn.prepareStatement(insertUnit);
-				pstmt.setInt(1, buildingId);
-				pstmt.setString(2, unitName);
-				int affectedRows = pstmt.executeUpdate();
-				if (affectedRows > 0) {
-					System.out.println("등록되었습니다");
-				} else {
-					System.out.println("등록이 안되었습니다");
-				}
+			System.out.println("---------------------------------강 의 실 등 록---------------------------------------");
+			String insertUnit = "insert into units (building_id, unit) values (?, ?)";
+			System.out.print("건물번호>>");
+			int buildingId = sc.nextInt();
+			System.out.print("강의실ID>>");
+			String unitName = buildingId + "-" + sc.next();
+			conn = DBConnector.getConnection();
+			pstmt = conn.prepareStatement(insertUnit);
+			pstmt.setInt(1, buildingId);
+			pstmt.setString(2, unitName);
+			int affectedRows = pstmt.executeUpdate();
+			if (affectedRows > 0) {
+				System.out.println("등록되었습니다");
+			} else {
+				System.out.println("등록이 안되었습니다");
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -495,15 +495,27 @@ public class ManagerController {
 
 	// 시간표 데이터 저장.
 	public void saveClassScheduleInfo(Scanner sc) {
-		ClassSchedule classShedule = new ClassSchedule(0, 0, null, null, null);
+		ClassSchedule classShedule = new ClassSchedule(0, 0, null, null, null, null);
 		System.out.print("강의ID>>");
 		classShedule.setCourseId(sc.nextInt());
 		System.out.print("요일>>");
 		classShedule.setDayOfWeek(sc.next());
 		System.out.print("시작시간>>");
-		classShedule.setStartTime(sc.next());
+		String startTime = sc.next();
+		if (startTime.length() == 1) {
+			startTime = "0" + startTime + ":00";
+		} else {
+			startTime = startTime + ":00";
+		}
+		classShedule.setStartTime(startTime);
 		System.out.print("종료시간>>");
-		classShedule.setEndTime(sc.next());
+		String endTime = sc.next();
+		if (endTime.length() == 1) {
+			endTime = "0" + endTime + ":00";
+		} else {
+			endTime = endTime + ":00";
+		}
+		classShedule.setUnit(sc.next());
 		System.out.println("1.등록 2.취소");
 		int input = sc.next().charAt(0) - '0';
 		sc.nextLine();
@@ -519,6 +531,31 @@ public class ManagerController {
 		case 2:
 			System.out.println("취소되었습니다");
 			break;
+		}
+	}
+
+	// view용 등록
+	public void saveClassScheduleInfo(int courseId, String dayOfWeek, String startTime, String endTime, String unit) {
+		ClassSchedule classShedule = new ClassSchedule(0, 0, null, null, null, null);
+		classShedule.setCourseId(courseId);
+		classShedule.setDayOfWeek(dayOfWeek);
+		if (startTime.length() == 1) {
+			startTime = "0" + startTime + ":00";
+		} else {
+			startTime = startTime + ":00";
+		}
+		classShedule.setStartTime(startTime);
+		if (endTime.length() == 1) {
+			endTime = "0" + endTime + ":00";
+		} else {
+			endTime = endTime + ":00";
+		}
+		classShedule.setEndTime(endTime);
+		classShedule.setUnit(unit);
+		if (insertClassScheduleInfo(classShedule) == null) {
+			System.out.println("등록실패");
+		} else {
+			System.out.println("등록성공");
 		}
 	}
 
@@ -555,6 +592,28 @@ public class ManagerController {
 		case 2:
 			System.out.println("취소했습니다");
 			break;
+		}
+	}
+
+	public void deleteClassSchedule(int classScheduleId) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		int inputClassScheduleID = classScheduleId;
+		try {
+			conn = DBConnector.getConnection();
+			String DeleteclassSchedule = "DELETE FROM class_schedules WHERE schedule_id = ?";
+			pstmt = conn.prepareStatement(DeleteclassSchedule);
+			pstmt.setInt(1, inputClassScheduleID);
+			int affectedRows = pstmt.executeUpdate();
+			if (affectedRows > 0) {
+				System.out.println("삭제되었습니다");
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, pstmt);
 		}
 	}
 

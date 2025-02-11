@@ -1,12 +1,36 @@
 package kims.semi1.view;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import kims.semi1.controller.ManagerController;
+import kims.semi1.dao.ClassScheduleDao;
+import kims.semi1.model.ClassSchedule;
+import kims.semi1.model.Course;
+import kims.semi1.model.CourseInfo;
+import kims.semi1.model.Enrollment;
+import kims.semi1.model.Professor;
 
 // 1. 매니저관리 홈화면 
 public class ManagerFrame extends JFrame {
@@ -83,11 +107,14 @@ public class ManagerFrame extends JFrame {
 
 	/// 2.매니저 시간표관리
 	public class ManagerScheduleFrame extends JFrame {
+		private final ClassScheduleDao classScheduleDao;
 		private DefaultTableModel tableModel;
 		private JTable scheduleTable;
-		private JTextField txtLectureID, txtDay, txtStartTime, txtEndTime;
+		private JTextField txtLectureID, txtDay, txtStartTime, txtEndTime, txtUnit;
 
 		public ManagerScheduleFrame() {
+			classScheduleDao = new ClassScheduleDao();
+			managerController = new ManagerController();
 			setTitle("학사관리시스템(교직원)");
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			setSize(1200, 800); // 크기 유지
@@ -132,7 +159,7 @@ public class ManagerFrame extends JFrame {
 			// 입력 폼 패널
 			JPanel formPanel = new JPanel(new GridBagLayout());
 			formPanel.setBorder(BorderFactory.createTitledBorder("강의 시간표 등록"));
-			formPanel.setPreferredSize(new Dimension(320, 300)); // 크기 확장
+			formPanel.setPreferredSize(new Dimension(350, 300)); // 크기 확장
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.insets = new Insets(20, 10, 10, 30); // 간격 조정
 			gbc.anchor = GridBagConstraints.WEST;
@@ -144,12 +171,14 @@ public class ManagerFrame extends JFrame {
 			txtDay = new JTextField(15);
 			txtStartTime = new JTextField(15);
 			txtEndTime = new JTextField(15);
-			JButton btnRegister = new JButton("등록");
+			txtUnit = new JTextField(15);
+			JButton btnRegister = new JButton("등록하기");
 
 			txtLectureID.setFont(fieldFont);
 			txtDay.setFont(fieldFont);
 			txtStartTime.setFont(fieldFont);
 			txtEndTime.setFont(fieldFont);
+			txtUnit.setFont(fieldFont);
 			btnRegister.setFont(labelFont);
 
 			gbc.gridx = 0;
@@ -176,8 +205,14 @@ public class ManagerFrame extends JFrame {
 			gbc.gridx = 1;
 			formPanel.add(txtEndTime, gbc);
 
-			gbc.gridx = 1;
+			gbc.gridx = 0;
 			gbc.gridy = 4;
+			formPanel.add(new JLabel("강의실번호:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtUnit, gbc);
+
+			gbc.gridx = 1;
+			gbc.gridy = 5;
 			formPanel.add(btnRegister, gbc);
 
 			// 테이블 및 버튼 추가
@@ -225,7 +260,35 @@ public class ManagerFrame extends JFrame {
 				new ManagerCourseFrame();
 				dispose();
 			});
+			btnDelete.addActionListener(e->{
+	            int selectedRow = scheduleTable.getSelectedRow(); // 선택된 행 가져오기
 
+                if (selectedRow != -1) { // 선택된 행이 있다면
+                	int classScheduleId =(int) tableModel.getValueAt(selectedRow, 0);
+                	managerController.deleteClassSchedule(classScheduleId);
+                    tableModel.removeRow(selectedRow); // 행 삭제
+                }
+			});
+			btnViewAll.addActionListener(e -> {
+				tableModel.setRowCount(0);
+				List<CourseInfo> courseInfos = classScheduleDao.findCourseInfos();
+				courseInfos.stream().forEach(t -> {
+					ClassSchedule cs = t.getClassSchedule();
+					Course c = t.getCourse();
+					Professor p = t.getProfessor();
+					Object[] row = { cs.getScheduleId(), c.getName(), cs.getDayOfWeek() + "요일", cs.getStartTime(),
+							cs.getEndTime(), p.getName() };
+					tableModel.addRow(row);
+				});
+			});
+			btnRegister.addActionListener(e -> {
+				int courseID = Integer.parseInt(txtLectureID.getText());
+				String dayOfWeek = txtDay.getText();
+				String startTime = txtStartTime.getText();
+				String endTime = txtEndTime.getText();
+				String unit = txtUnit.getText();
+				managerController.saveClassScheduleInfo(courseID, dayOfWeek, startTime, endTime, unit);
+			});
 			add(schedulePanel);
 			setVisible(true);
 		}
