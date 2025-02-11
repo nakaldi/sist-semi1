@@ -25,6 +25,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import kims.semi1.controller.ProfessorController;
+
 public class ProfessorFrame extends Frame {
 
 	private CardLayout cardLayout;
@@ -53,6 +55,9 @@ public class ProfessorFrame extends Frame {
 	static final String USER = "hamster2"; // DB 계정 (본인 계정으로 수정)
 	static final String PASS = "1234"; // DB 비밀번호 (본인 비밀번호로 수정)
 	private int professorId;
+
+	// 프로페서컨트롤러 사용을 위한 필드
+	ProfessorController professorController;
 
 	public ProfessorFrame(LoginFrame loginFrame, int professorId) {
 		this.loginFrame = loginFrame;
@@ -85,6 +90,11 @@ public class ProfessorFrame extends Frame {
 		loadProfessorInfo(); // 교수 정보 로딩
 
 		setVisible(true);
+	}
+
+	// 컨트롤러 사용을 위한 메서드
+	public void setProfessorController(ProfessorController professorController) {
+		this.professorController = professorController;
 	}
 
 	// 교수 정보 로딩 메서드
@@ -755,4 +765,5 @@ class EditMyPageFrame extends Frame {
 
 		panel.add(linePanel);
 	}
+
 }

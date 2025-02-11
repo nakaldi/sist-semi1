@@ -60,12 +60,14 @@ public class LoginController {
 				sf.setStudentController(studentController);
 			} else if (Integer.toString(currentUserId).charAt(4) == '2') {
 				loginFrame.dispose();
-				ProfessorFrame pf = new ProfessorFrame(loginFrame,currentUserId);
-				new ProfessorController(currentUserId, pf);
+				ProfessorFrame pf = new ProfessorFrame(loginFrame, currentUserId);
+				ProfessorController professorController = new ProfessorController(currentUserId, pf);
+				pf.setProfessorController(professorController);
 			} else if (Integer.toString(currentUserId).charAt(4) == '3') {
 				loginFrame.dispose();
 				ManagerFrame mf = new ManagerFrame();
-				new ManagerController(currentUserId, mf);
+				ManagerController managerController = new ManagerController(currentUserId, mf);
+				mf.setManagerController(managerController);
 			}
 		}
 		return;

@@ -6,900 +6,944 @@ import javax.swing.*;
 import javax.swing.BorderFactory;
 import javax.swing.table.DefaultTableModel;
 
-// 1. ¸Å´ÏÀú°ü¸® È¨È­¸é 
+import kims.semi1.controller.ManagerController;
+
+// 1. ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È¨È­ï¿½ï¿½ 
 public class ManagerFrame extends JFrame {
-    public ManagerFrame() {
-        setTitle("ÇÐ»ç°ü¸®½Ã½ºÅÛ(±³Á÷¿ø)");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 400); // È¨ È­¸é Å©±â ÁÙÀÓ
-        setLocationRelativeTo(null);
-
-        JPanel homePanel = new JPanel(new BorderLayout());
-
-        // »ó´Ü ÆÐ³Î (Á¦¸ñ + ·Î±×¾Æ¿ô ¹öÆ°)
-        JPanel topPanel = new JPanel(new BorderLayout());
-        JLabel titleLabel = new JLabel("ÇÐ»ç°ü¸®½Ã½ºÅÛ(±³Á÷¿ø)", JLabel.LEFT);
-        titleLabel.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 15));
-        topPanel.setBackground(Color.BLACK);
-        topPanel.setPreferredSize(new Dimension(400, 50));
-        titleLabel.setForeground(Color.WHITE);
-       
-
-        JButton btnLogout = new JButton("·Î±×¾Æ¿ô");
-        btnLogout.setPreferredSize(new Dimension(100, 30)); // ¹öÆ° Å©±â Á¶Á¤
-        btnLogout.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 13));
-
-        
-        topPanel.add(titleLabel, BorderLayout.WEST);
-        topPanel.add(btnLogout, BorderLayout.EAST);
-        homePanel.add(topPanel, BorderLayout.NORTH);
-
-        // ¸Þ´º ¹öÆ° ÆÐ³Î
-        JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-
-        JButton btnSchedule = new JButton("½Ã°£Ç¥ °ü¸®");
-        JButton btnProfessor = new JButton("±³¼ö Á¤º¸ °ü¸®");
-        JButton btnStudent = new JButton("ÇÐ»ý Á¤º¸ °ü¸®");
-        JButton btnCourse = new JButton("°­ÀÇ Á¤º¸ Á¶È¸");
-
-        Font buttonFont = new Font("¸¼Àº °íµñ", Font.BOLD, 14);
-        btnSchedule.setFont(buttonFont);
-        btnProfessor.setFont(buttonFont);
-        btnStudent.setFont(buttonFont);
-        btnCourse.setFont(buttonFont);
-
-        buttonPanel.add(btnSchedule);
-        buttonPanel.add(btnProfessor);
-        buttonPanel.add(btnStudent);
-        buttonPanel.add(btnCourse);
-
-        homePanel.add(buttonPanel, BorderLayout.CENTER);
-
-        // ¹öÆ° ÀÌº¥Æ® (½Ã°£Ç¥ °ü¸® È­¸éÀ¸·Î ÀÌµ¿)
-        btnSchedule.addActionListener(e -> {
-            new ManagerScheduleFrame();
-            dispose();
-        });
-        btnProfessor.addActionListener(e -> {//±³¼ö °ü¸® È­¸éÀ¸·Î ÀÌµ¿
-            new ManagerProfessorFrame();
-            dispose();
-        });
-        btnStudent.addActionListener(e -> {//ÇÐ»ý °ü¸® È­¸éÀ¸·Î ÀÌµ¿
-            new ManagerStudentFrame();
-            dispose();
-        });
-        
-        btnCourse.addActionListener(e -> {//°­ÀÇ °ü¸® È­¸éÀ¸·Î ÀÌµ¿
-            new ManagerCourseFrame();
-            dispose();
-        });
-
-        add(homePanel);
-        setVisible(true);
-    }
-    
-    /// 2.¸Å´ÏÀú ½Ã°£Ç¥°ü¸® 
-    public class ManagerScheduleFrame extends JFrame {
-        private DefaultTableModel tableModel;
-        private JTable scheduleTable;
-        private JTextField txtLectureID, txtDay, txtStartTime, txtEndTime;
-
-        public ManagerScheduleFrame() {
-            setTitle("ÇÐ»ç°ü¸®½Ã½ºÅÛ(±³Á÷¿ø)");
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setSize(1200, 800); // Å©±â À¯Áö
-            setLocationRelativeTo(null);
-
-            JPanel schedulePanel = new JPanel(new BorderLayout());
-
-            // »ó´Ü ÆÐ³Î (ÅÇ ¸Þ´º + ·Î±×¾Æ¿ô ¹öÆ°)
-            JPanel topPanel = new JPanel(new BorderLayout());
-            JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-            JButton btnHome = new JButton("HOME");
-            JButton btnSchedule = new JButton("½Ã°£Ç¥°ü¸®");
-            JButton btnProfessor = new JButton("±³¼öÁ¤º¸°ü¸®");
-            JButton btnStudent = new JButton("ÇÐ»ýÁ¤º¸°ü¸®");
-            JButton btnCourse = new JButton("°­ÀÇÁ¤º¸");
-            JButton btnLogout = new JButton("·Î±×¾Æ¿ô");
-     
-            // ·Î±×¾Æ¿ô ¹öÆ° Å©±â ÅëÀÏ
-            btnLogout.setPreferredSize(new Dimension(100, 30));
-            Font tabFont = new Font("¸¼Àº °íµñ", Font.BOLD, 13);
-            btnHome.setFont(tabFont);
-            btnSchedule.setFont(tabFont);
-            btnProfessor.setFont(tabFont);
-            btnStudent.setFont(tabFont);
-            btnCourse.setFont(tabFont);
-            btnLogout.setFont(tabFont);
-
-            // ÇöÀç ÆäÀÌÁö Ç¥½Ã (½Ã°£Ç¥°ü¸® ¹öÆ° »ö»ó º¯°æ)
-            btnSchedule.setBackground(Color.LIGHT_GRAY);
-
-            tabPanel.add(btnHome);
-            tabPanel.add(btnSchedule);
-            tabPanel.add(btnProfessor);
-            tabPanel.add(btnStudent);
-            tabPanel.add(btnCourse);
-
-            topPanel.add(tabPanel, BorderLayout.WEST);
-            topPanel.add(btnLogout, BorderLayout.EAST);
-            schedulePanel.add(topPanel, BorderLayout.NORTH);
-
-            // ÀÔ·Â Æû ÆÐ³Î
-            JPanel formPanel = new JPanel(new GridBagLayout());
-            formPanel.setBorder(BorderFactory.createTitledBorder("°­ÀÇ ½Ã°£Ç¥ µî·Ï"));
-            formPanel.setPreferredSize(new Dimension(320, 300)); // Å©±â È®Àå
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(20, 10, 10, 30); // °£°Ý Á¶Á¤
-            gbc.anchor = GridBagConstraints.WEST;
-
-            Font labelFont = new Font("¸¼Àº °íµñ", Font.BOLD, 13);
-            Font fieldFont = new Font("¸¼Àº °íµñ", Font.BOLD, 12);
-
-            txtLectureID = new JTextField(15); // Å©±â È®Àå
-            txtDay = new JTextField(15);
-            txtStartTime = new JTextField(15);
-            txtEndTime = new JTextField(15);
-            JButton btnRegister = new JButton("µî·Ï");
-
-            txtLectureID.setFont(fieldFont);
-            txtDay.setFont(fieldFont);
-            txtStartTime.setFont(fieldFont);
-            txtEndTime.setFont(fieldFont);
-            btnRegister.setFont(labelFont);
-
-            gbc.gridx = 0; gbc.gridy = 0;
-            formPanel.add(new JLabel("°­ÀÇ ID:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtLectureID, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 1;
-            formPanel.add(new JLabel("¿äÀÏ:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtDay, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 2;
-            formPanel.add(new JLabel("½ÃÀÛ½Ã°£:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtStartTime, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 3;
-            formPanel.add(new JLabel("Á¾·á½Ã°£:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtEndTime, gbc);
-
-            gbc.gridx = 1; gbc.gridy = 4;
-            formPanel.add(btnRegister, gbc);
-
-            // Å×ÀÌºí ¹× ¹öÆ° Ãß°¡
-            String[] columnNames = {"½Ã°£Ç¥ID", "°­ÀÇ¸í", "¿äÀÏ", "½ÃÀÛ½Ã°£", "Á¾·á½Ã°£", "±³¼öÀÌ¸§"};
-            tableModel = new DefaultTableModel(columnNames, 0);
-            scheduleTable = new JTable(tableModel);
-            JScrollPane scrollPane = new JScrollPane(scheduleTable);
-
-            // ÀüÃ¼Á¶È¸ & »èÁ¦ ¹öÆ°
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            JButton btnViewAll = new JButton("ÀüÃ¼½Ã°£Ç¥Á¶È¸");
-            JButton btnDelete = new JButton("»èÁ¦");
-
-            btnViewAll.setFont(labelFont);
-            btnDelete.setFont(labelFont);
-
-            buttonPanel.add(btnViewAll);
-            buttonPanel.add(btnDelete);
-
-            // Á¤·Ä Á¶Á¤
-            JPanel centerPanel = new JPanel(new BorderLayout());
-            centerPanel.add(formPanel, BorderLayout.WEST);
-            centerPanel.add(scrollPane, BorderLayout.CENTER);
-
-            schedulePanel.add(centerPanel, BorderLayout.CENTER);
-            schedulePanel.add(buttonPanel, BorderLayout.SOUTH);
-
-            // ¹öÆ° ÀÌº¥Æ® Ãß°¡
-            btnHome.addActionListener(e -> {
-                new ManagerFrame();
-                dispose();
-            });
-            
-            btnProfessor.addActionListener(e -> {
-                new ManagerProfessorFrame();
-                dispose();
-            });
-            
-            btnStudent.addActionListener(e -> {
-                new ManagerStudentFrame();
-                dispose();
-            });
-            
-            btnCourse.addActionListener(e -> {//°­ÀÇ °ü¸® È­¸éÀ¸·Î ÀÌµ¿
-                new ManagerCourseFrame();
-                dispose();
-            });
-
-            add(schedulePanel);
-            setVisible(true);
-        }
-    }
-    
-    ///3.±³¼öÁ¤º¸°ü¸®(Á¶È¸/µî·Ï)
-    public class ManagerProfessorFrame extends JFrame {
-        private DefaultTableModel tableModel;
-        private JTable professorTable;
-        private JTextField txtName, txtPhone, txtBirthday, txtEmail, txtDepartmentID;
-
-        public ManagerProfessorFrame() { //»ó´Ü°íÁ¤
-            setTitle("ÇÐ»ç°ü¸®½Ã½ºÅÛ(±³Á÷¿ø)");
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setSize(1200, 800); // Å©±â À¯Áö
-            setLocationRelativeTo(null);
-
-            JPanel professorPanel = new JPanel(new BorderLayout());
-
-            // »ó´Ü ÆÐ³Î (ÅÇ ¸Þ´º + ·Î±×¾Æ¿ô ¹öÆ°) - °íÁ¤
-            JPanel topPanel = new JPanel(new BorderLayout());
-            JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-            JButton btnHome = new JButton("HOME");
-            JButton btnSchedule = new JButton("½Ã°£Ç¥°ü¸®");
-            JButton btnProfessor = new JButton("±³¼öÁ¤º¸°ü¸®");
-            JButton btnStudent = new JButton("ÇÐ»ýÁ¤º¸°ü¸®");
-            JButton btnCourse = new JButton("°­ÀÇÁ¤º¸");
-            JButton btnLogout = new JButton("·Î±×¾Æ¿ô");
-     
-            // ·Î±×¾Æ¿ô ¹öÆ° Å©±â ÅëÀÏ - °íÁ¤
-            btnLogout.setPreferredSize(new Dimension(100, 30));
-            Font tabFont = new Font("¸¼Àº °íµñ", Font.BOLD, 12);
-            btnHome.setFont(tabFont);
-            btnSchedule.setFont(tabFont);
-            btnProfessor.setFont(tabFont);
-            btnStudent.setFont(tabFont);
-            btnCourse.setFont(tabFont);
-            btnLogout.setFont(tabFont);
-
-            // ÇöÀç ÆäÀÌÁö Ç¥½Ã (¹öÆ° »ö»ó º¯°æ) - °íÁ¤
-            btnProfessor.setBackground(Color.LIGHT_GRAY);
-
-            tabPanel.add(btnHome);
-            tabPanel.add(btnSchedule);
-            tabPanel.add(btnProfessor);
-            tabPanel.add(btnStudent);
-            tabPanel.add(btnCourse);
-
-            topPanel.add(tabPanel, BorderLayout.WEST);
-            topPanel.add(btnLogout, BorderLayout.EAST);
-            professorPanel.add(topPanel, BorderLayout.NORTH);
-
-            // ÀÔ·Â Æû ÆÐ³Î
-            JPanel formPanel = new JPanel(new GridBagLayout());
-            formPanel.setBorder(BorderFactory.createTitledBorder("±³¼ö µî·Ï"));
-            formPanel.setPreferredSize(new Dimension(320, 300)); // Å©±â È®Àå
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(20, 10, 10, 30); // °£°Ý Á¶Á¤
-            gbc.anchor = GridBagConstraints.WEST;
-
-            Font labelFont = new Font("¸¼Àº °íµñ", Font.BOLD, 13);
-            Font fieldFont = new Font("¸¼Àº °íµñ", Font.BOLD, 12);
-
-            txtName = new JTextField(15); // Å©±â È®Àå
-            txtPhone = new JTextField(15);
-            txtBirthday = new JTextField(15);
-            txtEmail = new JTextField(15);
-            txtDepartmentID = new JTextField(15);
-            JButton btnRegister = new JButton("µî·ÏÇÏ±â");
-
-
-            txtName.setFont(fieldFont);
-            txtPhone.setFont(fieldFont);
-            txtBirthday.setFont(fieldFont);
-            txtEmail.setFont(fieldFont);
-            txtDepartmentID.setFont(fieldFont);
-            btnRegister.setFont(labelFont);
-
-            gbc.gridx = 0; gbc.gridy = 0;
-            formPanel.add(new JLabel("±³¼ö ÀÌ¸§:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtName, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 1;
-            formPanel.add(new JLabel("ÀüÈ­¹øÈ£:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtPhone, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 2;
-            formPanel.add(new JLabel("»ý³â¿ùÀÏ:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtBirthday, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 3;
-            formPanel.add(new JLabel("ÀÌ¸ÞÀÏ:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtEmail, gbc);
-            
-            gbc.gridx = 0; gbc.gridy = 4;
-            formPanel.add(new JLabel("ÇÐ°ú¹øÈ£:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtDepartmentID, gbc);
-
-            gbc.gridx = 1; gbc.gridy = 5;
-            formPanel.add(btnRegister, gbc);
-
-            // Å×ÀÌºí ¹× ¹öÆ° Ãß°¡
-            String[] columnNames = {"±³¼öID", "±³¼öÀÌ¸§", "ÀüÈ­¹øÈ£", "»ý³â¿ùÀÏ", "ÀÌ¸ÞÀÏ","Ã¤¿ëÀÏÀÚ"};
-            tableModel = new DefaultTableModel(columnNames, 0);
-            professorTable = new JTable(tableModel);
-            JScrollPane scrollPane = new JScrollPane(professorTable);
-
-            // ÀüÃ¼Á¶È¸ & »èÁ¦ ¹öÆ°
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            JButton btnViewAll = new JButton("ÀüÃ¼±³¼öÁ¶È¸");
-            JButton btnDelete = new JButton("»èÁ¦");
-
-            btnViewAll.setFont(labelFont);
-            btnDelete.setFont(labelFont);
-
-            buttonPanel.add(btnViewAll);
-            buttonPanel.add(btnDelete);
-
-            // Á¤·Ä Á¶Á¤
-            JPanel centerPanel = new JPanel(new BorderLayout());
-            centerPanel.add(formPanel, BorderLayout.WEST);
-            centerPanel.add(scrollPane, BorderLayout.CENTER);
-
-            professorPanel.add(centerPanel, BorderLayout.CENTER);
-            professorPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-            // ¹öÆ° ÀÌº¥Æ® Ãß°¡
-            btnHome.addActionListener(e -> {
-                new ManagerFrame();
-                dispose();
-            });
-            
-            btnSchedule.addActionListener(e -> {
-                new ManagerScheduleFrame();
-                dispose();
-            });
-            
-            btnStudent.addActionListener(e -> {
-                new ManagerStudentFrame();
-                dispose();
-            });
-            
-            btnCourse.addActionListener(e -> {//°­ÀÇ °ü¸® È­¸éÀ¸·Î ÀÌµ¿
-                new ManagerCourseFrame();
-                dispose();
-            });
-
-            add(professorPanel);
-            setVisible(true);
-        }
-    }
-    
-    ///4.ÇÐ»ýÁ¤º¸°ü¸®(Á¶È¸/µî·Ï)
-    public class ManagerStudentFrame extends JFrame {
-        private DefaultTableModel tableModel;
-        private JTable studentTable;
-        private JTextField txtName, txtPhone, txtBirthDay, txtEmail, txtDepartmentID;
-
-        public ManagerStudentFrame() {//»ó´Ü°íÁ¤
-            setTitle("ÇÐ»ç°ü¸®½Ã½ºÅÛ(±³Á÷¿ø)");
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setSize(1200, 800); // Å©±â À¯Áö
-            setLocationRelativeTo(null);
-
-            JPanel studentPanel = new JPanel(new BorderLayout());
-
-            // »ó´Ü ÆÐ³Î (ÅÇ ¸Þ´º + ·Î±×¾Æ¿ô ¹öÆ°) - °íÁ¤
-            JPanel topPanel = new JPanel(new BorderLayout());
-            JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-            JButton btnHome = new JButton("HOME");
-            JButton btnSchedule = new JButton("½Ã°£Ç¥°ü¸®");
-            JButton btnProfessor = new JButton("±³¼öÁ¤º¸°ü¸®");
-            JButton btnStudent = new JButton("ÇÐ»ýÁ¤º¸°ü¸®");
-            JButton btnCourse = new JButton("°­ÀÇÁ¤º¸");
-            JButton btnLogout = new JButton("·Î±×¾Æ¿ô");
-     
-            // ·Î±×¾Æ¿ô ¹öÆ° Å©±â ÅëÀÏ - °íÁ¤
-            btnLogout.setPreferredSize(new Dimension(100, 30));
-            Font tabFont = new Font("¸¼Àº °íµñ", Font.BOLD, 12);
-            btnHome.setFont(tabFont);
-            btnSchedule.setFont(tabFont);
-            btnProfessor.setFont(tabFont);
-            btnStudent.setFont(tabFont);
-            btnCourse.setFont(tabFont);
-            btnLogout.setFont(tabFont);
-
-            // ÇöÀç ÆäÀÌÁö Ç¥½Ã (¹öÆ° »ö»ó º¯°æ) - °íÁ¤
-            btnStudent.setBackground(Color.LIGHT_GRAY);
-
-            tabPanel.add(btnHome);
-            tabPanel.add(btnSchedule);
-            tabPanel.add(btnProfessor);
-            tabPanel.add(btnStudent);
-            tabPanel.add(btnCourse);
-
-            topPanel.add(tabPanel, BorderLayout.WEST);
-            topPanel.add(btnLogout, BorderLayout.EAST);
-            studentPanel.add(topPanel, BorderLayout.NORTH);
-
-            // ÀÔ·Â Æû ÆÐ³Î
-            JPanel formPanel = new JPanel(new GridBagLayout());
-            formPanel.setBorder(BorderFactory.createTitledBorder("ÇÐ»ý µî·Ï"));
-            formPanel.setPreferredSize(new Dimension(320, 300)); // Å©±â È®Àå
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(20, 10, 10, 30); // °£°Ý Á¶Á¤
-            gbc.anchor = GridBagConstraints.WEST;
-
-            Font labelFont = new Font("¸¼Àº °íµñ", Font.BOLD, 13);
-            Font fieldFont = new Font("¸¼Àº °íµñ", Font.PLAIN, 12);
-
-            txtName = new JTextField(15); // Å©±â È®Àå
-            txtPhone = new JTextField(15);
-            txtBirthDay = new JTextField(15);
-            txtEmail = new JTextField(15);
-            txtDepartmentID = new JTextField(15);
-            JButton btnRegister = new JButton("µî·ÏÇÏ±â");
-
-
-            txtName.setFont(fieldFont);
-            txtPhone.setFont(fieldFont);
-            txtBirthDay.setFont(fieldFont);
-            txtEmail.setFont(fieldFont);
-            txtDepartmentID.setFont(fieldFont);
-            btnRegister.setFont(labelFont);
-
-            gbc.gridx = 0; gbc.gridy = 0;
-            formPanel.add(new JLabel("ÇÐ»ý ÀÌ¸§:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtName, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 1;
-            formPanel.add(new JLabel("ÀüÈ­¹øÈ£:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtPhone, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 2;
-            formPanel.add(new JLabel("»ý³â¿ùÀÏ:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtBirthDay, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 3;
-            formPanel.add(new JLabel("ÀÌ¸ÞÀÏ:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtEmail, gbc);
-            
-            gbc.gridx = 0; gbc.gridy = 4;
-            formPanel.add(new JLabel("ÇÐ°ú¹øÈ£:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtDepartmentID, gbc);
-
-            gbc.gridx = 1; gbc.gridy = 5;
-            formPanel.add(btnRegister, gbc);
-
-            // Å×ÀÌºí ¹× ¹öÆ° Ãß°¡
-            String[] columnNames = {"ÇÐ¹ø", "ÇÐ»ýÀÌ¸§", "ÀüÈ­¹øÈ£", "»ý³â¿ùÀÏ", "ÀÌ¸ÞÀÏ","ÀÔÇÐ³âµµ"};
-            tableModel = new DefaultTableModel(columnNames, 0);
-            studentTable = new JTable(tableModel);
-            JScrollPane scrollPane = new JScrollPane(studentTable);
-
-            // ÀüÃ¼Á¶È¸ & »èÁ¦ ¹öÆ°
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            JButton btnViewAll = new JButton("ÀüÃ¼ÇÐ»ýÁ¶È¸");
-            JButton btnDelete = new JButton("»èÁ¦");
-
-            btnViewAll.setFont(labelFont);
-            btnDelete.setFont(labelFont);
-
-            buttonPanel.add(btnViewAll);
-            buttonPanel.add(btnDelete);
-
-            // Á¤·Ä Á¶Á¤
-            JPanel centerPanel = new JPanel(new BorderLayout());
-            centerPanel.add(formPanel, BorderLayout.WEST);
-            centerPanel.add(scrollPane, BorderLayout.CENTER);
-
-            studentPanel.add(centerPanel, BorderLayout.CENTER);
-            studentPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-            // ¹öÆ° ÀÌº¥Æ® Ãß°¡
-            btnHome.addActionListener(e -> {
-                new ManagerFrame();
-                dispose();
-            });
-            
-            btnSchedule.addActionListener(e -> {
-                new ManagerScheduleFrame();
-                dispose();
-            });
-            
-            btnProfessor.addActionListener(e -> {
-                new ManagerProfessorFrame();
-                dispose();
-            });
-            
-            btnCourse.addActionListener(e -> {//°­ÀÇ °ü¸® È­¸éÀ¸·Î ÀÌµ¿
-                new ManagerCourseFrame();
-                dispose();
-            });
-
-            add(studentPanel);
-            setVisible(true);
-        }
-    }
-    
-    ///5.°­ÀÇÁ¤º¸°ü¸®
-    public class ManagerCourseFrame extends JFrame {
-        private DefaultTableModel tableModel;
-        private JTable CourseTable;
-        private JTextField txtLectureID, txtDay, txtStartTime, txtEndTime;
-
-        public ManagerCourseFrame() {//»ó´Ü°íÁ¤
-            setTitle("ÇÐ»ç°ü¸®½Ã½ºÅÛ(±³Á÷¿ø)");
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setSize(1200, 800); // Å©±â À¯Áö
-            setLocationRelativeTo(null);
-
-            JPanel coursePanel = new JPanel(new BorderLayout());
-
-            // »ó´Ü ÆÐ³Î (ÅÇ ¸Þ´º + ·Î±×¾Æ¿ô ¹öÆ°) - °íÁ¤
-            JPanel topPanel = new JPanel(new BorderLayout());
-            JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-            JButton btnHome = new JButton("HOME");
-            JButton btnSchedule = new JButton("½Ã°£Ç¥°ü¸®");
-            JButton btnProfessor = new JButton("±³¼öÁ¤º¸°ü¸®");
-            JButton btnStudent = new JButton("ÇÐ»ýÁ¤º¸°ü¸®");
-            JButton btnCourse = new JButton("°­ÀÇÁ¤º¸");
-            JButton btnLogout = new JButton("·Î±×¾Æ¿ô");
-     
-            // ·Î±×¾Æ¿ô ¹öÆ° Å©±â ÅëÀÏ - °íÁ¤
-            btnLogout.setPreferredSize(new Dimension(100, 30));
-            Font tabFont = new Font("¸¼Àº °íµñ", Font.BOLD, 12);
-            btnHome.setFont(tabFont);
-            btnSchedule.setFont(tabFont);
-            btnProfessor.setFont(tabFont);
-            btnStudent.setFont(tabFont);
-            btnCourse.setFont(tabFont);
-            btnLogout.setFont(tabFont);
-
-            // ÇöÀç ÆäÀÌÁö Ç¥½Ã (¹öÆ° »ö»ó º¯°æ) - °íÁ¤
-            btnCourse.setBackground(Color.LIGHT_GRAY);
-
-            tabPanel.add(btnHome);
-            tabPanel.add(btnSchedule);
-            tabPanel.add(btnProfessor);
-            tabPanel.add(btnStudent);
-            tabPanel.add(btnCourse);
-
-            topPanel.add(tabPanel, BorderLayout.WEST);
-            topPanel.add(btnLogout, BorderLayout.EAST);
-            coursePanel.add(topPanel, BorderLayout.NORTH);
-
-            // ÀÔ·Â Æû ÆÐ³Î
-            JPanel formPanel = new JPanel(new GridBagLayout());
-            formPanel.setBorder(BorderFactory.createTitledBorder("°­ÀÇÁ¤º¸ Á¶È¸"));
-            formPanel.setPreferredSize(new Dimension(380, 400)); // Å©±â È®Àå
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(20, 10, 10, 20); // °£°Ý Á¶Á¤
-            gbc.anchor = GridBagConstraints.WEST;
-
-            Font labelFont = new Font("¸¼Àº °íµñ", Font.BOLD, 13);
-            Font fieldFont = new Font("¸¼Àº °íµñ", Font.PLAIN, 12);
-
-            txtLectureID = new JTextField(15); // Å©±â È®Àå
-            txtDay = new JTextField(15);
-            txtStartTime = new JTextField(15);
-            txtEndTime = new JTextField(15);
-            JButton btnSearch = new JButton("Á¶È¸ÇÏ±â");
-
-
-            txtLectureID.setFont(fieldFont);
-            txtDay.setFont(fieldFont);
-            txtStartTime.setFont(fieldFont);
-            txtEndTime.setFont(fieldFont);
-            btnSearch.setFont(labelFont);
-
-            gbc.gridx = 0; gbc.gridy = 0;
-            formPanel.add(new JLabel("°­ÀÇ½Ç ¹øÈ£:", JLabel.LEFT), gbc);
-            gbc.gridx = 1; formPanel.add(txtLectureID, gbc);
-
-            gbc.gridx = 1; gbc.gridy = 4;
-            formPanel.add(btnSearch, gbc);
-
-            // Å×ÀÌºí ¹× ¹öÆ° Ãß°¡
-            String[] columnNames = {"°­ÀÇ½Ç ¹øÈ£", "°­ÀÇ¸í", "´ã´ç±³¼ö", "ÇÐ°ú"};
-            tableModel = new DefaultTableModel(columnNames, 0);
-            CourseTable = new JTable(tableModel);
-            JScrollPane scrollPane = new JScrollPane(CourseTable);
-
-            // ÀüÃ¼½Ã°£Ç¥Á¶È¸ & »èÁ¦ ¹öÆ°
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            JButton btnViewAll = new JButton("ÀüÃ¼°­ÀÇÁ¶È¸");
-            
-            // -- <°­ÀÇ½Ç°ü¸® ¹öÆ° ´©¸£¸é »õ ÆäÀÌÁö·Î>
-            JButton btnBuildingManage = new JButton("°­ÀÇ½Ç°ü¸®");
-
-            btnViewAll.setFont(labelFont);
-            btnBuildingManage.setFont(labelFont);
-            buttonPanel.add(btnViewAll);
-            buttonPanel.add(btnBuildingManage);
-
-
-            // Á¤·Ä Á¶Á¤
-            JPanel centerPanel = new JPanel(new BorderLayout());
-            centerPanel.add(formPanel, BorderLayout.WEST);
-            centerPanel.add(scrollPane, BorderLayout.CENTER);
-
-            coursePanel.add(centerPanel, BorderLayout.CENTER);
-            coursePanel.add(buttonPanel, BorderLayout.SOUTH);
-
-            // ¹öÆ° ÀÌº¥Æ® Ãß°¡
-            btnHome.addActionListener(e -> {
-                new ManagerFrame();
-                dispose();
-            });
-            
-            btnSchedule.addActionListener(e -> {
-                new ManagerScheduleFrame();
-                dispose();
-            });
-            
-            btnProfessor.addActionListener(e -> {
-                new ManagerProfessorFrame();
-                dispose();
-            });
-            
-            btnStudent.addActionListener(e -> {
-                new ManagerStudentFrame();
-                dispose();
-            });
-
-            btnBuildingManage.addActionListener(e -> {
-                new ManagerBuildingFrame();
-                dispose();
-            });
-            
-            add(coursePanel);
-            setVisible(true);
-        }
-    }
-    
-    ///5-2.°­ÀÇÁ¤º¸°ü¸® ¹öÆ° ´©¸£¸é ---- °­ÀÇ½Ç °ü¸®·Î ÀÌµ¿(°Ç¹° Á¶È¸ / µî·Ï)
-    public class ManagerBuildingFrame extends JFrame {
-        private DefaultTableModel tableModel;
-        private JTable BuildingTable;
-        private JTextField txtBuildingID, txtBuildingName;
-
-        public ManagerBuildingFrame() { //»ó´Ü°íÁ¤
-            setTitle("ÇÐ»ç°ü¸®½Ã½ºÅÛ(±³Á÷¿ø)");
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setSize(1200, 800); // Å©±â À¯Áö
-            setLocationRelativeTo(null);
-
-            JPanel BuildingPanel = new JPanel(new BorderLayout());
-
-            // »ó´Ü ÆÐ³Î (ÅÇ ¸Þ´º + ·Î±×¾Æ¿ô ¹öÆ°) - °íÁ¤
-            JPanel topPanel = new JPanel(new BorderLayout());
-            JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-            JButton btnPrevios = new JButton("ÀÌÀüÈ­¸éÀ¸·Î µ¹¾Æ°¡±â");
-            JButton btnBuilding = new JButton("°Ç¹° °ü¸®");
-            JButton btnUnit = new JButton("°­ÀÇ½Ç °ü¸®");
-            JButton btnLogout = new JButton("·Î±×¾Æ¿ô");
-     
-            // ·Î±×¾Æ¿ô ¹öÆ° Å©±â ÅëÀÏ - °íÁ¤
-            btnLogout.setPreferredSize(new Dimension(100, 30));
-            Font tabFont = new Font("¸¼Àº °íµñ", Font.BOLD, 12);
-            btnPrevios.setFont(tabFont);
-            btnBuilding.setFont(tabFont);
-            btnUnit.setFont(tabFont);
-            btnLogout.setFont(tabFont);
-
-            // ÇöÀç ÆäÀÌÁö Ç¥½Ã (¹öÆ° »ö»ó º¯°æ) - °íÁ¤
-            btnBuilding.setBackground(Color.LIGHT_GRAY);
-
-            tabPanel.add(btnPrevios);
-            tabPanel.add(btnBuilding);
-            tabPanel.add(btnUnit);
-            tabPanel.add(btnLogout);
- 
-            topPanel.add(tabPanel, BorderLayout.WEST);
-            topPanel.add(btnLogout, BorderLayout.EAST);
-            BuildingPanel.add(topPanel, BorderLayout.NORTH);
-
-            // ÀÔ·Â Æû ÆÐ³Î
-            JPanel formPanel = new JPanel(new GridBagLayout());
-            formPanel.setBorder(BorderFactory.createTitledBorder("°Ç¹° µî·Ï ¹× Á¶È¸"));
-            formPanel.setPreferredSize(new Dimension(320, 300)); // Å©±â È®Àå
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(20, 10, 10, 30); // °£°Ý Á¶Á¤
-            gbc.anchor = GridBagConstraints.WEST;
-
-            Font labelFont = new Font("¸¼Àº °íµñ", Font.BOLD, 13);
-            Font fieldFont = new Font("¸¼Àº °íµñ", Font.PLAIN, 12);
-
-            txtBuildingID = new JTextField(10); // Å©±â È®Àå
-            txtBuildingName = new JTextField(10);
-
-            JButton btnSearch = new JButton("Á¶È¸ÇÏ±â");
-            JButton btnRegister = new JButton("µî·ÏÇÏ±â");
-            
-
-            txtBuildingID.setFont(fieldFont);
-            txtBuildingName.setFont(fieldFont);
-   
-            btnSearch.setFont(labelFont);
-            btnRegister.setFont(labelFont);
-
-            gbc.gridx = 0; gbc.gridy = 0;
-            formPanel.add(new JLabel("°Ç¹° ¹øÈ£:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtBuildingID, gbc);
-             
-            gbc.gridx = 0; gbc.gridy = 1;
-            formPanel.add(new JLabel("°Ç¹° ÀÌ¸§:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtBuildingName, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 4;
-            formPanel.add(btnSearch, gbc);
-            
-            gbc.gridx = 1; gbc.gridy = 4;
-            formPanel.add(btnRegister, gbc);
-
-            // Å×ÀÌºí ¹× ¹öÆ° Ãß°¡
-            String[] columnNames = {"°Ç¹° ¹øÈ£", "°Ç¹° ÀÌ¸§"};
-            tableModel = new DefaultTableModel(columnNames, 0);
-            BuildingTable = new JTable(tableModel);
-            JScrollPane scrollPane = new JScrollPane(BuildingTable);
-
-            // ÀüÃ¼½Ã°£Ç¥Á¶È¸ & »èÁ¦ ¹öÆ°
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            JButton btnViewAll = new JButton("ÀüÃ¼°­ÀÇ½Ç Á¶È¸");
-
-
-            btnViewAll.setFont(labelFont);
-            buttonPanel.add(btnViewAll);
-
-            // Á¤·Ä Á¶Á¤
-            JPanel centerPanel = new JPanel(new BorderLayout());
-            centerPanel.add(formPanel, BorderLayout.WEST);
-            centerPanel.add(scrollPane, BorderLayout.CENTER);
-
-            BuildingPanel.add(centerPanel, BorderLayout.CENTER);
-            BuildingPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-            // ¹öÆ° ÀÌº¥Æ® Ãß°¡
-            btnPrevios.addActionListener(e -> {
-                new ManagerCourseFrame();
-                dispose();
-            });
-            
-            btnUnit.addActionListener(e -> {
-                new ManagerUnitFrame();
-                dispose();
-            });
-            
-            add(BuildingPanel);
-            setVisible(true);
-        }
-    }
-    
-    ///5-3.°­ÀÇ½Ç °ü¸® ¾È¿¡¼­ (°­ÀÇ½Ç Á¶È¸ / µî·Ï / »èÁ¦)
-    public class ManagerUnitFrame extends JFrame {
-        private DefaultTableModel tableModel;
-        private JTable UnitTable;
-        private JTextField txtBuildingID, txtUnitID;
-
-        public ManagerUnitFrame() {
-            setTitle("ÇÐ»ç°ü¸®½Ã½ºÅÛ(±³Á÷¿ø)");
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setSize(1200, 800); // Å©±â À¯Áö
-            setLocationRelativeTo(null);
-
-            JPanel BuildingPanel = new JPanel(new BorderLayout());
-
-            // »ó´Ü ÆÐ³Î (ÅÇ ¸Þ´º + ·Î±×¾Æ¿ô ¹öÆ°) - °íÁ¤
-            JPanel topPanel = new JPanel(new BorderLayout());
-            JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-            JButton btnPrevios = new JButton("ÀÌÀüÈ­¸éÀ¸·Î µ¹¾Æ°¡±â");
-            JButton btnBuilding = new JButton("°Ç¹° °ü¸®");
-            JButton btnUnit = new JButton("°­ÀÇ½Ç °ü¸®");
-            JButton btnLogout = new JButton("·Î±×¾Æ¿ô");
-     
-            // ·Î±×¾Æ¿ô ¹öÆ° Å©±â ÅëÀÏ - °íÁ¤
-            btnLogout.setPreferredSize(new Dimension(100, 30));
-            Font tabFont = new Font("¸¼Àº °íµñ", Font.BOLD, 12);
-            btnPrevios.setFont(tabFont);
-            btnBuilding.setFont(tabFont);
-            btnUnit.setFont(tabFont);
-            btnLogout.setFont(tabFont);
-
-            // ÇöÀç ÆäÀÌÁö Ç¥½Ã (¹öÆ° »ö»ó º¯°æ) - °íÁ¤
-            btnUnit.setBackground(Color.LIGHT_GRAY);
-
-            tabPanel.add(btnPrevios);
-            tabPanel.add(btnBuilding);
-            tabPanel.add(btnUnit);
-            tabPanel.add(btnLogout);
- 
-            topPanel.add(tabPanel, BorderLayout.WEST);
-            topPanel.add(btnLogout, BorderLayout.EAST);
-            BuildingPanel.add(topPanel, BorderLayout.NORTH);
-
-            // ÀÔ·Â Æû ÆÐ³Î
-            JPanel formPanel = new JPanel(new GridBagLayout());
-
-            formPanel.setBorder(BorderFactory.createTitledBorder("°­ÀÇ½Ç µî·Ï ¹× Á¶È¸"));
-            formPanel.setPreferredSize(new Dimension(320, 300)); // Å©±â È®Àå
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(20, 10, 10, 30); // °£°Ý Á¶Á¤
-            gbc.anchor = GridBagConstraints.WEST;
-
-            Font labelFont = new Font("¸¼Àº °íµñ", Font.BOLD, 13);
-            Font fieldFont = new Font("¸¼Àº °íµñ", Font.BOLD, 12);
-
-            txtBuildingID = new JTextField(10); // Å©±â È®Àå
-            txtUnitID = new JTextField(10);
-
-            JButton btnSearch = new JButton("Á¶È¸ÇÏ±â");
-            JButton btnRegister = new JButton("µî·ÏÇÏ±â");
-
-            txtBuildingID.setFont(fieldFont);
-            txtUnitID.setFont(fieldFont);
-            
-            btnSearch.setFont(labelFont);
-            btnRegister.setFont(labelFont);
-
-            gbc.gridx = 0; gbc.gridy = 0;
-            formPanel.add(new JLabel("°Ç¹° ¹øÈ£:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtBuildingID, gbc);
-             
-            gbc.gridx = 0; gbc.gridy = 1;
-            formPanel.add(new JLabel("°­ÀÇ½Ç ¹øÈ£:", JLabel.RIGHT), gbc);
-            gbc.gridx = 1; formPanel.add(txtUnitID, gbc);
-
-            gbc.gridx = 0; gbc.gridy = 5;
-            formPanel.add(btnSearch, gbc);
-            
-            gbc.gridx = 1; gbc.gridy = 5;
-            formPanel.add(btnRegister, gbc);
-
-            // Å×ÀÌºí ¹× ¹öÆ° Ãß°¡
-            String[] columnNames = {"°Ç¹° ¹øÈ£", "°Ç¹°¸í", "°­ÀÇ½Ç ¹øÈ£"};
-            tableModel = new DefaultTableModel(columnNames, 0);
-            UnitTable = new JTable(tableModel);
-            JScrollPane scrollPane = new JScrollPane(UnitTable);
-
-            // ÀüÃ¼½Ã°£Ç¥Á¶È¸ & »èÁ¦ ¹öÆ°
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            
-            JButton btnViewAll = new JButton("ÀüÃ¼°­ÀÇ½Ç Á¶È¸");
-            JButton btnDelete = new JButton("»èÁ¦");
-
-            btnViewAll.setFont(labelFont);
-            btnDelete.setFont(labelFont);
-            buttonPanel.add(btnViewAll);
-            buttonPanel.add(btnDelete);
-
-            // Á¤·Ä Á¶Á¤
-            JPanel centerPanel = new JPanel(new BorderLayout());
-            centerPanel.add(formPanel, BorderLayout.WEST);
-            centerPanel.add(scrollPane, BorderLayout.CENTER);
-
-            BuildingPanel.add(centerPanel, BorderLayout.CENTER);
-            BuildingPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-            // ¹öÆ° ÀÌº¥Æ® Ãß°¡
-            btnPrevios.addActionListener(e -> {
-                new ManagerCourseFrame();
-                dispose();
-            });
-            
-            btnBuilding.addActionListener(e -> {
-                new ManagerBuildingFrame();
-                dispose();
-            });
-            
-            add(BuildingPanel);
-            setVisible(true);
-        }
-    }
-    
-       
-    //// ½ÇÇà ¸Þ¼Òµå 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(ManagerFrame::new);
-    }
-    
-    
-    
+
+	ManagerController managerController;
+
+	public ManagerFrame() {
+		setTitle("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setSize(400, 400); // È¨ È­ï¿½ï¿½ Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		setLocationRelativeTo(null);
+
+		JPanel homePanel = new JPanel(new BorderLayout());
+
+		// ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½ (ï¿½ï¿½ï¿½ï¿½ + ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ°)
+		JPanel topPanel = new JPanel(new BorderLayout());
+		JLabel titleLabel = new JLabel("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)", JLabel.LEFT);
+		titleLabel.setFont(new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 15));
+		topPanel.setBackground(Color.BLACK);
+		topPanel.setPreferredSize(new Dimension(400, 50));
+		titleLabel.setForeground(Color.WHITE);
+
+		JButton btnLogout = new JButton("ï¿½Î±×¾Æ¿ï¿½");
+		btnLogout.setPreferredSize(new Dimension(100, 30)); // ï¿½ï¿½Æ° Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		btnLogout.setFont(new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 13));
+
+		topPanel.add(titleLabel, BorderLayout.WEST);
+		topPanel.add(btnLogout, BorderLayout.EAST);
+		homePanel.add(topPanel, BorderLayout.NORTH);
+
+		// ï¿½Þ´ï¿½ ï¿½ï¿½Æ° ï¿½Ð³ï¿½
+		JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10));
+		buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+
+		JButton btnSchedule = new JButton("ï¿½Ã°ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½");
+		JButton btnProfessor = new JButton("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
+		JButton btnStudent = new JButton("ï¿½Ð»ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
+		JButton btnCourse = new JButton("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¸");
+
+		Font buttonFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 14);
+		btnSchedule.setFont(buttonFont);
+		btnProfessor.setFont(buttonFont);
+		btnStudent.setFont(buttonFont);
+		btnCourse.setFont(buttonFont);
+
+		buttonPanel.add(btnSchedule);
+		buttonPanel.add(btnProfessor);
+		buttonPanel.add(btnStudent);
+		buttonPanel.add(btnCourse);
+
+		homePanel.add(buttonPanel, BorderLayout.CENTER);
+
+		// ï¿½ï¿½Æ° ï¿½Ìºï¿½Æ® (ï¿½Ã°ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½)
+		btnSchedule.addActionListener(e -> {
+			new ManagerScheduleFrame();
+			dispose();
+		});
+		btnProfessor.addActionListener(e -> {// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+			new ManagerProfessorFrame();
+			dispose();
+		});
+		btnStudent.addActionListener(e -> {// ï¿½Ð»ï¿½ ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+			new ManagerStudentFrame();
+			dispose();
+		});
+
+		btnCourse.addActionListener(e -> {// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+			new ManagerCourseFrame();
+			dispose();
+		});
+
+		add(homePanel);
+		setVisible(true);
+	}
+
+	/// 2.ï¿½Å´ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½Ç¥ï¿½ï¿½ï¿½ï¿½
+	public class ManagerScheduleFrame extends JFrame {
+		private DefaultTableModel tableModel;
+		private JTable scheduleTable;
+		private JTextField txtLectureID, txtDay, txtStartTime, txtEndTime;
+
+		public ManagerScheduleFrame() {
+			setTitle("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)");
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			setSize(1200, 800); // Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			setLocationRelativeTo(null);
+
+			JPanel schedulePanel = new JPanel(new BorderLayout());
+
+			// ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½ (ï¿½ï¿½ ï¿½Þ´ï¿½ + ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ°)
+			JPanel topPanel = new JPanel(new BorderLayout());
+			JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+			JButton btnHome = new JButton("HOME");
+			JButton btnSchedule = new JButton("ï¿½Ã°ï¿½Ç¥ï¿½ï¿½ï¿½ï¿½");
+			JButton btnProfessor = new JButton("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnStudent = new JButton("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnCourse = new JButton("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnLogout = new JButton("ï¿½Î±×¾Æ¿ï¿½");
+
+			// ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ° Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 13);
+			btnHome.setFont(tabFont);
+			btnSchedule.setFont(tabFont);
+			btnProfessor.setFont(tabFont);
+			btnStudent.setFont(tabFont);
+			btnCourse.setFont(tabFont);
+			btnLogout.setFont(tabFont);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½ (ï¿½Ã°ï¿½Ç¥ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+			btnSchedule.setBackground(Color.LIGHT_GRAY);
+
+			tabPanel.add(btnHome);
+			tabPanel.add(btnSchedule);
+			tabPanel.add(btnProfessor);
+			tabPanel.add(btnStudent);
+			tabPanel.add(btnCourse);
+
+			topPanel.add(tabPanel, BorderLayout.WEST);
+			topPanel.add(btnLogout, BorderLayout.EAST);
+			schedulePanel.add(topPanel, BorderLayout.NORTH);
+
+			// ï¿½Ô·ï¿½ ï¿½ï¿½ ï¿½Ð³ï¿½
+			JPanel formPanel = new JPanel(new GridBagLayout());
+			formPanel.setBorder(BorderFactory.createTitledBorder("ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½Ç¥ ï¿½ï¿½ï¿½"));
+			formPanel.setPreferredSize(new Dimension(320, 300)); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.insets = new Insets(20, 10, 10, 30); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			gbc.anchor = GridBagConstraints.WEST;
+
+			Font labelFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 13);
+			Font fieldFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 12);
+
+			txtLectureID = new JTextField(15); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			txtDay = new JTextField(15);
+			txtStartTime = new JTextField(15);
+			txtEndTime = new JTextField(15);
+			JButton btnRegister = new JButton("ï¿½ï¿½ï¿½");
+
+			txtLectureID.setFont(fieldFont);
+			txtDay.setFont(fieldFont);
+			txtStartTime.setFont(fieldFont);
+			txtEndTime.setFont(fieldFont);
+			btnRegister.setFont(labelFont);
+
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			formPanel.add(new JLabel("ï¿½ï¿½ï¿½ï¿½ ID:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtLectureID, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 1;
+			formPanel.add(new JLabel("ï¿½ï¿½ï¿½ï¿½:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtDay, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 2;
+			formPanel.add(new JLabel("ï¿½ï¿½ï¿½Û½Ã°ï¿½:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtStartTime, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 3;
+			formPanel.add(new JLabel("ï¿½ï¿½ï¿½ï¿½Ã°ï¿½:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtEndTime, gbc);
+
+			gbc.gridx = 1;
+			gbc.gridy = 4;
+			formPanel.add(btnRegister, gbc);
+
+			// ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½ß°ï¿½
+			String[] columnNames = { "ï¿½Ã°ï¿½Ç¥ID", "ï¿½ï¿½ï¿½Ç¸ï¿½", "ï¿½ï¿½ï¿½ï¿½", "ï¿½ï¿½ï¿½Û½Ã°ï¿½", "ï¿½ï¿½ï¿½ï¿½Ã°ï¿½", "ï¿½ï¿½ï¿½ï¿½ï¿½Ì¸ï¿½" };
+			tableModel = new DefaultTableModel(columnNames, 0);
+			scheduleTable = new JTable(tableModel);
+			JScrollPane scrollPane = new JScrollPane(scheduleTable);
+
+			// ï¿½ï¿½Ã¼ï¿½ï¿½È¸ & ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
+			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			JButton btnViewAll = new JButton("ï¿½ï¿½Ã¼ï¿½Ã°ï¿½Ç¥ï¿½ï¿½È¸");
+			JButton btnDelete = new JButton("ï¿½ï¿½ï¿½ï¿½");
+
+			btnViewAll.setFont(labelFont);
+			btnDelete.setFont(labelFont);
+
+			buttonPanel.add(btnViewAll);
+			buttonPanel.add(btnDelete);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			JPanel centerPanel = new JPanel(new BorderLayout());
+			centerPanel.add(formPanel, BorderLayout.WEST);
+			centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+			schedulePanel.add(centerPanel, BorderLayout.CENTER);
+			schedulePanel.add(buttonPanel, BorderLayout.SOUTH);
+
+			// ï¿½ï¿½Æ° ï¿½Ìºï¿½Æ® ï¿½ß°ï¿½
+			btnHome.addActionListener(e -> {
+				new ManagerFrame();
+				dispose();
+			});
+
+			btnProfessor.addActionListener(e -> {
+				new ManagerProfessorFrame();
+				dispose();
+			});
+
+			btnStudent.addActionListener(e -> {
+				new ManagerStudentFrame();
+				dispose();
+			});
+
+			btnCourse.addActionListener(e -> {// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+				new ManagerCourseFrame();
+				dispose();
+			});
+
+			add(schedulePanel);
+			setVisible(true);
+		}
+	}
+
+	/// 3.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½È¸/ï¿½ï¿½ï¿½)
+	public class ManagerProfessorFrame extends JFrame {
+		private DefaultTableModel tableModel;
+		private JTable professorTable;
+		private JTextField txtName, txtPhone, txtBirthday, txtEmail, txtDepartmentID;
+
+		public ManagerProfessorFrame() { // ï¿½ï¿½Ü°ï¿½ï¿½ï¿½
+			setTitle("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)");
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			setSize(1200, 800); // Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			setLocationRelativeTo(null);
+
+			JPanel professorPanel = new JPanel(new BorderLayout());
+
+			// ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½ (ï¿½ï¿½ ï¿½Þ´ï¿½ + ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ°) - ï¿½ï¿½ï¿½ï¿½
+			JPanel topPanel = new JPanel(new BorderLayout());
+			JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+			JButton btnHome = new JButton("HOME");
+			JButton btnSchedule = new JButton("ï¿½Ã°ï¿½Ç¥ï¿½ï¿½ï¿½ï¿½");
+			JButton btnProfessor = new JButton("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnStudent = new JButton("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnCourse = new JButton("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnLogout = new JButton("ï¿½Î±×¾Æ¿ï¿½");
+
+			// ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ° Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½
+			btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 12);
+			btnHome.setFont(tabFont);
+			btnSchedule.setFont(tabFont);
+			btnProfessor.setFont(tabFont);
+			btnStudent.setFont(tabFont);
+			btnCourse.setFont(tabFont);
+			btnLogout.setFont(tabFont);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½ (ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) - ï¿½ï¿½ï¿½ï¿½
+			btnProfessor.setBackground(Color.LIGHT_GRAY);
+
+			tabPanel.add(btnHome);
+			tabPanel.add(btnSchedule);
+			tabPanel.add(btnProfessor);
+			tabPanel.add(btnStudent);
+			tabPanel.add(btnCourse);
+
+			topPanel.add(tabPanel, BorderLayout.WEST);
+			topPanel.add(btnLogout, BorderLayout.EAST);
+			professorPanel.add(topPanel, BorderLayout.NORTH);
+
+			// ï¿½Ô·ï¿½ ï¿½ï¿½ ï¿½Ð³ï¿½
+			JPanel formPanel = new JPanel(new GridBagLayout());
+			formPanel.setBorder(BorderFactory.createTitledBorder("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½"));
+			formPanel.setPreferredSize(new Dimension(320, 300)); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.insets = new Insets(20, 10, 10, 30); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			gbc.anchor = GridBagConstraints.WEST;
+
+			Font labelFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 13);
+			Font fieldFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 12);
+
+			txtName = new JTextField(15); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			txtPhone = new JTextField(15);
+			txtBirthday = new JTextField(15);
+			txtEmail = new JTextField(15);
+			txtDepartmentID = new JTextField(15);
+			JButton btnRegister = new JButton("ï¿½ï¿½ï¿½ï¿½Ï±ï¿½");
+
+			txtName.setFont(fieldFont);
+			txtPhone.setFont(fieldFont);
+			txtBirthday.setFont(fieldFont);
+			txtEmail.setFont(fieldFont);
+			txtDepartmentID.setFont(fieldFont);
+			btnRegister.setFont(labelFont);
+
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			formPanel.add(new JLabel("ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtName, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 1;
+			formPanel.add(new JLabel("ï¿½ï¿½È­ï¿½ï¿½È£:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtPhone, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 2;
+			formPanel.add(new JLabel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtBirthday, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 3;
+			formPanel.add(new JLabel("ï¿½Ì¸ï¿½ï¿½ï¿½:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtEmail, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 4;
+			formPanel.add(new JLabel("ï¿½Ð°ï¿½ï¿½ï¿½È£:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtDepartmentID, gbc);
+
+			gbc.gridx = 1;
+			gbc.gridy = 5;
+			formPanel.add(btnRegister, gbc);
+
+			// ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½ß°ï¿½
+			String[] columnNames = { "ï¿½ï¿½ï¿½ï¿½ID", "ï¿½ï¿½ï¿½ï¿½ï¿½Ì¸ï¿½", "ï¿½ï¿½È­ï¿½ï¿½È£", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", "ï¿½Ì¸ï¿½ï¿½ï¿½", "Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" };
+			tableModel = new DefaultTableModel(columnNames, 0);
+			professorTable = new JTable(tableModel);
+			JScrollPane scrollPane = new JScrollPane(professorTable);
+
+			// ï¿½ï¿½Ã¼ï¿½ï¿½È¸ & ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
+			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			JButton btnViewAll = new JButton("ï¿½ï¿½Ã¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¸");
+			JButton btnDelete = new JButton("ï¿½ï¿½ï¿½ï¿½");
+
+			btnViewAll.setFont(labelFont);
+			btnDelete.setFont(labelFont);
+
+			buttonPanel.add(btnViewAll);
+			buttonPanel.add(btnDelete);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			JPanel centerPanel = new JPanel(new BorderLayout());
+			centerPanel.add(formPanel, BorderLayout.WEST);
+			centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+			professorPanel.add(centerPanel, BorderLayout.CENTER);
+			professorPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+			// ï¿½ï¿½Æ° ï¿½Ìºï¿½Æ® ï¿½ß°ï¿½
+			btnHome.addActionListener(e -> {
+				new ManagerFrame();
+				dispose();
+			});
+
+			btnSchedule.addActionListener(e -> {
+				new ManagerScheduleFrame();
+				dispose();
+			});
+
+			btnStudent.addActionListener(e -> {
+				new ManagerStudentFrame();
+				dispose();
+			});
+
+			btnCourse.addActionListener(e -> {// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+				new ManagerCourseFrame();
+				dispose();
+			});
+
+			add(professorPanel);
+			setVisible(true);
+		}
+	}
+
+	/// 4.ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½È¸/ï¿½ï¿½ï¿½)
+	public class ManagerStudentFrame extends JFrame {
+		private DefaultTableModel tableModel;
+		private JTable studentTable;
+		private JTextField txtName, txtPhone, txtBirthDay, txtEmail, txtDepartmentID;
+
+		public ManagerStudentFrame() {// ï¿½ï¿½Ü°ï¿½ï¿½ï¿½
+			setTitle("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)");
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			setSize(1200, 800); // Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			setLocationRelativeTo(null);
+
+			JPanel studentPanel = new JPanel(new BorderLayout());
+
+			// ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½ (ï¿½ï¿½ ï¿½Þ´ï¿½ + ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ°) - ï¿½ï¿½ï¿½ï¿½
+			JPanel topPanel = new JPanel(new BorderLayout());
+			JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+			JButton btnHome = new JButton("HOME");
+			JButton btnSchedule = new JButton("ï¿½Ã°ï¿½Ç¥ï¿½ï¿½ï¿½ï¿½");
+			JButton btnProfessor = new JButton("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnStudent = new JButton("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnCourse = new JButton("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnLogout = new JButton("ï¿½Î±×¾Æ¿ï¿½");
+
+			// ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ° Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½
+			btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 12);
+			btnHome.setFont(tabFont);
+			btnSchedule.setFont(tabFont);
+			btnProfessor.setFont(tabFont);
+			btnStudent.setFont(tabFont);
+			btnCourse.setFont(tabFont);
+			btnLogout.setFont(tabFont);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½ (ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) - ï¿½ï¿½ï¿½ï¿½
+			btnStudent.setBackground(Color.LIGHT_GRAY);
+
+			tabPanel.add(btnHome);
+			tabPanel.add(btnSchedule);
+			tabPanel.add(btnProfessor);
+			tabPanel.add(btnStudent);
+			tabPanel.add(btnCourse);
+
+			topPanel.add(tabPanel, BorderLayout.WEST);
+			topPanel.add(btnLogout, BorderLayout.EAST);
+			studentPanel.add(topPanel, BorderLayout.NORTH);
+
+			// ï¿½Ô·ï¿½ ï¿½ï¿½ ï¿½Ð³ï¿½
+			JPanel formPanel = new JPanel(new GridBagLayout());
+			formPanel.setBorder(BorderFactory.createTitledBorder("ï¿½Ð»ï¿½ ï¿½ï¿½ï¿½"));
+			formPanel.setPreferredSize(new Dimension(320, 300)); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.insets = new Insets(20, 10, 10, 30); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			gbc.anchor = GridBagConstraints.WEST;
+
+			Font labelFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 13);
+			Font fieldFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.PLAIN, 12);
+
+			txtName = new JTextField(15); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			txtPhone = new JTextField(15);
+			txtBirthDay = new JTextField(15);
+			txtEmail = new JTextField(15);
+			txtDepartmentID = new JTextField(15);
+			JButton btnRegister = new JButton("ï¿½ï¿½ï¿½ï¿½Ï±ï¿½");
+
+			txtName.setFont(fieldFont);
+			txtPhone.setFont(fieldFont);
+			txtBirthDay.setFont(fieldFont);
+			txtEmail.setFont(fieldFont);
+			txtDepartmentID.setFont(fieldFont);
+			btnRegister.setFont(labelFont);
+
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			formPanel.add(new JLabel("ï¿½Ð»ï¿½ ï¿½Ì¸ï¿½:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtName, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 1;
+			formPanel.add(new JLabel("ï¿½ï¿½È­ï¿½ï¿½È£:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtPhone, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 2;
+			formPanel.add(new JLabel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtBirthDay, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 3;
+			formPanel.add(new JLabel("ï¿½Ì¸ï¿½ï¿½ï¿½:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtEmail, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 4;
+			formPanel.add(new JLabel("ï¿½Ð°ï¿½ï¿½ï¿½È£:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtDepartmentID, gbc);
+
+			gbc.gridx = 1;
+			gbc.gridy = 5;
+			formPanel.add(btnRegister, gbc);
+
+			// ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½ß°ï¿½
+			String[] columnNames = { "ï¿½Ð¹ï¿½", "ï¿½Ð»ï¿½ï¿½Ì¸ï¿½", "ï¿½ï¿½È­ï¿½ï¿½È£", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", "ï¿½Ì¸ï¿½ï¿½ï¿½", "ï¿½ï¿½ï¿½Ð³âµµ" };
+			tableModel = new DefaultTableModel(columnNames, 0);
+			studentTable = new JTable(tableModel);
+			JScrollPane scrollPane = new JScrollPane(studentTable);
+
+			// ï¿½ï¿½Ã¼ï¿½ï¿½È¸ & ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
+			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			JButton btnViewAll = new JButton("ï¿½ï¿½Ã¼ï¿½Ð»ï¿½ï¿½ï¿½È¸");
+			JButton btnDelete = new JButton("ï¿½ï¿½ï¿½ï¿½");
+
+			btnViewAll.setFont(labelFont);
+			btnDelete.setFont(labelFont);
+
+			buttonPanel.add(btnViewAll);
+			buttonPanel.add(btnDelete);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			JPanel centerPanel = new JPanel(new BorderLayout());
+			centerPanel.add(formPanel, BorderLayout.WEST);
+			centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+			studentPanel.add(centerPanel, BorderLayout.CENTER);
+			studentPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+			// ï¿½ï¿½Æ° ï¿½Ìºï¿½Æ® ï¿½ß°ï¿½
+			btnHome.addActionListener(e -> {
+				new ManagerFrame();
+				dispose();
+			});
+
+			btnSchedule.addActionListener(e -> {
+				new ManagerScheduleFrame();
+				dispose();
+			});
+
+			btnProfessor.addActionListener(e -> {
+				new ManagerProfessorFrame();
+				dispose();
+			});
+
+			btnCourse.addActionListener(e -> {// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+				new ManagerCourseFrame();
+				dispose();
+			});
+
+			add(studentPanel);
+			setVisible(true);
+		}
+	}
+
+	/// 5.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	public class ManagerCourseFrame extends JFrame {
+		private DefaultTableModel tableModel;
+		private JTable CourseTable;
+		private JTextField txtLectureID, txtDay, txtStartTime, txtEndTime;
+
+		public ManagerCourseFrame() {// ï¿½ï¿½Ü°ï¿½ï¿½ï¿½
+			setTitle("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)");
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			setSize(1200, 800); // Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			setLocationRelativeTo(null);
+
+			JPanel coursePanel = new JPanel(new BorderLayout());
+
+			// ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½ (ï¿½ï¿½ ï¿½Þ´ï¿½ + ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ°) - ï¿½ï¿½ï¿½ï¿½
+			JPanel topPanel = new JPanel(new BorderLayout());
+			JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+			JButton btnHome = new JButton("HOME");
+			JButton btnSchedule = new JButton("ï¿½Ã°ï¿½Ç¥ï¿½ï¿½ï¿½ï¿½");
+			JButton btnProfessor = new JButton("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnStudent = new JButton("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnCourse = new JButton("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
+			JButton btnLogout = new JButton("ï¿½Î±×¾Æ¿ï¿½");
+
+			// ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ° Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½
+			btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 12);
+			btnHome.setFont(tabFont);
+			btnSchedule.setFont(tabFont);
+			btnProfessor.setFont(tabFont);
+			btnStudent.setFont(tabFont);
+			btnCourse.setFont(tabFont);
+			btnLogout.setFont(tabFont);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½ (ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) - ï¿½ï¿½ï¿½ï¿½
+			btnCourse.setBackground(Color.LIGHT_GRAY);
+
+			tabPanel.add(btnHome);
+			tabPanel.add(btnSchedule);
+			tabPanel.add(btnProfessor);
+			tabPanel.add(btnStudent);
+			tabPanel.add(btnCourse);
+
+			topPanel.add(tabPanel, BorderLayout.WEST);
+			topPanel.add(btnLogout, BorderLayout.EAST);
+			coursePanel.add(topPanel, BorderLayout.NORTH);
+
+			// ï¿½Ô·ï¿½ ï¿½ï¿½ ï¿½Ð³ï¿½
+			JPanel formPanel = new JPanel(new GridBagLayout());
+			formPanel.setBorder(BorderFactory.createTitledBorder("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¸"));
+			formPanel.setPreferredSize(new Dimension(380, 400)); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.insets = new Insets(20, 10, 10, 20); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			gbc.anchor = GridBagConstraints.WEST;
+
+			Font labelFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 13);
+			Font fieldFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.PLAIN, 12);
+
+			txtLectureID = new JTextField(15); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			txtDay = new JTextField(15);
+			txtStartTime = new JTextField(15);
+			txtEndTime = new JTextField(15);
+			JButton btnSearch = new JButton("ï¿½ï¿½È¸ï¿½Ï±ï¿½");
+
+			txtLectureID.setFont(fieldFont);
+			txtDay.setFont(fieldFont);
+			txtStartTime.setFont(fieldFont);
+			txtEndTime.setFont(fieldFont);
+			btnSearch.setFont(labelFont);
+
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			formPanel.add(new JLabel("ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½È£:", JLabel.LEFT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtLectureID, gbc);
+
+			gbc.gridx = 1;
+			gbc.gridy = 4;
+			formPanel.add(btnSearch, gbc);
+
+			// ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½ß°ï¿½
+			String[] columnNames = { "ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½È£", "ï¿½ï¿½ï¿½Ç¸ï¿½", "ï¿½ï¿½ç±³ï¿½ï¿½", "ï¿½Ð°ï¿½" };
+			tableModel = new DefaultTableModel(columnNames, 0);
+			CourseTable = new JTable(tableModel);
+			JScrollPane scrollPane = new JScrollPane(CourseTable);
+
+			// ï¿½ï¿½Ã¼ï¿½Ã°ï¿½Ç¥ï¿½ï¿½È¸ & ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
+			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			JButton btnViewAll = new JButton("ï¿½ï¿½Ã¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¸");
+
+			// -- <ï¿½ï¿½ï¿½Ç½Ç°ï¿½ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½>
+			JButton btnBuildingManage = new JButton("ï¿½ï¿½ï¿½Ç½Ç°ï¿½ï¿½ï¿½");
+
+			btnViewAll.setFont(labelFont);
+			btnBuildingManage.setFont(labelFont);
+			buttonPanel.add(btnViewAll);
+			buttonPanel.add(btnBuildingManage);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			JPanel centerPanel = new JPanel(new BorderLayout());
+			centerPanel.add(formPanel, BorderLayout.WEST);
+			centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+			coursePanel.add(centerPanel, BorderLayout.CENTER);
+			coursePanel.add(buttonPanel, BorderLayout.SOUTH);
+
+			// ï¿½ï¿½Æ° ï¿½Ìºï¿½Æ® ï¿½ß°ï¿½
+			btnHome.addActionListener(e -> {
+				new ManagerFrame();
+				dispose();
+			});
+
+			btnSchedule.addActionListener(e -> {
+				new ManagerScheduleFrame();
+				dispose();
+			});
+
+			btnProfessor.addActionListener(e -> {
+				new ManagerProfessorFrame();
+				dispose();
+			});
+
+			btnStudent.addActionListener(e -> {
+				new ManagerStudentFrame();
+				dispose();
+			});
+
+			btnBuildingManage.addActionListener(e -> {
+				new ManagerBuildingFrame();
+				dispose();
+			});
+
+			add(coursePanel);
+			setVisible(true);
+		}
+	}
+
+	/// 5-2.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ---- ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½(ï¿½Ç¹ï¿½ ï¿½ï¿½È¸ / ï¿½ï¿½ï¿½)
+	public class ManagerBuildingFrame extends JFrame {
+		private DefaultTableModel tableModel;
+		private JTable BuildingTable;
+		private JTextField txtBuildingID, txtBuildingName;
+
+		public ManagerBuildingFrame() { // ï¿½ï¿½Ü°ï¿½ï¿½ï¿½
+			setTitle("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)");
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			setSize(1200, 800); // Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			setLocationRelativeTo(null);
+
+			JPanel BuildingPanel = new JPanel(new BorderLayout());
+
+			// ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½ (ï¿½ï¿½ ï¿½Þ´ï¿½ + ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ°) - ï¿½ï¿½ï¿½ï¿½
+			JPanel topPanel = new JPanel(new BorderLayout());
+			JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+			JButton btnPrevios = new JButton("ï¿½ï¿½ï¿½ï¿½È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Æ°ï¿½ï¿½ï¿½");
+			JButton btnBuilding = new JButton("ï¿½Ç¹ï¿½ ï¿½ï¿½ï¿½ï¿½");
+			JButton btnUnit = new JButton("ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½ï¿½ï¿½");
+			JButton btnLogout = new JButton("ï¿½Î±×¾Æ¿ï¿½");
+
+			// ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ° Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½
+			btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 12);
+			btnPrevios.setFont(tabFont);
+			btnBuilding.setFont(tabFont);
+			btnUnit.setFont(tabFont);
+			btnLogout.setFont(tabFont);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½ (ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) - ï¿½ï¿½ï¿½ï¿½
+			btnBuilding.setBackground(Color.LIGHT_GRAY);
+
+			tabPanel.add(btnPrevios);
+			tabPanel.add(btnBuilding);
+			tabPanel.add(btnUnit);
+			tabPanel.add(btnLogout);
+
+			topPanel.add(tabPanel, BorderLayout.WEST);
+			topPanel.add(btnLogout, BorderLayout.EAST);
+			BuildingPanel.add(topPanel, BorderLayout.NORTH);
+
+			// ï¿½Ô·ï¿½ ï¿½ï¿½ ï¿½Ð³ï¿½
+			JPanel formPanel = new JPanel(new GridBagLayout());
+			formPanel.setBorder(BorderFactory.createTitledBorder("ï¿½Ç¹ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½È¸"));
+			formPanel.setPreferredSize(new Dimension(320, 300)); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.insets = new Insets(20, 10, 10, 30); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			gbc.anchor = GridBagConstraints.WEST;
+
+			Font labelFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 13);
+			Font fieldFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.PLAIN, 12);
+
+			txtBuildingID = new JTextField(10); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			txtBuildingName = new JTextField(10);
+
+			JButton btnSearch = new JButton("ï¿½ï¿½È¸ï¿½Ï±ï¿½");
+			JButton btnRegister = new JButton("ï¿½ï¿½ï¿½ï¿½Ï±ï¿½");
+
+			txtBuildingID.setFont(fieldFont);
+			txtBuildingName.setFont(fieldFont);
+
+			btnSearch.setFont(labelFont);
+			btnRegister.setFont(labelFont);
+
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			formPanel.add(new JLabel("ï¿½Ç¹ï¿½ ï¿½ï¿½È£:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtBuildingID, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 1;
+			formPanel.add(new JLabel("ï¿½Ç¹ï¿½ ï¿½Ì¸ï¿½:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtBuildingName, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 4;
+			formPanel.add(btnSearch, gbc);
+
+			gbc.gridx = 1;
+			gbc.gridy = 4;
+			formPanel.add(btnRegister, gbc);
+
+			// ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½ß°ï¿½
+			String[] columnNames = { "ï¿½Ç¹ï¿½ ï¿½ï¿½È£", "ï¿½Ç¹ï¿½ ï¿½Ì¸ï¿½" };
+			tableModel = new DefaultTableModel(columnNames, 0);
+			BuildingTable = new JTable(tableModel);
+			JScrollPane scrollPane = new JScrollPane(BuildingTable);
+
+			// ï¿½ï¿½Ã¼ï¿½Ã°ï¿½Ç¥ï¿½ï¿½È¸ & ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
+			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			JButton btnViewAll = new JButton("ï¿½ï¿½Ã¼ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½È¸");
+
+			btnViewAll.setFont(labelFont);
+			buttonPanel.add(btnViewAll);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			JPanel centerPanel = new JPanel(new BorderLayout());
+			centerPanel.add(formPanel, BorderLayout.WEST);
+			centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+			BuildingPanel.add(centerPanel, BorderLayout.CENTER);
+			BuildingPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+			// ï¿½ï¿½Æ° ï¿½Ìºï¿½Æ® ï¿½ß°ï¿½
+			btnPrevios.addActionListener(e -> {
+				new ManagerCourseFrame();
+				dispose();
+			});
+
+			btnUnit.addActionListener(e -> {
+				new ManagerUnitFrame();
+				dispose();
+			});
+
+			add(BuildingPanel);
+			setVisible(true);
+		}
+	}
+
+	/// 5-3.ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½È¿ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½È¸ / ï¿½ï¿½ï¿½ / ï¿½ï¿½ï¿½ï¿½)
+	public class ManagerUnitFrame extends JFrame {
+		private DefaultTableModel tableModel;
+		private JTable UnitTable;
+		private JTextField txtBuildingID, txtUnitID;
+
+		public ManagerUnitFrame() {
+			setTitle("ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)");
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			setSize(1200, 800); // Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			setLocationRelativeTo(null);
+
+			JPanel BuildingPanel = new JPanel(new BorderLayout());
+
+			// ï¿½ï¿½ï¿½ ï¿½Ð³ï¿½ (ï¿½ï¿½ ï¿½Þ´ï¿½ + ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ°) - ï¿½ï¿½ï¿½ï¿½
+			JPanel topPanel = new JPanel(new BorderLayout());
+			JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+			JButton btnPrevios = new JButton("ï¿½ï¿½ï¿½ï¿½È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Æ°ï¿½ï¿½ï¿½");
+			JButton btnBuilding = new JButton("ï¿½Ç¹ï¿½ ï¿½ï¿½ï¿½ï¿½");
+			JButton btnUnit = new JButton("ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½ï¿½ï¿½");
+			JButton btnLogout = new JButton("ï¿½Î±×¾Æ¿ï¿½");
+
+			// ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½Æ° Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½
+			btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 12);
+			btnPrevios.setFont(tabFont);
+			btnBuilding.setFont(tabFont);
+			btnUnit.setFont(tabFont);
+			btnLogout.setFont(tabFont);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç¥ï¿½ï¿½ (ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) - ï¿½ï¿½ï¿½ï¿½
+			btnUnit.setBackground(Color.LIGHT_GRAY);
+
+			tabPanel.add(btnPrevios);
+			tabPanel.add(btnBuilding);
+			tabPanel.add(btnUnit);
+			tabPanel.add(btnLogout);
+
+			topPanel.add(tabPanel, BorderLayout.WEST);
+			topPanel.add(btnLogout, BorderLayout.EAST);
+			BuildingPanel.add(topPanel, BorderLayout.NORTH);
+
+			// ï¿½Ô·ï¿½ ï¿½ï¿½ ï¿½Ð³ï¿½
+			JPanel formPanel = new JPanel(new GridBagLayout());
+
+			formPanel.setBorder(BorderFactory.createTitledBorder("ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½È¸"));
+			formPanel.setPreferredSize(new Dimension(320, 300)); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			GridBagConstraints gbc = new GridBagConstraints();
+			gbc.insets = new Insets(20, 10, 10, 30); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			gbc.anchor = GridBagConstraints.WEST;
+
+			Font labelFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 13);
+			Font fieldFont = new Font("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", Font.BOLD, 12);
+
+			txtBuildingID = new JTextField(10); // Å©ï¿½ï¿½ È®ï¿½ï¿½
+			txtUnitID = new JTextField(10);
+
+			JButton btnSearch = new JButton("ï¿½ï¿½È¸ï¿½Ï±ï¿½");
+			JButton btnRegister = new JButton("ï¿½ï¿½ï¿½ï¿½Ï±ï¿½");
+
+			txtBuildingID.setFont(fieldFont);
+			txtUnitID.setFont(fieldFont);
+
+			btnSearch.setFont(labelFont);
+			btnRegister.setFont(labelFont);
+
+			gbc.gridx = 0;
+			gbc.gridy = 0;
+			formPanel.add(new JLabel("ï¿½Ç¹ï¿½ ï¿½ï¿½È£:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtBuildingID, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 1;
+			formPanel.add(new JLabel("ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½È£:", JLabel.RIGHT), gbc);
+			gbc.gridx = 1;
+			formPanel.add(txtUnitID, gbc);
+
+			gbc.gridx = 0;
+			gbc.gridy = 5;
+			formPanel.add(btnSearch, gbc);
+
+			gbc.gridx = 1;
+			gbc.gridy = 5;
+			formPanel.add(btnRegister, gbc);
+
+			// ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ ï¿½ï¿½Æ° ï¿½ß°ï¿½
+			String[] columnNames = { "ï¿½Ç¹ï¿½ ï¿½ï¿½È£", "ï¿½Ç¹ï¿½ï¿½ï¿½", "ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½È£" };
+			tableModel = new DefaultTableModel(columnNames, 0);
+			UnitTable = new JTable(tableModel);
+			JScrollPane scrollPane = new JScrollPane(UnitTable);
+
+			// ï¿½ï¿½Ã¼ï¿½Ã°ï¿½Ç¥ï¿½ï¿½È¸ & ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ°
+			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+			JButton btnViewAll = new JButton("ï¿½ï¿½Ã¼ï¿½ï¿½ï¿½Ç½ï¿½ ï¿½ï¿½È¸");
+			JButton btnDelete = new JButton("ï¿½ï¿½ï¿½ï¿½");
+
+			btnViewAll.setFont(labelFont);
+			btnDelete.setFont(labelFont);
+			buttonPanel.add(btnViewAll);
+			buttonPanel.add(btnDelete);
+
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			JPanel centerPanel = new JPanel(new BorderLayout());
+			centerPanel.add(formPanel, BorderLayout.WEST);
+			centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+			BuildingPanel.add(centerPanel, BorderLayout.CENTER);
+			BuildingPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+			// ï¿½ï¿½Æ° ï¿½Ìºï¿½Æ® ï¿½ß°ï¿½
+			btnPrevios.addActionListener(e -> {
+				new ManagerCourseFrame();
+				dispose();
+			});
+
+			btnBuilding.addActionListener(e -> {
+				new ManagerBuildingFrame();
+				dispose();
+			});
+
+			add(BuildingPanel);
+			setVisible(true);
+		}
+	}
+
+	public void setManagerController(ManagerController managerController) {
+		this.managerController = managerController;
+	}
+
+	//// ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¼Òµï¿½
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(ManagerFrame::new);
+	}
+
 }
