@@ -391,6 +391,9 @@ public class StudentController {
 				t -> System.out.println(t.getCourseInfo().getCourse().getName() + "  " + t.getGrade().getGrade()));
 	}
 
+	private void searchGrades() {
+		
+	}
 	// 한 학기 취득학점 , 성적 평균 조회
 	private void searchPrintGrades(Scanner sc) {
 		String input = selectSemester(sc);
