@@ -262,7 +262,7 @@ public class ManagerController {
 			System.out.print("메뉴 >> ");
 			int ubMenuInput = sc.next().charAt(0) - '0';
 			sc.nextLine();
-
+			
 			Connection conn = null;
 			PreparedStatement ps = null;
 			ResultSet rs = null;
@@ -283,34 +283,9 @@ public class ManagerController {
 						String buildingname = rs.getString("name");
 						System.out.println(buildingId + "\t" + "|" + buildingname);
 					}
-
 					break;
 				case 2: // 건물등록 - 건물 번호가 이미 있으면 다시 입력
-
-					String buildingIDSearch = "select building_id from buildings where building_id = ?";
-					ps = conn.prepareStatement(buildingIDSearch);
-
-					System.out.print("건물 번호 : ");
-					int buildingId = sc.nextInt();
-					sc.nextLine();
-
-					ps.setInt(1, buildingId);
-					rs = ps.executeQuery();
-					if (rs.next()) {
-						System.out.println("이미 존재하는 건물 번호 입니다. 다른 번호로 입력해주세요.");
-					} else {
-						String buildingSavesql = "insert into buildings values(?,?)";
-						ps = conn.prepareStatement(buildingSavesql);
-
-						ps.setInt(1, buildingId);
-
-						System.out.print("건물 이름 : ");
-						String buildingName = sc.nextLine();
-						ps.setString(2, buildingName);
-
-						ps.executeUpdate();
-					}
-
+					saveBuilding(sc);
 					break;
 				case 3:
 					searchUnitInfo();
@@ -324,6 +299,8 @@ public class ManagerController {
 				case 6:
 					System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
 					return;
+				case 7:
+			
 				default:
 					System.out.println("올바른 메뉴를 선택해주세요.");
 					break;
@@ -338,6 +315,79 @@ public class ManagerController {
 		}
 
 	}
+	
+	// 건물 등록 메소드
+	public void saveBuilding(Scanner sc) {
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			String buildingIDSearch = "select building_id from buildings where building_id = ?";
+			ps = conn.prepareStatement(buildingIDSearch);
+			
+			System.out.print("건물 번호 : ");
+			int buildingId = sc.nextInt();
+			sc.nextLine();
+			
+			ps.setInt(1, buildingId);
+			rs = ps.executeQuery();
+			if (rs.next()) {
+				System.out.println("이미 존재하는 건물 번호 입니다. 다른 번호로 입력해주세요.");
+			} else {
+				String buildingSavesql = "insert into buildings values(?,?)";
+				ps = conn.prepareStatement(buildingSavesql);
+				
+				ps.setInt(1, buildingId);
+				
+				System.out.print("건물 이름 : ");
+				String buildingName = sc.nextLine();
+				ps.setString(2, buildingName);
+				
+				ps.executeUpdate();
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, ps, rs);
+		}
+	}
+	
+	//view용 건물 등록
+	public void saveViewBuilding(int buildingId, String buildingName) {
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			conn = DBConnector.getConnection();
+			String buildingIDSearchsql = "select building_id from buildings where building_id = ?";
+			ps = conn.prepareStatement(buildingIDSearchsql);
+			ps.setInt(1, buildingId);
+			rs = ps.executeQuery();
+			
+			if (rs.next()) {
+				System.out.println("이미 존재하는 건물 번호 입니다. 다른 번호로 입력해주세요.");
+			} else {
+				String buildingSavesql = "insert into buildings values(?,?)";
+				ps = conn.prepareStatement(buildingSavesql);
+				
+				ps.setInt(1, buildingId);
+				ps.setString(2, buildingName);
+				
+				ps.executeUpdate();
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, ps, rs);
+		}
+	}
+
 
 	// 강의실 조회 메소드
 	public void searchUnitInfo() {

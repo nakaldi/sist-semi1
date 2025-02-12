@@ -35,6 +35,7 @@ public class StudentFrame {
 	JPanel sidePanel;
 	public StudentEnrollmentPanel studentEnrollmentPanel;
 	public StudentMypagePanel studentMypagePanel;
+	public StudentEnrollSpecPanel studentEnrollSpecPanel;
 
 	public StudentFrame(StudentController studentController) {
 		this.studentController = studentController;
@@ -96,13 +97,14 @@ public class StudentFrame {
 
 		studentMypagePanel = new StudentMypagePanel(studentController);
 		studentEnrollmentPanel = new StudentEnrollmentPanel(frame, studentController);
+		studentEnrollSpecPanel = new StudentEnrollSpecPanel(frame, studentController);
 		// 메인 패널 (CardLayout 사용)
 		cardLayout = new CardLayout();
 		mainPanel = new Panel(cardLayout);
 		mainPanel.setBackground(new Color(245, 245, 245));
 		mainPanel.add(studentMypagePanel.createMyPagePanel(), "마이페이지");
 		mainPanel.add(studentEnrollmentPanel.createEnrollmentPanel(), "수강신청");
-		mainPanel.add(new Label("출결관리 화면 (추후 구현)"), "수강현황");
+		mainPanel.add(studentEnrollSpecPanel.createEnrollSpecPanel(), "수강현황");
 		mainPanel.add(new Label("성적관리 화면 (추후 구현)"), "성적확인");
 		frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 
@@ -165,13 +167,6 @@ public class StudentFrame {
 		}
 	}
 
-	private Panel createCell(String text, boolean highlight) {
-		Panel cell = new Panel();
-		cell.setBackground(highlight ? Color.DARK_GRAY : Color.LIGHT_GRAY);
-		Label label = new Label(text, Label.CENTER);
-		label.setForeground(Color.WHITE);
-		cell.add(label);
-		return cell;
-	}
+
 
 }
