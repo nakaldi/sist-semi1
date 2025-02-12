@@ -1,9 +1,13 @@
 package kims.semi1.controller;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import kims.semi1.dao.GenericDao;
 import kims.semi1.model.Building;
 import kims.semi1.model.ClassSchedule;
 import kims.semi1.model.Course;
@@ -203,6 +207,94 @@ public class StudentController {
 			}
 		}
 		return input;
+	}
+
+	public Object[][] searchCourseInfosToArray(String semester) {
+		List<CourseInfo> courseInfos = studentService.getCourseInfoBySemester(semester);
+//		 "강의번호", "강의명", "교수명", "학과", "학점", "학기", "요일", "강의시간" 
+		if (courseInfos.size() == 0) {
+			return new Object[][] { { "", "", "등록된", "강의가", "없습니다", "", "", "" } };
+		}
+
+		return courseInfos.stream()
+				.map(t -> new Object[] { t.getCourse().getCourseId(), t.getCourse().getName(),
+						t.getProfessor().getName(), t.getDepartment().getName(), t.getCourse().getCredit(),
+						t.getCourse().getSemester(), t.getClassSchedule().getDayOfWeek(),
+						(t.getClassSchedule().getStartTime() + "-" + t.getClassSchedule().getEndTime()) })
+				.toArray(size -> new Object[size][8]);
+	}
+
+	public Object[][] searchEnrollmentInfosToArray(String semester) {
+		List<Enrollment> enrollmentInfos = studentService
+				.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(), semester);
+
+		if (enrollmentInfos.size() == 0) {
+			return new Object[][] { { "", "아직", "신청된", "강의가", "없습니다", "", "", "" } };
+		}
+		return enrollmentInfos.stream()
+				.map(t -> new Object[] { t.getCourseInfo().getCourse().getCourseId(),
+						t.getCourseInfo().getCourse().getName(), t.getCourseInfo().getProfessor().getName(),
+						t.getCourseInfo().getDepartment().getName(), t.getCourseInfo().getCourse().getCredit(),
+						t.getCourseInfo().getCourse().getSemester(),
+						t.getCourseInfo().getClassSchedule().getDayOfWeek(),
+						(t.getCourseInfo().getClassSchedule().getStartTime() + "-"
+								+ t.getCourseInfo().getClassSchedule().getEndTime()) })
+				.toArray(size -> new Object[size][8]);
+	}
+
+	public String makeSyllabus(int courseId) {
+		List<CourseInfo> courseInfos = studentService.getCourseInfoBySemester("1");
+		courseInfos.addAll(studentService.getCourseInfoBySemester("2"));
+		CourseInfo courseInfo = courseInfos.stream().filter(t -> t.getCourse().getCourseId() == courseId).findFirst()
+				.orElse(null);
+		if (courseInfo == null) {
+			return null;
+		}
+		String coursePlan = "-------------------------------- 강의 계획서 ---------------------------------" + "\n\n"
+				+ "강의명 : " + courseInfo.getCourse().getName() + "\t강의번호 : " + courseId + "\n" + "개설학기 : "
+				+ courseInfo.getCourse().getSemester() + "\n" + "\n" + "개설학과 : " + courseInfo.getDepartment().getName()
+				+ "\t" + "학점 : " + courseInfo.getCourse().getCredit() + "\n" + "\n" + "담당교수 : "
+				+ courseInfo.getProfessor().getName() + "\n" + "이메일 : " + courseInfo.getProfessor().getEmail() + "\n"
+				+ "전화번호 : " + courseInfo.getProfessor().getPhone() + "\n" + "\n" + "강의건물 : "
+				+ courseInfo.getBuilding().getName() + "\t" + "강의실 : " + courseInfo.getUnit().getUnitId() + "\n" + "\n"
+				+ "강의내용 : " + courseInfo.getCourse().getSyllabus();
+		return coursePlan;
+	}
+
+	public boolean registerEnrollment(int courseId) {
+		List<CourseInfo> courseInfos = studentService.getCourseInfoBySemester("1");
+		courseInfos.addAll(studentService.getCourseInfoBySemester("2"));
+		CourseInfo courseInfo = courseInfos.stream().filter(t -> t.getCourse().getCourseId() == courseId).findFirst()
+				.orElse(null);
+
+		String newCourseStartTime = courseInfo.getClassSchedule().getStartTime();
+		String newCourseEndTime = courseInfo.getClassSchedule().getEndTime();
+		List<Enrollment> enrollmentInfos = studentService
+				.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(), courseInfo.getCourse().getSemester());
+
+		for (Enrollment e : enrollmentInfos) {
+
+//			if ((e.getCourseInfo().getCourse().getSemester() == courseInfo.getCourse().getSemester())
+//					&& (e.getCourseInfo().getClassSchedule().getDayOfWeek()
+//							.equals(courseInfo.getClassSchedule().getDayOfWeek()))) {
+				if (isTimeOverlap(e.getCourseInfo().getClassSchedule().getStartTime(),
+						e.getCourseInfo().getClassSchedule().getEndTime(), newCourseStartTime, newCourseEndTime)) {
+					return false; // 학기, 요일, 시간이 겹치면 실패
+				}
+			}
+//		}
+
+		return studentService.registerEnrollment(student.getStudentId(), courseId);
+	}
+
+	private boolean isTimeOverlap(String start1, String end1, String start2, String end2) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+		LocalTime s1 = LocalTime.parse(start1, formatter);
+		LocalTime e1 = LocalTime.parse(end1, formatter);
+		LocalTime s2 = LocalTime.parse(start2, formatter);
+		LocalTime e2 = LocalTime.parse(end2, formatter);
+		return (s1.equals(s2) || e1.equals(e2) || (s1.isBefore(e2) && e1.isAfter(s2)));
 	}
 
 	public void searchCourses(Scanner sc) {

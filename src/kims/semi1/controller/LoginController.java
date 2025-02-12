@@ -60,12 +60,9 @@ public class LoginController {
 			} else if (Integer.toString(currentUserId).charAt(4) == '2') {
 				loginFrame.dispose();
 				ProfessorFrame pf = new ProfessorFrame(loginFrame, currentUserId);
-<<<<<<< HEAD
-				new ProfessorController(currentUserId, pf);
-=======
+
 				ProfessorController professorController = new ProfessorController(currentUserId, pf);
-				pf.setProfessorController(professorController);
->>>>>>> c7dbf2f74df044b5878990016359d59856e581c9
+
 			} else if (Integer.toString(currentUserId).charAt(4) == '3') {
 				loginFrame.dispose();
 				ManagerFrame mf = new ManagerFrame();
