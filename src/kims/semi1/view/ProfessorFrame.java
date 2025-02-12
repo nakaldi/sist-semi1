@@ -854,7 +854,35 @@ public class ProfessorFrame extends Frame {
 		listPanel.add(listButtonPanel, BorderLayout.SOUTH); // 버튼을 하단에 배치
 		
 		// 4. 액션 리스너 등록
-		
+		btnGradeModify.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		        // 1. 리스트에서 선택된 성적 정보 가져오기
+		        int selectedIndex = gradeList.getSelectedIndex();
+		        if (selectedIndex == -1) {
+		            System.out.println("수정할 성적을 선택해주세요.");
+		            return;
+		        }
+
+		        String selectedGrade = gradeList.getItem(selectedIndex);
+		        String[] gradeInfo = selectedGrade.split("\\|");
+
+		        // gradeInfo 배열의 길이가 예상대로인지 확인
+		        if (gradeInfo.length < 4) {
+		            System.err.println("오류: 잘못된 성적 데이터 형식입니다.");
+		            return;
+		        }
+
+		        // 2. 팝업창 생성 및 표시
+		        String courseId = gradeInfo[0].trim();
+		        String studentName = gradeInfo[1].trim();
+		        String currentGrade = gradeInfo[2].trim();
+		        String student_review = gradeInfo[3].trim();
+
+		        openGradeModifyPopup(courseId, studentName, currentGrade, student_review);
+
+		    }
+		});
 		btnGradeSearchAll.addActionListener(new ActionListener() {
 		    @Override
 		    public void actionPerformed(ActionEvent e) {
