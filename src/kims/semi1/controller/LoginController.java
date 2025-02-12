@@ -60,7 +60,7 @@ public class LoginController {
 				sf.setStudentController(studentController);
 			} else if (Integer.toString(currentUserId).charAt(4) == '2') {
 				loginFrame.dispose();
-				ProfessorFrame pf = new ProfessorFrame(loginFrame,currentUserId);
+				ProfessorFrame pf = new ProfessorFrame(loginFrame, currentUserId);
 				new ProfessorController(currentUserId, pf);
 			} else if (Integer.toString(currentUserId).charAt(4) == '3') {
 				loginFrame.dispose();

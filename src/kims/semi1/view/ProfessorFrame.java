@@ -38,7 +38,7 @@ public class ProfessorFrame extends Frame {
 	private Button btnMyPage, btnSugang, btnGrade;
 
 	// 수강 관리
-	private TextField txtCourseName, txtCourseId, txtCourseCredit, txtCourseDescription;
+	private TextField txtCourseName, txtCourseBuilding, txtCourseCredit, txtCourseDescription, txtCourseSemester;
 	private Button btnRegister, btnModify, btnSearch, btnDelete, btnSearchAll;
 	private List courseList;
 
@@ -49,11 +49,14 @@ public class ProfessorFrame extends Frame {
 
 	// DB 연결 정보
 	static final String JDBC_DRIVER = "oracle.jdbc.driver.OracleDriver"; // JDBC 드라이버 클래스
-	static final String DB_URL = "jdbc:oracle:thin:@localhost:1521:XE"; // DB URL (본인 환경에 맞게 수정)
-	static final String USER = "hamster2"; // DB 계정 (본인 계정으로 수정)
-	static final String PASS = "1234"; // DB 비밀번호 (본인 비밀번호로 수정)
+	static final String DB_URL = "jdbc:oracle:thin:@localhost:1521:XE"; // DB URL
+	static final String USER = "hamster2"; // DB 계정
+	static final String PASS = "1234"; // DB 비밀번호
 	private int professorId;
-
+	private String selectedCourseId;
+	private ActionListener registerActionListener;
+	
+	
 	public ProfessorFrame(LoginFrame loginFrame, int professorId) {
 		this.loginFrame = loginFrame;
 		this.professorId = professorId;
@@ -133,6 +136,72 @@ public class ProfessorFrame extends Frame {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void addCourse() {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+
+		try {
+			// 1. DB 연결
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+			// 2. 텍스트 필드에서 입력된 값 가져오기
+			String courseName = txtCourseName.getText();
+			String courseCredit = txtCourseCredit.getText();
+			String courseDescription = txtCourseDescription.getText();
+			String courseBuilding = txtCourseBuilding.getText();
+			String courseSemester = txtCourseSemester.getText();
+
+			// 입력값 검증
+			if (courseName.isEmpty() || courseCredit.isEmpty() || courseDescription.isEmpty()
+					|| courseBuilding.isEmpty() || courseSemester.isEmpty()) {
+				System.out.println("모든 필드를 채워주세요.");
+				return;
+			}
+
+			String sql = "INSERT INTO courses (course_id, name, credits, syllabus, professor_id, department_id, semester) VALUES (seq_courses.NEXTVAL, ?, ?, ?, ?, ?, ?)";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, courseName);
+			pstmt.setString(2, courseCredit);
+			pstmt.setString(3, courseDescription);
+			pstmt.setInt(4, professorId);
+			pstmt.setString(5, courseBuilding);
+			pstmt.setString(6, courseSemester);
+
+			// 4. 쿼리 실행
+			int rowsAffected = pstmt.executeUpdate();
+			if (rowsAffected > 0) {
+				System.out.println("강의가 성공적으로 추가되었습니다.");
+				loadCourses(); // GUI 업데이트
+				clearInputFields(); // 입력 필드 초기화
+			} else {
+				System.out.println("강의 추가에 실패했습니다.");
+			}
+
+		} catch (ClassNotFoundException e) {
+			System.err.println("드라이버 로딩 실패: " + e.getMessage());
+		} catch (SQLException e) {
+			System.err.println("SQL 에러: " + e.getMessage());
+		} finally {
+			try {
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void clearInputFields() {
+		txtCourseName.setText("");
+		txtCourseCredit.setText("");
+		txtCourseDescription.setText("");
+		txtCourseBuilding.setText("");
+		txtCourseSemester.setText("");
 	}
 
 	// 학과 이름 가져오는 메서드
@@ -296,8 +365,8 @@ public class ProfessorFrame extends Frame {
 
 		// 1. 입력 영역
 		Panel inputPanel = new Panel();
-		inputPanel.setLayout(new GridLayout(4, 1, 0, 15)); // 세로로 배치, 간격 조정
-		inputPanel.setPreferredSize(new Dimension(220, 180)); // 폭을 줄임, 높이를 늘림
+		inputPanel.setLayout(new GridLayout(5, 1, 0, 15)); // 세로로 배치, 간격 조정
+		inputPanel.setPreferredSize(new Dimension(220, 220)); // 폭을 줄임, 높이를 늘림
 		inputPanel.setBackground(Color.WHITE);
 
 		Label lblCourseName = new Label("강의명:");
@@ -310,15 +379,25 @@ public class ProfessorFrame extends Frame {
 		courseNamePanel.add(txtCourseName);
 		inputPanel.add(courseNamePanel);
 
-		Label lblCourseId = new Label("강좌 ID:");
-		txtCourseId = new TextField(12); // 텍스트 필드 크기 줄임
-		Panel courseIdPanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // 간격 없앰
-		courseIdPanel.setBackground(Color.WHITE);
-		lblCourseId.setPreferredSize(new Dimension(60, 20)); // 라벨 크기 고정
-		txtCourseId.setPreferredSize(new Dimension(120, 20)); // 텍스트 필드 크기 고정
-		courseIdPanel.add(lblCourseId);
-		courseIdPanel.add(txtCourseId);
-		inputPanel.add(courseIdPanel);
+		Label lblCourseBuilding = new Label("강의 건물:");
+		txtCourseBuilding = new TextField(12);
+		Panel courseBuildingPanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		courseBuildingPanel.setBackground(Color.WHITE);
+		lblCourseBuilding.setPreferredSize(new Dimension(60, 20));
+		txtCourseBuilding.setPreferredSize(new Dimension(120, 20));
+		courseBuildingPanel.add(lblCourseBuilding);
+		courseBuildingPanel.add(txtCourseBuilding);
+		inputPanel.add(courseBuildingPanel);
+
+		Label lblCourseSemester = new Label("학기:");
+		txtCourseSemester = new TextField(12);
+		Panel courseSemesterPanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		courseSemesterPanel.setBackground(Color.WHITE);
+		lblCourseSemester.setPreferredSize(new Dimension(60, 20));
+		txtCourseSemester.setPreferredSize(new Dimension(120, 20));
+		courseSemesterPanel.add(lblCourseSemester);
+		courseSemesterPanel.add(txtCourseSemester);
+		inputPanel.add(courseSemesterPanel);
 
 		Label lblCourseCredit = new Label("학점:");
 		txtCourseCredit = new TextField(12); // 텍스트 필드 크기 줄임
@@ -347,35 +426,99 @@ public class ProfessorFrame extends Frame {
 		buttonPanel.setBackground(Color.WHITE);
 
 		btnRegister = new Button("등록");
-		btnModify = new Button("수정");
-		btnSearch = new Button("조회");
-		buttonPanel.add(btnRegister);
-		buttonPanel.add(btnModify);
-		buttonPanel.add(btnSearch);
+	    btnModify = new Button("수정");
+	    btnSearch = new Button("조회");
+	    buttonPanel.add(btnRegister);
+	    buttonPanel.add(btnModify);
+	    buttonPanel.add(btnSearch);
+	     
+		btnModify.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		        // 1. 리스트에서 선택된 강의 정보 가져오기
+		        int selectedIndex = courseList.getSelectedIndex();
+		        if (selectedIndex == -1) {
+		            System.out.println("수정할 강의를 선택해주세요.");
+		            return;
+		        }
+
+		        String selectedCourse = courseList.getItem(selectedIndex);
+		        String[] courseInfo = selectedCourse.split("\\|");
+
+		        // 2. 텍스트 필드에 강의 정보 표시
+		        String courseId = courseInfo[0].trim();
+		        String name = courseInfo[1].trim();
+		        String credits = courseInfo[2].trim();
+		        String building = courseInfo[3].trim();
+		        String semester = courseInfo[4].trim();
+		        String syllabus = courseInfo[5].trim();
+
+		        txtCourseName.setText(name);
+		        txtCourseCredit.setText(credits);
+		        txtCourseBuilding.setText(building);
+		        txtCourseSemester.setText(semester);
+		        txtCourseDescription.setText(syllabus);
+
+		        // 3. 수정할 courseId 저장 (updateCourse() 메서드에서 사용)
+		        selectedCourseId = courseId;
+		        btnRegister.setLabel("수정");
+		        btnRegister.removeActionListener(btnRegister.getActionListeners()[0]); // 기존 리스너 제거
+
+		        btnRegister.addActionListener(new ActionListener() {
+		            @Override
+		            public void actionPerformed(ActionEvent e) {
+		                updateCourse(); // 강의 수정 메서드 호출
+		            }
+		        });
+		    }
+		});
+
+		// register 버튼 액션 리스너
+		btnRegister.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		        addCourse(); // 강의 추가 메서드 호출
+		                clearInputFields();
+		    }
+		});
+
+
+		btnRegister.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				addCourse(); // 강의 추가 메서드 호출
+			}
+		});
 
 		// 3. 리스트 영역 (표 형태)
 		Panel listPanel = new Panel();
-		listPanel.setLayout(new BorderLayout()); // 리스트와 버튼을 배치하기 위한 레이아웃
-		listPanel.setBackground(Color.LIGHT_GRAY); // 보기 좋게 배경색 설정
+		listPanel.setLayout(new BorderLayout());
+		listPanel.setBackground(Color.LIGHT_GRAY);
 
 		// **컬럼명을 표시할 Panel 생성**
 		Panel columnHeaderPanel = new Panel(new FlowLayout(FlowLayout.LEFT));
 		columnHeaderPanel.setBackground(Color.LIGHT_GRAY);
-		// 컬럼명 Label 생성 및 폭 설정
+
 		Label lblCourseIdHeader = new Label("강좌 ID");
-		lblCourseIdHeader.setPreferredSize(new Dimension(80, 20)); // 폭 설정
+		lblCourseIdHeader.setPreferredSize(new Dimension(60, 20)); // 폭 조정
 		Label lblCourseNameHeader = new Label("강의명");
-		lblCourseNameHeader.setPreferredSize(new Dimension(300, 20)); // 폭 설정
+		lblCourseNameHeader.setPreferredSize(new Dimension(220, 20)); // 폭 조정
 		Label lblCreditsHeader = new Label("학점");
-		lblCreditsHeader.setPreferredSize(new Dimension(50, 20)); // 폭 설정
+		lblCreditsHeader.setPreferredSize(new Dimension(50, 20)); // 폭 조정
+		Label lblBuildingHeader = new Label("강의 건물");
+		lblBuildingHeader.setPreferredSize(new Dimension(100, 20)); // 폭 조정
+		Label lblSemesterHeader = new Label("학기");
+		lblSemesterHeader.setPreferredSize(new Dimension(50, 20)); // 폭 조정
 		Label lblSyllabusHeader = new Label("강의계획");
-		lblSyllabusHeader.setPreferredSize(new Dimension(350, 20)); // 폭 설정
-		// 컬럼명 Label을 Panel에 추가
+		lblSyllabusHeader.setPreferredSize(new Dimension(240, 20)); // 폭 조정
+
 		columnHeaderPanel.add(lblCourseIdHeader);
 		columnHeaderPanel.add(lblCourseNameHeader);
 		columnHeaderPanel.add(lblCreditsHeader);
+		columnHeaderPanel.add(lblBuildingHeader);
+		columnHeaderPanel.add(lblSemesterHeader);
 		columnHeaderPanel.add(lblSyllabusHeader);
-		// 컬럼명 Panel을 listPanel의 NORTH에 추가
+
 		listPanel.add(columnHeaderPanel, BorderLayout.NORTH);
 
 		courseList = new List();
@@ -388,8 +531,29 @@ public class ProfessorFrame extends Frame {
 		btnDelete = new Button("삭제");
 		btnSearchAll = new Button("전체조회");
 		listButtonPanel.add(btnDelete);
-		btnSearchAll = new Button("전체조회");
 		listButtonPanel.add(btnSearchAll);
+
+		btnDelete.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// 1. 리스트에서 선택된 강의 정보 가져오기
+				int selectedIndex = courseList.getSelectedIndex();
+				if (selectedIndex == -1) {
+					System.out.println("삭제할 강의를 선택해주세요.");
+					return;
+				}
+
+				String selectedCourse = courseList.getItem(selectedIndex);
+				String courseId = selectedCourse.split("\\|")[0].trim(); // courseId 추출
+
+				// 2. 데이터베이스에서 해당 강의 삭제
+				deleteCourse(courseId);
+
+				// 3. 리스트 갱신
+				loadCourses();
+			}
+		});
+
 		btnSearchAll.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -397,8 +561,8 @@ public class ProfessorFrame extends Frame {
 			}
 		});
 
-		listPanel.add(courseList, BorderLayout.CENTER); // 리스트를 중앙에 배치
-		listPanel.add(listButtonPanel, BorderLayout.SOUTH); // 버튼을 하단에 배치
+		listPanel.add(courseList, BorderLayout.CENTER);
+		listPanel.add(listButtonPanel, BorderLayout.SOUTH);
 
 		// 전체 패널에 각 영역 배치
 		panel.add(inputPanel, BorderLayout.WEST);
@@ -408,35 +572,75 @@ public class ProfessorFrame extends Frame {
 		return panel;
 	}
 
-	// 수강 목록 로딩 메서드
-	private void loadCourses() {
+	
+	private void updateCourse() {
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+
+	    try {
+	        Class.forName(JDBC_DRIVER);
+	        conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+	        String courseName = txtCourseName.getText();
+	        String courseCredit = txtCourseCredit.getText();
+	        String courseDescription = txtCourseDescription.getText();
+	        String courseBuilding = txtCourseBuilding.getText();
+	        String courseSemester = txtCourseSemester.getText();
+
+	        String sql = "UPDATE courses SET name = ?, credits = ?, syllabus = ?, department_id = ?, semester = ? WHERE course_id = ?";
+	        pstmt = conn.prepareStatement(sql);
+	        pstmt.setString(1, courseName);
+	        pstmt.setString(2, courseCredit);
+	        pstmt.setString(3, courseDescription);
+	        pstmt.setString(4, courseBuilding);
+	        pstmt.setString(5, courseSemester);
+	        pstmt.setString(6, selectedCourseId);
+
+	        int rowsAffected = pstmt.executeUpdate();
+	        if (rowsAffected > 0) {
+	            System.out.println("강의가 성공적으로 수정되었습니다.");
+	        } else {
+	            System.out.println("강의 수정에 실패했습니다.");
+	        }
+
+	    } catch (ClassNotFoundException e) {
+	        System.err.println("드라이버 로딩 실패: " + e.getMessage());
+	        e.printStackTrace();
+	    } catch (SQLException e) {
+	        System.err.println("SQL 에러: " + e.getMessage());
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (pstmt != null) pstmt.close();
+	            if (conn != null) conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    // 리스트 갱신 및 텍스트 필드 초기화
+	    loadCourses();
+	    clearInputFields();
+	    selectedCourseId = null; // courseId 초기화
+	}
+	
+	private void deleteCourse(String courseId) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 
 		try {
 			Class.forName(JDBC_DRIVER);
 			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
-			String sql = "SELECT course_id, name, credits,syllabus FROM courses WHERE professor_id = ?";
+			String sql = "DELETE FROM courses WHERE course_id = ?";
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, professorId); // 현재 교수가 담당하는 과목만 조회
+			pstmt.setString(1, courseId);
 
-			rs = pstmt.executeQuery();
-			courseList.removeAll(); // 기존 목록 비우기
-
-			while (rs.next()) {
-				String courseId = rs.getString("course_id");
-				String name = rs.getString("name");
-				String credits = rs.getString("credits");
-				String syllabus = rs.getString("syllabus");
-				// Syllabus 내용이 너무 길어지면 ...으로 줄여서 표시
-				if (syllabus.length() > 37) {
-					syllabus = syllabus.substring(0, 37) + "...";
-				}
-				String courseInfo = String.format("%-5s | %-26s | %-3s학점 | %-40s", courseId, name, credits, syllabus); // 포맷팅
-																														// 적용
-				courseList.add(courseInfo);
+			int rowsAffected = pstmt.executeUpdate();
+			if (rowsAffected > 0) {
+				System.out.println("강의가 성공적으로 삭제되었습니다.");
+			} else {
+				System.out.println("강의 삭제에 실패했습니다.");
 			}
 
 		} catch (ClassNotFoundException e) {
@@ -447,8 +651,6 @@ public class ProfessorFrame extends Frame {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (rs != null)
-					rs.close();
 				if (pstmt != null)
 					pstmt.close();
 				if (conn != null)
@@ -457,6 +659,60 @@ public class ProfessorFrame extends Frame {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	// 수강 목록 로딩 메서드
+	private void loadCourses() {
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    try {
+	        Class.forName(JDBC_DRIVER);
+	        conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+	        String sql = "SELECT course_id, name, credits, syllabus, department_id, semester FROM courses WHERE professor_id = ?";
+	        pstmt = conn.prepareStatement(sql);
+	        pstmt.setInt(1, professorId);
+
+	        rs = pstmt.executeQuery();
+	        courseList.removeAll();
+
+	        while (rs.next()) {
+	            String courseId = rs.getString("course_id");
+	            String name = rs.getString("name");
+	            String credits = rs.getString("credits");
+	            String syllabus = rs.getString("syllabus");
+	            String building = rs.getString("department_id");
+	            String semester = rs.getString("semester");
+
+	            // Syllabus 내용이 너무 길어지면 ...으로 줄여서 표시
+	            if (syllabus.length() > 27) {
+	                syllabus = syllabus.substring(0, 27) + "...";
+	            }
+
+	            // 폭을 맞추기 위해 String.format() 사용
+	            String courseInfo = String.format("%-4s | %-18s | %-4s | %-6s | %-4s | %-32s",
+	                    courseId, name, credits, building, semester, syllabus);
+
+	            courseList.add(courseInfo);
+	        }
+
+	    } catch (ClassNotFoundException e) {
+	        System.err.println("드라이버 로딩 실패: " + e.getMessage());
+	        e.printStackTrace();
+	    } catch (SQLException e) {
+	        System.err.println("SQL 에러: " + e.getMessage());
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (pstmt != null) pstmt.close();
+	            if (conn != null) conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 
 	private Panel createGradePanel() {
