@@ -283,5 +283,23 @@ public class StudentDao {
 		}
 		return false;
 	}
+	
+	public boolean updateReviewFromGrade(Grade grade) {
+		String sql = "UPDATE grades SET enrollment_id = ?, grade = ?, student_review = ? WHERE grade_id = ?";
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, grade.getEnrollmentId());
+			pstmt.setDouble(2, grade.getGrade());
+			pstmt.setString(3, grade.getStudentReview());
+			pstmt.setInt(4, grade.getGradeId());
+
+			int affectedRows = pstmt.executeUpdate();
+			return affectedRows > 0; // 업데이트된 행이 있는 경우 true 반환
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 }

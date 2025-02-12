@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -103,7 +104,7 @@ public class StudentEnrollSpecPanel {
 
 		GridBagLayout gbl_centerPanel = new GridBagLayout();
 		gbl_centerPanel.rowHeights = new int[] { 40, 160, 40, 40, 160 };
-		gbl_centerPanel.columnWidths = new int[] { 800 };
+		gbl_centerPanel.columnWidths = new int[] { 820 };
 		JPanel centerPanel = new JPanel(gbl_centerPanel);
 		GridBagConstraints gbc_centerPanel = new GridBagConstraints();
 		gbc_centerPanel.gridy = 1;
@@ -123,12 +124,12 @@ public class StudentEnrollSpecPanel {
 		centerPanel.add(titleLabel1, gbc_titleLabel1);
 		{
 			// 2. 첫 번째 테이블
-			columnNames = new String[] { "강의번호", "강의명", "교수명", "학과", "학점", "학기", "요일", "강의시간" };
+			columnNames = new String[] { "강의번호", "강의명", "교수명", "학과", "학점", "요일", "강의시간" };
 			table1 = new JTable(new Object[1][8], columnNames);
 			table1.setGridColor(new Color(192, 192, 192));
 			table1.setShowVerticalLines(false);
-			table1.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
-			table1.setRowHeight(26);
+			table1.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
+			table1.setRowHeight(28);
 			table1.setIntercellSpacing(new Dimension(1, 1));
 			table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -286,7 +287,7 @@ public class StudentEnrollSpecPanel {
 
 		JTextArea textArea = new JTextArea(syllabus);
 		textArea.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
-		textArea.setEditable(false);
+		textArea.setEditable(true);
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
 

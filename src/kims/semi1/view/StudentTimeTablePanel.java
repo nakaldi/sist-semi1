@@ -95,7 +95,7 @@ public class StudentTimeTablePanel {
 
 		GridBagLayout gbl_centerPanel = new GridBagLayout();
 		gbl_centerPanel.rowHeights = new int[] { 40, 200, 40, 30, 80 };
-		gbl_centerPanel.columnWidths = new int[] { 800 };
+		gbl_centerPanel.columnWidths = new int[] { 700 };
 		JPanel centerPanel = new JPanel(gbl_centerPanel);
 		GridBagConstraints gbc_centerPanel = new GridBagConstraints();
 		gbc_centerPanel.gridy = 1;
@@ -124,13 +124,13 @@ public class StudentTimeTablePanel {
 		table1.setRowHeight(45);
 
 		GridBagConstraints gbc_table1 = new GridBagConstraints();
-		gbc_table1.fill = GridBagConstraints.VERTICAL;
+		gbc_table1.fill = GridBagConstraints.BOTH;
 		gbc_table1.anchor = GridBagConstraints.NORTH;
 		gbc_table1.gridx = 0;
 		JPanel timeTablePanel = new JPanel();
 
 		GridBagLayout gbl_timeTablePanel = new GridBagLayout();
-		gbl_timeTablePanel.columnWidths = new int[] { 100, 600, 100 };
+		gbl_timeTablePanel.columnWidths = new int[] { 700 };
 		gbl_timeTablePanel.rowHeights = new int[] { 450 };
 		gbl_timeTablePanel.columnWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
 		gbl_timeTablePanel.rowWeights = new double[] { 0.0 };
@@ -141,7 +141,7 @@ public class StudentTimeTablePanel {
 		GridBagConstraints gbc_table1_1 = new GridBagConstraints();
 		gbc_table1_1.fill = GridBagConstraints.BOTH;
 		gbc_table1_1.anchor = GridBagConstraints.NORTH;
-		gbc_table1_1.gridx = 1;
+		gbc_table1_1.gridx = 0;
 		gbc_table1_1.gridy = 0;
 		timeTablePanel.add(table1, gbc_table1_1);
 
@@ -165,7 +165,7 @@ public class StudentTimeTablePanel {
 		gbc_filterPanel.gridx = 0;
 		ButtonGroup group = new ButtonGroup();
 		GridBagLayout gbl_filterPanel = new GridBagLayout();
-		gbl_filterPanel.columnWidths = new int[] { 200, 70, 70, 70, 70, 100 };
+		gbl_filterPanel.columnWidths = new int[] { 200, 70, 70, 70, 70, 50 };
 		gbl_filterPanel.rowHeights = new int[] { 0 };
 		gbl_filterPanel.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		gbl_filterPanel.rowWeights = new double[] { 0.0 };
