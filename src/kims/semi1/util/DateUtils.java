@@ -16,7 +16,8 @@ public class DateUtils {
 	 */
 	public static LocalDate convertStringToLocalDate(String dateString) {
 		DateTimeFormatter[] formatters = new DateTimeFormatter[] { DateTimeFormatter.ofPattern("yyyyMMdd"),
-				DateTimeFormatter.ofPattern("yyyy-MM-dd") };
+				DateTimeFormatter.ofPattern("yyyy-MM-dd"), DateTimeFormatter.ofPattern("yyyy년MM월dd"),
+				DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"), DateTimeFormatter.ofPattern("yyyy MM dd") };
 
 		for (DateTimeFormatter formatter : formatters) {
 			try {

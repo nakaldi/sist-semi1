@@ -3,7 +3,6 @@
 .project
 .settings/
 .metadata/
-resources/
 
 # 빌드 결과물 무시
 /bin/
