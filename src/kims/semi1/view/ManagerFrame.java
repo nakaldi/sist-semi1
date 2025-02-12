@@ -15,6 +15,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -24,6 +25,8 @@ import javax.swing.table.DefaultTableModel;
 
 import kims.semi1.controller.ManagerController;
 import kims.semi1.dao.ClassScheduleDao;
+import kims.semi1.dao.GenericDao;
+import kims.semi1.model.Building;
 import kims.semi1.model.ClassSchedule;
 import kims.semi1.model.Course;
 import kims.semi1.model.CourseInfo;
@@ -35,8 +38,10 @@ import kims.semi1.model.Unit;
 // 1. 매니저관리 홈화면 
 public class ManagerFrame extends JFrame {
 	ManagerController managerController;
+	GenericDao genericDao;
 
 	public ManagerFrame() {
+		managerController = new ManagerController();
 		setTitle("학사관리시스템(교직원)");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(400, 400); // 홈 화면 크기 줄임
@@ -85,7 +90,6 @@ public class ManagerFrame extends JFrame {
 		// 버튼 이벤트 (시간표 관리 화면으로 이동)
 		btnLogout.addActionListener(e -> {
 			new LoginFrame();
-			dispose();
 		});
 		btnSchedule.addActionListener(e -> {
 			new ManagerScheduleFrame();
@@ -247,7 +251,6 @@ public class ManagerFrame extends JFrame {
 			// 버튼 이벤트 추가
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
-				dispose();
 			});
 
 			btnHome.addActionListener(e -> {
@@ -444,7 +447,6 @@ public class ManagerFrame extends JFrame {
 			// 버튼 이벤트 추가
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
-				dispose();
 			});
 
 			btnHome.addActionListener(e -> {
@@ -630,7 +632,6 @@ public class ManagerFrame extends JFrame {
 			// 버튼 이벤트 추가
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
-				dispose();
 			});
 
 			btnHome.addActionListener(e -> {
@@ -791,7 +792,6 @@ public class ManagerFrame extends JFrame {
 			// 버튼 이벤트 추가
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
-				dispose();
 			});
 
 			btnHome.addActionListener(e -> {
@@ -830,9 +830,9 @@ public class ManagerFrame extends JFrame {
 					tableModel.addRow(row);
 				});
 			});
-			btnSearch.addActionListener(e ->{
+			btnSearch.addActionListener(e -> {
 				tableModel.setRowCount(0);
-				List<CourseInfo> courseInfos = classScheduleDao.findUnitInfos(txtLectureID.getText());
+				List<CourseInfo> courseInfos = classScheduleDao.findClassRoomInfos(txtLectureID.getText());
 				courseInfos.stream().forEach(t -> {
 					Unit u = t.getUnit();
 					Department d = t.getDepartment();
@@ -841,7 +841,7 @@ public class ManagerFrame extends JFrame {
 					Object[] row = { u.getUnitId(), c.getName(), p.getName(), d.getName() };
 					tableModel.addRow(row);
 				});
-				
+
 			});
 			add(coursePanel);
 			setVisible(true);
@@ -967,7 +967,6 @@ public class ManagerFrame extends JFrame {
 			});
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
-				dispose();
 			});
 
 			add(BuildingPanel);
@@ -977,11 +976,14 @@ public class ManagerFrame extends JFrame {
 
 	/// 5-3.강의실 관리 안에서 (강의실 조회 / 등록 / 삭제)
 	public class ManagerUnitFrame extends JFrame {
+		private final ClassScheduleDao classScheduleDao;
 		private DefaultTableModel tableModel;
 		private JTable UnitTable;
 		private JTextField txtBuildingID, txtUnitID;
 
 		public ManagerUnitFrame() {
+			classScheduleDao = new ClassScheduleDao();
+			managerController = new ManagerController();
 			setTitle("학사관리시스템(교직원)");
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			setSize(1200, 800); // 크기 유지
@@ -1100,9 +1102,72 @@ public class ManagerFrame extends JFrame {
 
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
-				dispose();
 			});
 
+			btnViewAll.addActionListener(e -> {
+				tableModel.setRowCount(0);
+				List<CourseInfo> unitBuildingInfos = classScheduleDao.findUnitBuildingInfos();
+				unitBuildingInfos.stream().forEach(t -> {
+					Building b = t.getBuilding();
+					Unit u = t.getUnit();
+					Object[] row = { b.getBuildingId(), b.getName(), u.getUnitId() };
+					tableModel.addRow(row);
+				});
+			});
+
+			btnDelete.addActionListener(e -> {
+				int selectedRow = UnitTable.getSelectedRow(); // 선택된 행 가져오기
+				if (selectedRow != -1) { // 선택된 행이 있다면
+					String UnitId = tableModel.getValueAt(selectedRow, 0) + "";
+					managerController.deleteVeiwUnit(UnitId);
+					tableModel.removeRow(selectedRow); // 행 삭제
+				} else {
+					JOptionPane.showMessageDialog(BuildingPanel, "삭제실패.", "확인", JOptionPane.INFORMATION_MESSAGE);
+				}
+			});
+
+			btnSearch.addActionListener(e -> {
+				tableModel.setRowCount(0);
+				if ("".equals(txtBuildingID.getText().trim()) && txtUnitID.getText() != null) {
+					List<CourseInfo> unitBuildingInfos = classScheduleDao.findUnitInfos(txtUnitID.getText());
+					unitBuildingInfos.stream().forEach(t -> {
+						Building b = t.getBuilding();
+						Unit u = t.getUnit();
+						Object[] row = { b.getBuildingId(), b.getName(), u.getUnitId() };
+						tableModel.addRow(row);
+					});
+
+				} else if ("".equals(txtUnitID.getText().trim()) && txtBuildingID.getText() != null) {
+					List<CourseInfo> unitBuildingInfos = classScheduleDao
+							.findBuildingInfos(Integer.parseInt(txtBuildingID.getText()));
+					unitBuildingInfos.stream().forEach(t -> {
+						Building b = t.getBuilding();
+						Unit u = t.getUnit();
+						Object[] row = { b.getBuildingId(), b.getName(), u.getUnitId() };
+						tableModel.addRow(row);
+					});
+
+				} else {
+					List<CourseInfo> unitBuildingInfos = classScheduleDao
+							.findUnitBuildingInfos(Integer.parseInt(txtBuildingID.getText()), txtUnitID.getText());
+					unitBuildingInfos.stream().forEach(t -> {
+						Building b = t.getBuilding();
+						Unit u = t.getUnit();
+						Object[] row = { b.getBuildingId(), b.getName(), u.getUnitId() };
+						tableModel.addRow(row);
+					});
+				}
+			});
+
+			btnRegister.addActionListener(e -> {
+				int buildingId = Integer.parseInt(txtBuildingID.getText());
+				String unitId = txtUnitID.getText();
+				if (managerController.insertVeiwUnit(buildingId, unitId)) {
+					JOptionPane.showMessageDialog(BuildingPanel, "등록되었습니다.", "확인", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(BuildingPanel, "등록실패했습니다.", "확인", JOptionPane.INFORMATION_MESSAGE);
+				}
+			});
 			add(BuildingPanel);
 			setVisible(true);
 		}

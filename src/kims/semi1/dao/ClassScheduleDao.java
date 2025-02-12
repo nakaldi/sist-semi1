@@ -50,7 +50,7 @@ public class ClassScheduleDao {
 		return courseInfo;
 	}
 	
-	public List<CourseInfo> findUnitInfos(String unitId) {
+	public List<CourseInfo> findClassRoomInfos(String unitId) {
 		String sql = "select * " + "FROM courses c,professors p,departments d,class_schedules s, buildings b,units u "
 				+ " WHERE s.course_id = c.course_id " + "AND p.professor_id = c.professor_id "
 				+ "AND c.department_id = d.department_id " + "AND d.building_id = b.building_id " + "AND s.unit = u.unit "
@@ -112,6 +112,78 @@ public class ClassScheduleDao {
 		return professorInfo;
 	}
 	
+	public List<CourseInfo> findUnitBuildingInfos() {
+		String sql = "SELECT * FROM buildings b,units u where u.building_id = b.building_id ";
+		List<CourseInfo> unitBuildingInfo = new ArrayList<CourseInfo>();
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					Building b = new Building(rs.getInt(1), rs.getString(2));
+					Unit u = new Unit(rs.getString(3), rs.getInt(4));
+					unitBuildingInfo.add(new CourseInfo(null, null, null, null, b, u));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return unitBuildingInfo;
+	}
+	
+	public List<CourseInfo> findUnitInfos(String unit) {
+		String sql = "SELECT * FROM buildings b,units u where u.building_id = b.building_id and unit = ?";
+		List<CourseInfo> unitBuildingInfo = new ArrayList<CourseInfo>();
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, unit);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					Building b = new Building(rs.getInt(1), rs.getString(2));
+					Unit u = new Unit(rs.getString(3), rs.getInt(4));
+					unitBuildingInfo.add(new CourseInfo(null, null, null, null, b, u));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return unitBuildingInfo;
+	}
+	
+	public List<CourseInfo> findBuildingInfos(int buildingId) {
+		String sql = "select * FROM buildings b,units u where u.building_id = b.building_id and b.building_id = ?  ";
+		List<CourseInfo> unitBuildingInfo = new ArrayList<CourseInfo>();
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, buildingId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					Building b = new Building(rs.getInt(1), rs.getString(2));
+					Unit u = new Unit(rs.getString(3), rs.getInt(4));
+					unitBuildingInfo.add(new CourseInfo(null, null, null, null, b, u));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return unitBuildingInfo;
+	}
+	
+	public List<CourseInfo> findUnitBuildingInfos(int buildingId , String unit) {
+		String sql = " select * FROM buildings b,units u where u.building_id = b.building_id and unit = ? and b.building_id = ?   ";
+		List<CourseInfo> unitBuildingInfo = new ArrayList<CourseInfo>();
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1,buildingId+"-"+ unit);
+			pstmt.setInt(2, buildingId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					Building b = new Building(rs.getInt(1), rs.getString(2));
+					Unit u = new Unit(rs.getString(3), rs.getInt(4));
+					unitBuildingInfo.add(new CourseInfo(null, null, null, null, b, u));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return unitBuildingInfo;
+	}
+
 	public boolean insertClassSchedule(ClassSchedule classSchedule) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;

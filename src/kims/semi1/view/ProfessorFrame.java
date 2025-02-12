@@ -737,8 +737,12 @@ public class ProfessorFrame extends Frame {
 				}
 
 				// 폭을 맞추기 위해 String.format() 사용
-				String courseInfo = String.format("%-4s | %-18s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
-						building, semester, syllabus);
+		        String courseInfo = padRight(courseId, 8) 
+                        + padRight(name, 20) 
+                        + padRight(credits, 7) 
+                        + padRight(building, 14) 
+                        + padRight(semester, 7) 
+                        + syllabus;
 
 				courseList.add(courseInfo);
 			}
@@ -763,6 +767,16 @@ public class ProfessorFrame extends Frame {
 		}
 	}
 
+    public static String padRight(String str, int n) {
+        // 한글과 영어를 고려하여 문자열 길이 맞추기
+        int paddingLength = n - str.length();
+        StringBuilder paddedString = new StringBuilder(str);
+        for (int i = 0; i < paddingLength; i++) {
+            paddedString.append(" ");
+        }
+        return paddedString.toString();
+    }
+    
 	private Panel createGradePanel() {
 		Panel panel = new Panel(new BorderLayout());
 		panel.setBackground(Color.WHITE);
