@@ -62,7 +62,6 @@ public class LoginController {
 				ProfessorFrame pf = new ProfessorFrame(loginFrame, currentUserId);
 
 				ProfessorController professorController = new ProfessorController(currentUserId, pf);
-				pf.setProfessorController(professorController);
 
 			} else if (Integer.toString(currentUserId).charAt(4) == '3') {
 				loginFrame.dispose();

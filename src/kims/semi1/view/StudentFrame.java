@@ -30,8 +30,8 @@ public class StudentFrame {
 	private Panel mainPanel;
 	private JFrame frame;
 	private StudentController studentController;
-	ImageIcon icon = new ImageIcon("/resources/button_white.png");
-	ImageIcon selectedIcon = new ImageIcon("/resources/button_clicked.png");
+	private static final ImageIcon icon = new ImageIcon("resources/button_white.png");
+	private static final ImageIcon selectedIcon = new ImageIcon("resources/button_clicked.png");
 	JPanel sidePanel;
 	public StudentEnrollmentPanel studentEnrollmentPanel;
 	public StudentMypagePanel studentMypagePanel;

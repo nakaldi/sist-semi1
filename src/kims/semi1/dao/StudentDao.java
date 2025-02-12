@@ -188,13 +188,20 @@ public class StudentDao {
 	}
 
 	public List<Enrollment> findEnrollmentInfosByStudentIdAndSemester(int studentId, String semester) {
-		String sql = "select * from (((((((courses c inner join enrollments e on c.course_id = e.course_id) "
+		String sql = "select c.course_id, c.name as course_name, c.professor_id, c.department_id, c.credits, c.semester, c.syllabus, "
+				+ "p.professor_id, p.name as professor_name, p.phone as professor_phone, p.birth_date, p.email, p.password, p.department_id as professor_department_id, p.hire_date, "
+				+ "d.department_id, d.name as department_name, d.phone as department_phone, d.building_id, "
+				+ "s.schedule_id, s.course_id as schedule_course_id, s.day_of_week, s.start_time, s.end_time, s.unit as schedule_unit, "
+				+ "b.building_id, b.name as building_name, " + "u.unit, u.building_id as unit_building_id, "
+				+ "g.grade_id, g.enrollment_id, g.grade, g.student_review, "
+				+ "e.enrollment_id, e.student_id, e.course_id as enrollment_course_id "
+				+ "from (((((((courses c inner join enrollments e on c.course_id = e.course_id) "
 				+ "inner join professors p on c.professor_id = p.professor_id) "
 				+ "inner join departments d on c.department_id = d.department_id) "
 				+ "left outer join class_schedules s on c.course_id = s.course_id) "
 				+ "left outer join buildings b on d.building_id = b.building_id) "
 				+ "left outer join grades g on e.enrollment_id = g.enrollment_id) "
-				+ "left outer join units u on u.unit = s.unit) " + "where e.student_id = ? and c.semester = ? ";
+				+ "left outer join units u on u.unit = s.unit) " + "where e.student_id = ? and c.semester = ?";
 
 		List<Enrollment> enrollmentInfos = new ArrayList<Enrollment>();
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -202,26 +209,26 @@ public class StudentDao {
 			pstmt.setString(2, semester);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				while (rs.next()) {
-					Course c = new Course(rs.getInt("course_id"), rs.getString("name"), rs.getInt("professor_id"),
-							rs.getInt("department_id"), rs.getString("credits"), rs.getString("semester"),
-							rs.getString("syllabus"));
-					Professor p = new Professor(rs.getInt("professor_id"), rs.getString("name"), rs.getString("phone"),
-							rs.getDate("birth_date").toLocalDate(), rs.getString("email"), rs.getString("password"),
-							rs.getInt("department_id"), rs.getDate("hire_date").toLocalDate());
-					Department d = new Department(rs.getInt("department_id"), rs.getString("name"),
-							rs.getString("phone"), rs.getInt("building_id"));
-					ClassSchedule s = new ClassSchedule(rs.getInt("schedule_id"), rs.getInt("course_id"),
+					Course c = new Course(rs.getInt("course_id"), rs.getString("course_name"),
+							rs.getInt("professor_id"), rs.getInt("department_id"), rs.getString("credits"),
+							rs.getString("semester"), rs.getString("syllabus"));
+					Professor p = new Professor(rs.getInt("professor_id"), rs.getString("professor_name"),
+							rs.getString("professor_phone"), rs.getDate("birth_date").toLocalDate(),
+							rs.getString("email"), rs.getString("password"), rs.getInt("professor_department_id"),
+							rs.getDate("hire_date").toLocalDate());
+					Department d = new Department(rs.getInt("department_id"), rs.getString("department_name"),
+							rs.getString("department_phone"), rs.getInt("building_id"));
+					ClassSchedule s = new ClassSchedule(rs.getInt("schedule_id"), rs.getInt("schedule_course_id"),
 							rs.getString("day_of_week"), rs.getString("start_time"), rs.getString("end_time"),
-							rs.getString("unit"));
-					Building b = new Building(rs.getInt("building_id"), rs.getString("name"));
-					Unit u = new Unit(rs.getString("unit"), rs.getInt("building_id"));
+							rs.getString("schedule_unit"));
+					Building b = new Building(rs.getInt("building_id"), rs.getString("building_name"));
+					Unit u = new Unit(rs.getString("unit"), rs.getInt("unit_building_id"));
 					Grade g = new Grade(rs.getInt("grade_id"), rs.getInt("enrollment_id"), rs.getDouble("grade"),
 							rs.getString("student_review"));
 					CourseInfo courseInfo = new CourseInfo(c, d, s, p, b, u);
 					enrollmentInfos.add(new Enrollment(rs.getInt("enrollment_id"), rs.getInt("student_id"),
-							rs.getInt("course_id"), courseInfo, g));
+							rs.getInt("enrollment_course_id"), courseInfo, g));
 				}
-
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -245,7 +252,6 @@ public class StudentDao {
 		return false;
 	}
 
-	// Enrollments 테이블에 저장
 	public boolean existsEnrollmentByStudentIdAndCourseId(int studentId, int courseId) {
 		String sql = "select * from enrollments where student_id = ? AND course_id = ?";
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {

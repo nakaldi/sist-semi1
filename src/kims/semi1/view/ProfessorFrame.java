@@ -26,8 +26,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import kims.semi1.controller.ProfessorController;
-
 public class ProfessorFrame extends Frame {
 
 	private CardLayout cardLayout;
@@ -59,9 +57,8 @@ public class ProfessorFrame extends Frame {
 
 	private String selectedCourseId;
 	private ActionListener registerActionListener;
-
-	// 프로페서컨트롤러 사용을 위한 필드
-	ProfessorController professorController;
+	
+	
 
 	public ProfessorFrame(LoginFrame loginFrame, int professorId) {
 		this.loginFrame = loginFrame;
@@ -96,10 +93,6 @@ public class ProfessorFrame extends Frame {
 		setVisible(true);
 	}
 
-	// 컨트롤러 사용을 위한 메서드
-	public void setProfessorController(ProfessorController professorController) {
-		this.professorController = professorController;
-	}
 
 	// 교수 정보 로딩 메서드
 	private void loadProfessorInfo() {
