@@ -14,6 +14,7 @@ import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.List;
 import java.awt.Panel;
+import java.awt.ScrollPane;
 import java.awt.TextField;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -31,7 +32,7 @@ public class ProfessorFrame extends Frame {
 	private CardLayout cardLayout;
 	private Panel mainPanel;
 	private Panel myPagePanel, sugangPanel, gradePanel;
-	private Button btnLogout;
+	private Button btnLogout, btnTimetable;
 	private LoginFrame loginFrame;
 	private Panel myPageViewPanel;
 	TextField txtName, txtBirth, txtContact, txtMajor, txtEmail, txtHireDate, txtPw;
@@ -57,8 +58,7 @@ public class ProfessorFrame extends Frame {
 
 	private String selectedCourseId;
 	private ActionListener registerActionListener;
-	
-	
+	private Panel timetablePanel;
 
 	public ProfessorFrame(LoginFrame loginFrame, int professorId) {
 		this.loginFrame = loginFrame;
@@ -82,17 +82,18 @@ public class ProfessorFrame extends Frame {
 		myPagePanel = createMyPagePanel();
 		sugangPanel = createSugangPanel();
 		gradePanel = createGradePanel();
+		timetablePanel = createTimetablePanel();
 
 		mainPanel.add(myPagePanel, "myPage");
 		mainPanel.add(sugangPanel, "sugang");
 		mainPanel.add(gradePanel, "grade");
+		mainPanel.add(timetablePanel, "timetable");
 
 		add(mainPanel, BorderLayout.CENTER);
 		loadProfessorInfo(); // 교수 정보 로딩
 
 		setVisible(true);
 	}
-
 
 	// 교수 정보 로딩 메서드
 	private void loadProfessorInfo() {
@@ -257,12 +258,14 @@ public class ProfessorFrame extends Frame {
 		btnMyPage = new Button("마이페이지");
 		btnSugang = new Button("수강관리");
 		btnGrade = new Button("성적관리");
+		btnTimetable = new Button("시간표 조회");
 
 		btnLogout = new Button("로그아웃");
 
 		btnMyPage.addActionListener(e -> cardLayout.show(mainPanel, "myPage"));
 		btnSugang.addActionListener(e -> cardLayout.show(mainPanel, "sugang"));
 		btnGrade.addActionListener(e -> cardLayout.show(mainPanel, "grade"));
+		btnTimetable.addActionListener(e -> cardLayout.show(mainPanel, "timetable"));
 
 		btnLogout.addActionListener(new ActionListener() {
 			@Override
@@ -283,9 +286,87 @@ public class ProfessorFrame extends Frame {
 		panel.add(btnMyPage);
 		panel.add(btnSugang);
 		panel.add(btnGrade);
+		panel.add(btnTimetable);
 		panel.add(btnLogout);
 
 		return panel;
+	}
+
+	private Panel createTimetablePanel() {
+		timetablePanel = new Panel(new BorderLayout());
+		timetablePanel.setBackground(Color.WHITE);
+
+		// 시간표 데이터를 표시할 Panel 생성
+		Panel timetableDisplayPanel = new Panel(new GridLayout(0, 1)); // 행 자동 조정, 열 1개
+		timetableDisplayPanel.setBackground(Color.WHITE);
+
+		// 시간표 데이터 로딩 및 UI에 표시
+		loadTimetableData(timetableDisplayPanel);
+
+		// 스크롤 기능 추가
+		ScrollPane scrollPane = new ScrollPane();
+		scrollPane.add(timetableDisplayPanel);
+		timetablePanel.add(scrollPane, BorderLayout.CENTER);
+
+		return timetablePanel;
+	}
+
+	private void loadTimetableData(Panel displayPanel) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+			// SQL 쿼리 실행
+			String sql = "SELECT cs.day_of_week, cs.start_time, cs.end_time, c.name AS course_name "
+					+ "FROM class_schedules cs " + "JOIN courses c ON cs.course_id = c.course_id "
+					+ "WHERE c.professor_id = ? " + "ORDER BY cs.day_of_week, cs.start_time";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, professorId);
+			rs = pstmt.executeQuery();
+
+			// 기존 내용 지우기
+			displayPanel.removeAll();
+
+			while (rs.next()) {
+				String dayOfWeek = rs.getString("day_of_week");
+				String startTime = rs.getString("start_time");
+				String endTime = rs.getString("end_time");
+				String courseName = rs.getString("course_name");
+
+				// 시간표 정보 문자열 생성
+				String timetableInfo = String.format("%s: %s-%s, %s", dayOfWeek, startTime, endTime, courseName);
+
+				// Label 생성 및 Panel에 추가
+				Label label = new Label(timetableInfo);
+				displayPanel.add(label);
+			}
+
+			// UI 갱신
+			displayPanel.revalidate();
+			displayPanel.repaint();
+
+		} catch (ClassNotFoundException e) {
+			System.err.println("드라이버 로딩 실패: " + e.getMessage());
+			e.printStackTrace();
+		} catch (SQLException e) {
+			System.err.println("SQL 에러: " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private Panel createMyPagePanel() {
@@ -737,7 +818,7 @@ public class ProfessorFrame extends Frame {
 				}
 
 				// 폭을 맞추기 위해 String.format() 사용
-				String courseInfo = String.format("%-4s | %-18s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
+				String courseInfo = String.format("%-4s | %-30s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
 						building, semester, syllabus);
 
 				courseList.add(courseInfo);
@@ -852,56 +933,56 @@ public class ProfessorFrame extends Frame {
 
 		listPanel.add(gradeList, BorderLayout.CENTER); // 리스트를 중앙에 배치
 		listPanel.add(listButtonPanel, BorderLayout.SOUTH); // 버튼을 하단에 배치
-		
+
 		// 4. 액션 리스너 등록
 		btnGradeModify.addActionListener(new ActionListener() {
-		    @Override
-		    public void actionPerformed(ActionEvent e) {
-		        // 1. 리스트에서 선택된 성적 정보 가져오기
-		        int selectedIndex = gradeList.getSelectedIndex();
-		        if (selectedIndex == -1) {
-		            System.out.println("수정할 성적을 선택해주세요.");
-		            return;
-		        }
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// 1. 리스트에서 선택된 성적 정보 가져오기
+				int selectedIndex = gradeList.getSelectedIndex();
+				if (selectedIndex == -1) {
+					System.out.println("수정할 성적을 선택해주세요.");
+					return;
+				}
 
-		        String selectedGrade = gradeList.getItem(selectedIndex);
-		        String[] gradeInfo = selectedGrade.split("\\|");
+				String selectedGrade = gradeList.getItem(selectedIndex);
+				String[] gradeInfo = selectedGrade.split("\\|");
 
-		        // gradeInfo 배열의 길이가 예상대로인지 확인
-		        if (gradeInfo.length < 4) {
-		            System.err.println("오류: 잘못된 성적 데이터 형식입니다.");
-		            return;
-		        }
+				// gradeInfo 배열의 길이가 예상대로인지 확인
+				if (gradeInfo.length < 4) {
+					System.err.println("오류: 잘못된 성적 데이터 형식입니다.");
+					return;
+				}
 
-		        // 2. 팝업창 생성 및 표시
-		        String courseId = gradeInfo[0].trim();
-		        String studentName = gradeInfo[1].trim();
-		        String currentGrade = gradeInfo[2].trim();
-		        String student_review = gradeInfo[3].trim();
+				// 2. 팝업창 생성 및 표시
+				String courseId = gradeInfo[0].trim();
+				String studentName = gradeInfo[1].trim();
+				String currentGrade = gradeInfo[2].trim();
+				String student_review = gradeInfo[3].trim();
 
-		        openGradeModifyPopup(courseId, studentName, currentGrade, student_review);
+				openGradeModifyPopup(courseId, studentName, currentGrade, student_review);
 
-		    }
+			}
 		});
 		btnGradeSearchAll.addActionListener(new ActionListener() {
-		    @Override
-		    public void actionPerformed(ActionEvent e) {
-		        loadGradesDataSorted(); // 성적순으로 조회
-		    }
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				loadGradesDataSorted(); // 성적순으로 조회
+			}
 		});
 		btnGradeRegister.addActionListener(new ActionListener() {
-		    @Override
-		    public void actionPerformed(ActionEvent e) {
-		        registerGrade(); // 성적 등록 메서드 호출
-		    }
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				registerGrade(); // 성적 등록 메서드 호출
+			}
 		});
-		
+
 		btnGradeSearch.addActionListener(new ActionListener() {
-		    @Override
-		    public void actionPerformed(ActionEvent e) {
-		        // 검색 팝업창 생성 및 표시
-		        openGradeSearchPopup();
-		    }
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// 검색 팝업창 생성 및 표시
+				openGradeSearchPopup();
+			}
 		});
 
 		// grades 테이블 데이터 로딩
@@ -914,221 +995,227 @@ public class ProfessorFrame extends Frame {
 
 		return panel;
 	}
-	
+
 	private void loadGradesDataSorted() {
-	    Connection conn = null;
-	    PreparedStatement pstmt = null;
-	    ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-	    try {
-	        Class.forName(JDBC_DRIVER);
-	        conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		try {
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
-	        // SQL 쿼리 수정: 성적을 기준으로 내림차순 정렬
-	        String sql = "SELECT c.course_id, s.name AS student_name, g.grade, g.student_review "
-	                + "FROM grades g, enrollments e, courses c, students s " + "WHERE " + "c.professor_id = ? "
-	                + "AND g.enrollment_id = e.enrollment_id " + "AND e.course_id = c.course_id "
-	                + "AND e.student_id = s.student_id " + "ORDER BY g.grade DESC"; // 성적 내림차순 정렬
-	        pstmt = conn.prepareStatement(sql);
-	        pstmt.setInt(1, professorId);
-	        rs = pstmt.executeQuery();
+			// SQL 쿼리 수정: 성적을 기준으로 내림차순 정렬
+			String sql = "SELECT c.course_id, s.name AS student_name, g.grade, g.student_review "
+					+ "FROM grades g, enrollments e, courses c, students s " + "WHERE " + "c.professor_id = ? "
+					+ "AND g.enrollment_id = e.enrollment_id " + "AND e.course_id = c.course_id "
+					+ "AND e.student_id = s.student_id " + "ORDER BY g.grade DESC"; // 성적 내림차순 정렬
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, professorId);
+			rs = pstmt.executeQuery();
 
-	        gradeList.removeAll(); // 기존 리스트 초기화
+			gradeList.removeAll(); // 기존 리스트 초기화
 
-	        while (rs.next()) {
-	            String courseId = rs.getString("course_id");
-	            String studentName = rs.getString("student_name");
-	            String grade = rs.getString("grade");
-	            String student_review = rs.getString("student_review");
+			while (rs.next()) {
+				String courseId = rs.getString("course_id");
+				String studentName = rs.getString("student_name");
+				String grade = rs.getString("grade");
+				String student_review = rs.getString("student_review");
 
-	            // 리스트에 표시할 문자열 생성
-	            String gradeInfo = String.format("%-10s | %-15s | %-5s | %-10s", courseId, studentName, grade,
-	                    student_review);
-	            gradeList.add(gradeInfo);
-	        }
+				// 리스트에 표시할 문자열 생성
+				String gradeInfo = String.format("%-10s | %-15s | %-5s | %-10s", courseId, studentName, grade,
+						student_review);
+				gradeList.add(gradeInfo);
+			}
 
-	    } catch (ClassNotFoundException e) {
-	        System.err.println("드라이버 로딩 실패: " + e.getMessage());
-	        e.printStackTrace();
-	    } catch (SQLException e) {
-	        System.err.println("SQL 에러: " + e.getMessage());
-	        e.printStackTrace();
-	    } finally {
-	        try {
-	            if (rs != null)
-	                rs.close();
-	            if (pstmt != null)
-	                pstmt.close();
-	            if (conn != null)
-	                conn.close();
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        }
-	    }
+		} catch (ClassNotFoundException e) {
+			System.err.println("드라이버 로딩 실패: " + e.getMessage());
+			e.printStackTrace();
+		} catch (SQLException e) {
+			System.err.println("SQL 에러: " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-	
+
 	private void openGradeSearchPopup() {
-	    GradeSearchPopup popup = new GradeSearchPopup(this, "성적 검색", true);
-	    popup.setVisible(true);
+		GradeSearchPopup popup = new GradeSearchPopup(this, "성적 검색", true);
+		popup.setVisible(true);
 	}
 
 	// GradeSearchPopup 클래스 정의
 	class GradeSearchPopup extends Dialog implements ActionListener {
-	    private TextField txtSearchCourseID, txtSearchStudentName, txtSearchStudentID;
-	    private Button btnSearch, btnCancel;
-	    private ProfessorFrame parentFrame;
+		private TextField txtSearchCourseID, txtSearchStudentName, txtSearchStudentID;
+		private Button btnSearch, btnCancel;
+		private ProfessorFrame parentFrame;
 
-	    public GradeSearchPopup(ProfessorFrame parentFrame, String title, boolean modal) {
-	        super(parentFrame, title, modal);
-	        this.parentFrame = parentFrame;
+		public GradeSearchPopup(ProfessorFrame parentFrame, String title, boolean modal) {
+			super(parentFrame, title, modal);
+			this.parentFrame = parentFrame;
 
-	        setSize(400, 200);
-	        setLayout(new GridLayout(4, 2));
+			setSize(400, 200);
+			setLayout(new GridLayout(4, 2));
 
-	        Label lblSearchCourseID = new Label("강의 ID:");
-	        txtSearchCourseID = new TextField(20);
-	        Label lblSearchStudentName = new Label("학생 이름:");
-	        txtSearchStudentName = new TextField(20);
-	        Label lblSearchStudentID = new Label("학생 ID:");
-	        txtSearchStudentID = new TextField(20);
+			Label lblSearchCourseID = new Label("강의 ID:");
+			txtSearchCourseID = new TextField(20);
+			Label lblSearchStudentName = new Label("학생 이름:");
+			txtSearchStudentName = new TextField(20);
+			Label lblSearchStudentID = new Label("학생 ID:");
+			txtSearchStudentID = new TextField(20);
 
-	        btnSearch = new Button("검색");
-	        btnCancel = new Button("취소");
+			btnSearch = new Button("검색");
+			btnCancel = new Button("취소");
 
-	        add(lblSearchCourseID);
-	        add(txtSearchCourseID);
-	        add(lblSearchStudentName);
-	        add(txtSearchStudentName);
-	        add(lblSearchStudentID);
-	        add(txtSearchStudentID);
-	        add(btnSearch);
-	        add(btnCancel);
+			add(lblSearchCourseID);
+			add(txtSearchCourseID);
+			add(lblSearchStudentName);
+			add(txtSearchStudentName);
+			add(lblSearchStudentID);
+			add(txtSearchStudentID);
+			add(btnSearch);
+			add(btnCancel);
 
-	        btnSearch.addActionListener(this);
-	        btnCancel.addActionListener(this);
+			btnSearch.addActionListener(this);
+			btnCancel.addActionListener(this);
 
-	        // 팝업 창 닫기
-	        addWindowListener(new WindowAdapter() {
-	            @Override
-	            public void windowClosing(WindowEvent e) {
-	                dispose();
-	            }
-	        });
+			// 팝업 창 닫기
+			addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					dispose();
+				}
+			});
 
-	        // 프레임 가운데 배치
-	        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-	        Dimension frameSize = getSize();
-	        setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
+			// 프레임 가운데 배치
+			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			Dimension frameSize = getSize();
+			setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
 
-	        setVisible(true);
-	    }
+			setVisible(true);
+		}
 
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-	        if (e.getSource() == btnSearch) {
-	            // 1. 검색 조건 가져오기
-	            String courseID = txtSearchCourseID.getText();
-	            String studentName = txtSearchStudentName.getText();
-	            String studentID = txtSearchStudentID.getText();
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == btnSearch) {
+				// 1. 검색 조건 가져오기
+				String courseID = txtSearchCourseID.getText();
+				String studentName = txtSearchStudentName.getText();
+				String studentID = txtSearchStudentID.getText();
 
-	            // 2. 검색 수행
-	            performGradeSearch(courseID, studentName, studentID);
+				// 2. 검색 수행
+				performGradeSearch(courseID, studentName, studentID);
 
-	            // 3. 팝업 닫기
-	            dispose();
-	        } else if (e.getSource() == btnCancel) {
-	            // 취소 버튼 클릭 시 동작
-	            dispose(); // 팝업 닫기
-	        }
-	    }
-	    
-	 // 검색 수행 메서드
-	    private void performGradeSearch(String courseID, String studentName, String studentID) {
-	        Connection conn = null;
-	        PreparedStatement pstmt = null;
-	        ResultSet rs = null;
+				// 3. 팝업 닫기
+				dispose();
+			} else if (e.getSource() == btnCancel) {
+				// 취소 버튼 클릭 시 동작
+				dispose(); // 팝업 닫기
+			}
+		}
 
-	        try {
-	            Class.forName(JDBC_DRIVER);
-	            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		// 검색 수행 메서드
+		private void performGradeSearch(String courseID, String studentName, String studentID) {
+			Connection conn = null;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
 
-	            // 1. SQL 쿼리 생성 (검색 조건에 따라 동적으로 쿼리 생성)
-	            StringBuilder sql = new StringBuilder("SELECT c.course_id, s.name AS student_name, g.grade, g.student_review " +
-	                    "FROM grades g, enrollments e, courses c, students s " +
-	                    "WHERE c.professor_id = ? " + // 현재 로그인한 교수의 강의만 검색
-	                    "AND g.enrollment_id = e.enrollment_id " +
-	                    "AND e.course_id = c.course_id " +
-	                    "AND e.student_id = s.student_id ");
+			try {
+				Class.forName(JDBC_DRIVER);
+				conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
-	            // 강의 ID 조건 추가
-	            if (courseID != null && !courseID.isEmpty()) {
-	                sql.append("AND c.course_id LIKE ? ");
-	            }
+				// 1. SQL 쿼리 생성 (검색 조건에 따라 동적으로 쿼리 생성)
+				StringBuilder sql = new StringBuilder(
+						"SELECT c.course_id, s.name AS student_name, g.grade, g.student_review "
+								+ "FROM grades g, enrollments e, courses c, students s " + "WHERE c.professor_id = ? " + // 현재
+																															// 로그인한
+																															// 교수의
+																															// 강의만
+																															// 검색
+								"AND g.enrollment_id = e.enrollment_id " + "AND e.course_id = c.course_id "
+								+ "AND e.student_id = s.student_id ");
 
-	            // 학생 이름 조건 추가
-	            if (studentName != null && !studentName.isEmpty()) {
-	                sql.append("AND s.name LIKE ? ");
-	            }
+				// 강의 ID 조건 추가
+				if (courseID != null && !courseID.isEmpty()) {
+					sql.append("AND c.course_id LIKE ? ");
+				}
 
-	            // 학생 ID 조건 추가
-	            if (studentID != null && !studentID.isEmpty()) {
-	                sql.append("AND s.student_id LIKE ? ");
-	            }
+				// 학생 이름 조건 추가
+				if (studentName != null && !studentName.isEmpty()) {
+					sql.append("AND s.name LIKE ? ");
+				}
 
-	            // 2. PreparedStatement 생성 및 파라미터 설정
-	            pstmt = conn.prepareStatement(sql.toString());
-	            int parameterIndex = 1; // 시작 인덱스
-	            pstmt.setInt(parameterIndex++, parentFrame.getProfessorId()); // 교수 ID 설정
+				// 학생 ID 조건 추가
+				if (studentID != null && !studentID.isEmpty()) {
+					sql.append("AND s.student_id LIKE ? ");
+				}
 
-	            // 동적으로 추가된 파라미터 설정
-	            if (courseID != null && !courseID.isEmpty()) {
-	                pstmt.setString(parameterIndex++, "%" + courseID + "%");
-	            }
+				// 2. PreparedStatement 생성 및 파라미터 설정
+				pstmt = conn.prepareStatement(sql.toString());
+				int parameterIndex = 1; // 시작 인덱스
+				pstmt.setInt(parameterIndex++, parentFrame.getProfessorId()); // 교수 ID 설정
 
-	            if (studentName != null && !studentName.isEmpty()) {
-	                pstmt.setString(parameterIndex++, "%" + studentName + "%");
-	            }
+				// 동적으로 추가된 파라미터 설정
+				if (courseID != null && !courseID.isEmpty()) {
+					pstmt.setString(parameterIndex++, "%" + courseID + "%");
+				}
 
-	            if (studentID != null && !studentID.isEmpty()) {
-	                pstmt.setString(parameterIndex++, "%" + studentID + "%");
-	            }
+				if (studentName != null && !studentName.isEmpty()) {
+					pstmt.setString(parameterIndex++, "%" + studentName + "%");
+				}
 
-	            // 3. 쿼리 실행 및 결과 처리
-	            rs = pstmt.executeQuery();
-	            gradeList.removeAll(); // 기존 리스트 초기화
+				if (studentID != null && !studentID.isEmpty()) {
+					pstmt.setString(parameterIndex++, "%" + studentID + "%");
+				}
 
-	            while (rs.next()) {
-	                String courseId = rs.getString("course_id");
-	                String student_Name = rs.getString("student_name");
-	                String grade = rs.getString("grade");
-	                String student_review = rs.getString("student_review");
+				// 3. 쿼리 실행 및 결과 처리
+				rs = pstmt.executeQuery();
+				gradeList.removeAll(); // 기존 리스트 초기화
 
-	                // 리스트에 표시할 문자열 생성
-	                String gradeInfo = String.format("%-10s | %-15s | %-5s | %-10s", courseId, student_Name, grade, student_review);
-	                gradeList.add(gradeInfo);
-	            }
+				while (rs.next()) {
+					String courseId = rs.getString("course_id");
+					String student_Name = rs.getString("student_name");
+					String grade = rs.getString("grade");
+					String student_review = rs.getString("student_review");
 
-	        } catch (ClassNotFoundException e) {
-	            System.err.println("드라이버 로딩 실패: " + e.getMessage());
-	            e.printStackTrace();
-	        } catch (SQLException e) {
-	            System.err.println("SQL 에러: " + e.getMessage());
-	            e.printStackTrace();
-	        } finally {
-	            try {
-	                if (rs != null) rs.close();
-	                if (pstmt != null) pstmt.close();
-	                if (conn != null) conn.close();
-	            } catch (SQLException e) {
-	                e.printStackTrace();
-	            }
-	        }
-	    }
-	    
+					// 리스트에 표시할 문자열 생성
+					String gradeInfo = String.format("%-10s | %-15s | %-5s | %-10s", courseId, student_Name, grade,
+							student_review);
+					gradeList.add(gradeInfo);
+				}
 
-	    public void setVisible(boolean b) {
-	        super.setVisible(b);
-	    }
+			} catch (ClassNotFoundException e) {
+				System.err.println("드라이버 로딩 실패: " + e.getMessage());
+				e.printStackTrace();
+			} catch (SQLException e) {
+				System.err.println("SQL 에러: " + e.getMessage());
+				e.printStackTrace();
+			} finally {
+				try {
+					if (rs != null)
+						rs.close();
+					if (pstmt != null)
+						pstmt.close();
+					if (conn != null)
+						conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		public void setVisible(boolean b) {
+			super.setVisible(b);
+		}
 	}
 
 	private void clearGradeInputFields() {
