@@ -34,12 +34,13 @@ import javax.swing.table.TableRowSorter;
 
 import kims.semi1.controller.StudentController;
 
-public class StudentEnrollSpecPanel {
+public class StudentGradePanel {
 	JFrame frame;
 	StudentController studentController;
 	public JLabel titleLabel1;
 	public JTable table1;
 
+	private Object[][] courseInfos;
 	private Object[][] enrollmentInfos;
 	TableRowSorter<DefaultTableModel> sorter;
 
@@ -50,12 +51,12 @@ public class StudentEnrollSpecPanel {
 	private JButton btnConditionSearchButton;
 	private String[] columnNames;
 
-	public StudentEnrollSpecPanel(JFrame frame, StudentController studentController) {
+	public StudentGradePanel(JFrame frame, StudentController studentController) {
 		this.studentController = studentController;
 		this.frame = frame;
 	}
 
-	public Panel createEnrollSpecPanel() {
+	public Panel createGradePanel() {
 		Panel innerPanel = new Panel();
 		GridBagLayout gbl_innerPanel = new GridBagLayout();
 		gbl_innerPanel.columnWidths = new int[] { 850 };
@@ -80,7 +81,7 @@ public class StudentEnrollSpecPanel {
 		gbl_headPanel.rowWeights = new double[] { 0.0, 0.0 };
 		headPanel.setLayout(gbl_headPanel);
 
-		JLabel headTitleLabel = new JLabel("수강 현황");
+		JLabel headTitleLabel = new JLabel("성적 확인");
 		headTitleLabel.setBackground(new Color(0, 0, 0));
 		headTitleLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 28));
 		GridBagConstraints gbc_headTitleLabel = new GridBagConstraints();
@@ -123,7 +124,7 @@ public class StudentEnrollSpecPanel {
 		centerPanel.add(titleLabel1, gbc_titleLabel1);
 		{
 			// 2. 첫 번째 테이블
-			columnNames = new String[] { "강의번호", "강의명", "교수명", "학과", "학점", "학기", "요일", "강의시간" };
+			columnNames = new String[] { "강의번호", "강의명", "교수명", "학과", "학점", "학기", "평가 학점"};
 			table1 = new JTable(new Object[1][8], columnNames);
 			table1.setGridColor(new Color(192, 192, 192));
 			table1.setShowVerticalLines(false);
@@ -253,7 +254,7 @@ public class StudentEnrollSpecPanel {
 
 	public void setTablesByRadioButton() {
 		String semester = radio1.isSelected() ? "1" : "2";
-		titleLabel1.setText(semester + "학기 수강 목록");
+		titleLabel1.setText(semester + "학기 성적 목록");
 		enrollmentInfos = studentController.searchEnrollmentInfosToArray(semester);
 		setEnrollmentInfoTable(enrollmentInfos, columnNames);
 	}
@@ -291,60 +292,20 @@ public class StudentEnrollSpecPanel {
 		textArea.setWrapStyleWord(true);
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
-		JButton saveButton = new JButton("수강 취소");
-		saveButton.setBackground(null);
+
 		JButton closeButton = new JButton("닫기");
 		closeButton.setBackground(null);
-		saveButton.addActionListener(e -> {
 
-			if (studentController.deleteEnrollment(courseId)) {
-				showMessageDialog(frame, "수강 취소가 완료되었습니다.");
-			} else {
-				showMessageDialog(frame, "수강 취소가 실패했습니다.");
-			}
-			dialog.dispose();
-			setTablesByRadioButton();
-		});
 		closeButton.addActionListener(e -> dialog.dispose());
 
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(245, 245, 245));
-		panel.add(saveButton);
+
 		panel.add(closeButton);
 
 		dialog.getContentPane().setLayout(new BorderLayout());
 		dialog.getContentPane().add(scrollPane, BorderLayout.CENTER);
 		dialog.getContentPane().add(panel, BorderLayout.SOUTH);
-
-		dialog.setVisible(true);
-	}
-
-	private void showMessageDialog(JFrame parent, String message) {
-
-		JDialog dialog = new JDialog();
-		dialog.setSize(280, 120);
-		dialog.setBackground(new Color(245, 245, 245));
-		dialog.setLocationRelativeTo(parent);
-		dialog.getContentPane().setLayout(new BorderLayout());
-
-		JLabel messageLabel = new JLabel();
-		messageLabel.setText(message);
-		messageLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 16));
-		JPanel panel1 = new JPanel();
-		panel1.setBackground(new Color(245, 245, 245));
-		panel1.add(messageLabel);
-		dialog.getContentPane().add(panel1, BorderLayout.CENTER);
-
-		JButton closeButton = new JButton("닫기");
-		closeButton.setBackground(null);
-
-		closeButton.addActionListener(e -> dialog.dispose());
-
-		JPanel panel2 = new JPanel();
-		panel2.setBackground(new Color(245, 245, 245));
-		panel2.add(closeButton);
-
-		dialog.getContentPane().add(panel2, BorderLayout.SOUTH);
 
 		dialog.setVisible(true);
 	}

@@ -245,6 +245,57 @@ public class StudentController {
 				.toArray(size -> new Object[size][8]);
 	}
 
+	public Object[][] makeTimeTableInfoBySemester(String semester) {
+		List<Enrollment> enrollmentInfos = studentService
+				.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(), semester);
+
+		return generateSchedule(enrollmentInfos);
+	}
+
+	public Object[][] generateSchedule(List<Enrollment> enrollmentInfos) {
+		String[] header = new String[] { "시간", "월", "화", "수", "목", "금" };
+		Object[][] schedule = new Object[10][6];
+		System.arraycopy(header, 0, schedule[0], 0, header.length);
+
+		String[] timeSlots = new String[9];
+		for (int i = 0; i < timeSlots.length; i++) {
+			timeSlots[i] = String.format("%02d:00", 9 + i);
+			schedule[i + 1][0] = timeSlots[i]; // 첫 번째 열에 시간 추가
+		}
+		for (Enrollment enrollment : enrollmentInfos) {
+			ClassSchedule scheduleInfo = enrollment.getCourseInfo().getClassSchedule();
+			String day = scheduleInfo.getDayOfWeek();
+			String startTime = scheduleInfo.getStartTime();
+			String endTime = scheduleInfo.getEndTime();
+
+			int col = getDayColumn(day);
+			int startRow = Integer.parseInt(startTime.split(":")[0]) - 8;
+			int endRow = Integer.parseInt(endTime.split(":")[0]) - 8;
+
+			for (int row = startRow; row < endRow; row++) {
+				schedule[row][col] = enrollment.getCourseInfo().getCourse().getName();
+			}
+		}
+		return schedule;
+	}
+
+	private int getDayColumn(String day) {
+		switch (day) {
+		case "월":
+			return 1;
+		case "화":
+			return 2;
+		case "수":
+			return 3;
+		case "목":
+			return 4;
+		case "금":
+			return 5;
+		default:
+			return -1;
+		}
+	}
+
 	public String makeSyllabus(int courseId) {
 		List<CourseInfo> courseInfos = studentService.getCourseInfoBySemester("1");
 		courseInfos.addAll(studentService.getCourseInfoBySemester("2"));
@@ -392,8 +443,9 @@ public class StudentController {
 	}
 
 	private void searchGrades() {
-		
+
 	}
+
 	// 한 학기 취득학점 , 성적 평균 조회
 	private void searchPrintGrades(Scanner sc) {
 		String input = selectSemester(sc);

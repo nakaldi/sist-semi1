@@ -17,7 +17,6 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.text.JTextComponent;
 
 import kims.semi1.controller.StudentController;
 
