@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import kims.semi1.dao.GenericDao;
+import kims.semi1.dao.StudentDao;
 import kims.semi1.model.Building;
 import kims.semi1.model.ClassSchedule;
 import kims.semi1.model.Course;
@@ -24,9 +25,11 @@ public class StudentController {
 	private Student student;
 	private Department department;
 	private Building building;
+	private StudentDao studentDao;
 
 	public StudentController(int currentUserId) {
 		this.studentService = new StudentService();
+		this.studentDao = new StudentDao();
 		Object[] temps = studentService.getStudentAndDepartmentAndBuildingInfo(currentUserId);
 		student = (Student) temps[0];
 		department = (Department) temps[1];
@@ -274,16 +277,16 @@ public class StudentController {
 
 		for (Enrollment e : enrollmentInfos) {
 
-//			if ((e.getCourseInfo().getCourse().getSemester() == courseInfo.getCourse().getSemester())
-//					&& (e.getCourseInfo().getClassSchedule().getDayOfWeek()
-//							.equals(courseInfo.getClassSchedule().getDayOfWeek()))) {
+			if ((e.getCourseInfo().getCourse().getSemester().equals(courseInfo.getCourse().getSemester()))
+					&& (e.getCourseInfo().getClassSchedule().getDayOfWeek()
+							.equals(courseInfo.getClassSchedule().getDayOfWeek()))) {
 				if (isTimeOverlap(e.getCourseInfo().getClassSchedule().getStartTime(),
 						e.getCourseInfo().getClassSchedule().getEndTime(), newCourseStartTime, newCourseEndTime)) {
+					System.out.println("학기, 요일, 시간이 겹칩니다.");
 					return false; // 학기, 요일, 시간이 겹치면 실패
 				}
 			}
-//		}
-
+		}
 		return studentService.registerEnrollment(student.getStudentId(), courseId);
 	}
 
@@ -295,6 +298,16 @@ public class StudentController {
 		LocalTime s2 = LocalTime.parse(start2, formatter);
 		LocalTime e2 = LocalTime.parse(end2, formatter);
 		return (s1.equals(s2) || e1.equals(e2) || (s1.isBefore(e2) && e1.isAfter(s2)));
+	}
+
+	public boolean existsEnrollment(int courseId) {
+		return studentDao.existsEnrollmentByStudentIdAndCourseId(student.getStudentId(), courseId);
+	}
+
+	public boolean deleteEnrollment(int courseId) {
+		return existsEnrollment(courseId)
+				? studentDao.deleteEnrollmentByStudentIdAndCourseId(student.getStudentId(), courseId)
+				: false;
 	}
 
 	public void searchCourses(Scanner sc) {

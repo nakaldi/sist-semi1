@@ -26,27 +26,23 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
 import kims.semi1.controller.StudentController;
 
-public class StudentEnrollmentPanel {
+public class StudentEnrollSpecPanel {
 	JFrame frame;
 	StudentController studentController;
 	public JLabel titleLabel1;
 	public JTable table1;
-	public JLabel titleLabel2;
-	public JTable table2;
+
 	private Object[][] courseInfos;
 	private Object[][] enrollmentInfos;
 	TableRowSorter<DefaultTableModel> sorter;
-	TableRowSorter<DefaultTableModel> sorter2;
+
 	private JTextField searchField;
 	private JComboBox<String> comboBox;
 	private JRadioButton radio2;
@@ -54,12 +50,12 @@ public class StudentEnrollmentPanel {
 	private JButton btnConditionSearchButton;
 	private String[] columnNames;
 
-	public StudentEnrollmentPanel(JFrame frame, StudentController studentController) {
+	public StudentEnrollSpecPanel(JFrame frame, StudentController studentController) {
 		this.studentController = studentController;
 		this.frame = frame;
 	}
 
-	public Panel createEnrollmentPanel() {
+	public Panel createEnrollSpecPanel() {
 		Panel innerPanel = new Panel();
 		GridBagLayout gbl_innerPanel = new GridBagLayout();
 		gbl_innerPanel.columnWidths = new int[] { 850 };
@@ -84,7 +80,7 @@ public class StudentEnrollmentPanel {
 		gbl_headPanel.rowWeights = new double[] { 0.0, 0.0 };
 		headPanel.setLayout(gbl_headPanel);
 
-		JLabel headTitleLabel = new JLabel("수강 신청");
+		JLabel headTitleLabel = new JLabel("수강 현황");
 		headTitleLabel.setBackground(new Color(0, 0, 0));
 		headTitleLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 28));
 		GridBagConstraints gbc_headTitleLabel = new GridBagConstraints();
@@ -106,7 +102,7 @@ public class StudentEnrollmentPanel {
 		headPanel.add(separator, gbc_separator);
 
 		GridBagLayout gbl_centerPanel = new GridBagLayout();
-		gbl_centerPanel.rowHeights = new int[] { 40, 200, 40, 40, 160 };
+		gbl_centerPanel.rowHeights = new int[] { 40, 160, 40, 40, 160 };
 		gbl_centerPanel.columnWidths = new int[] { 800 };
 		JPanel centerPanel = new JPanel(gbl_centerPanel);
 		GridBagConstraints gbc_centerPanel = new GridBagConstraints();
@@ -128,7 +124,7 @@ public class StudentEnrollmentPanel {
 		{
 			// 2. 첫 번째 테이블
 			columnNames = new String[] { "강의번호", "강의명", "교수명", "학과", "학점", "학기", "요일", "강의시간" };
-			table1 = new JTable(new Object[10][8], columnNames);
+			table1 = new JTable(new Object[1][8], columnNames);
 			table1.setGridColor(new Color(192, 192, 192));
 			table1.setShowVerticalLines(false);
 			table1.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
@@ -220,48 +216,6 @@ public class StudentEnrollmentPanel {
 		gbc_filterPanel.weighty = 0;
 		centerPanel.add(filterPanel, gbc_filterPanel);
 
-		// 4. 두 번째 라벨
-		titleLabel2 = new JLabel("2학기 수강 목록");
-		GridBagConstraints gbc_titleLabel2 = new GridBagConstraints();
-		gbc_titleLabel2.anchor = GridBagConstraints.WEST;
-		gbc_titleLabel2.gridx = 0;
-		titleLabel2.setFont(new Font("맑은 고딕", Font.PLAIN, 20));
-		gbc_titleLabel2.gridy = 3;
-		centerPanel.add(titleLabel2, gbc_titleLabel2);
-		{
-			// 5. 두 번째 테이블
-			columnNames = new String[] { "강의번호", "강의명", "교수명", "학과", "학점", "학기", "요일", "강의시간" };
-			table2 = new JTable(new Object[1][8], columnNames);
-			table2.setGridColor(new Color(192, 192, 192));
-			table2.setShowVerticalLines(false);
-			table2.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
-			table2.setEnabled(false);
-			table2.setRowHeight(25);
-			GridBagConstraints gbc_table2 = new GridBagConstraints();
-			gbc_table2.anchor = GridBagConstraints.NORTH;
-			gbc_table2.insets = new Insets(0, 0, 30, 0);
-			gbc_table2.weighty = 0.1;
-			gbc_table2.fill = GridBagConstraints.BOTH;
-			gbc_table2.gridx = 0;
-			JScrollPane scrollPane2 = new JScrollPane(table2);
-			gbc_table2.gridy = 4;
-			centerPanel.add(scrollPane2, gbc_table2);
-
-			JTableHeader header = table2.getTableHeader();
-			header.setDefaultRenderer(new DefaultTableCellRenderer() {
-				@Override
-				public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-						boolean hasFocus, int row, int column) {
-					Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
-							column);
-					comp.setBackground(new Color(245, 245, 245)); // 배경색 설정
-					comp.setForeground(Color.BLACK); // 글자색 설정
-					((JComponent) comp).setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK)); // 테두리 설정
-					return comp;
-				}
-			});
-
-		}
 		table1.getSelectionModel().addListSelectionListener(e -> {
 			if (!e.getValueIsAdjusting() && table1.getSelectedRow() != -1) {
 				int selectedRow = table1.getSelectedRow();
@@ -271,47 +225,30 @@ public class StudentEnrollmentPanel {
 			}
 
 		});
-		
-		table2.getSelectionModel().addListSelectionListener(e -> {
-			if (!e.getValueIsAdjusting() && table2.getSelectedRow() != -1) {
-				int selectedRow = table1.getSelectedRow();
-				int courseId = (Integer) table2.getValueAt(selectedRow, 0);
-				showSyllabusDialog(frame, courseId);
-				table2.clearSelection();
-			}
-
-		});
 
 		radio1.addActionListener(e -> setTablesByRadioButton());
 		radio2.addActionListener(e -> setTablesByRadioButton());
 		btnConditionSearchButton.addActionListener(e -> sortTable1ByFilter());
 
 		setTablesByRadioButton();
-		setCourseinfoTable(courseInfos, columnNames);
+		setEnrollmentInfoTable(enrollmentInfos, columnNames);
 		sortTable1ByFilter();
 		StudentFrame.setBackgroundDisableForAllComponents(innerPanel);
 		return innerPanel;
 	}
 
-	public void setCourseinfoTable(Object[][] courseInfos, String[] columnNames) {
-		DefaultTableModel tableModel = new DefaultTableModel(courseInfos, columnNames);
+	public void setEnrollmentInfoTable(Object[][] enrollmentInfos, String[] columnNames) {
+		DefaultTableModel tableModel = new DefaultTableModel(enrollmentInfos, columnNames);
 		table1.setModel(tableModel);
 		sorter = new TableRowSorter<>(tableModel);
 		table1.setRowSorter(sorter);
 	}
 
-	public void setEnrollmentInfoTable(Object[][] enrollmentInfos, String[] columnNames) {
-		DefaultTableModel tableModel = new DefaultTableModel(enrollmentInfos, columnNames);
-		table2.setModel(tableModel);
-	}
 
 	public void setTablesByRadioButton() {
 		String semester = radio1.isSelected() ? "1" : "2";
-		titleLabel1.setText(semester + "학기 수강 신청");
-		titleLabel2.setText(semester + "학기 수강 목록");
-		courseInfos = studentController.searchCourseInfosToArray(semester);
+		titleLabel1.setText(semester + "학기 수강 목록");
 		enrollmentInfos = studentController.searchEnrollmentInfosToArray(semester);
-		setCourseinfoTable(courseInfos, columnNames);
 		setEnrollmentInfoTable(enrollmentInfos, columnNames);
 	}
 
@@ -348,20 +285,20 @@ public class StudentEnrollmentPanel {
 		textArea.setWrapStyleWord(true);
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
-		JButton saveButton = new JButton("수강 등록");
+		JButton saveButton = new JButton("수강 취소");
 		saveButton.setBackground(null);
+		JButton closeButton = new JButton("닫기");
+		closeButton.setBackground(null);
 		saveButton.addActionListener(e -> {
 
-			if (studentController.registerEnrollment(courseId)) {
-				showMessageDialog(frame, "수강 등록이 완료되었습니다.");
+			if (studentController.deleteEnrollment(courseId)) {
+				showMessageDialog(frame, "수강 취소가 완료되었습니다.");
 			} else {
-				showMessageDialog(frame, "수강 등록이 실패했습니다.");
+				showMessageDialog(frame, "수강 취소가 실패했습니다.");
 			}
 			dialog.dispose();
 			setTablesByRadioButton();
 		});
-		JButton closeButton = new JButton("닫기");
-		closeButton.setBackground(null);
 		closeButton.addActionListener(e -> dialog.dispose());
 
 		JPanel panel = new JPanel();

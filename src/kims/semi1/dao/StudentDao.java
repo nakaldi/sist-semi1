@@ -269,4 +269,19 @@ public class StudentDao {
 		}
 		return false;
 	}
+
+	public boolean deleteEnrollmentByStudentIdAndCourseId(int studentId, int courseId) {
+		String sql = "delete from enrollments where student_id = ? AND course_id = ?";
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			pstmt.setInt(1, studentId);
+			pstmt.setInt(2, courseId);
+			
+			return pstmt.executeUpdate() > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 }
