@@ -633,7 +633,7 @@ public class ManagerController {
 	}
 
 	// view용 등록
-	public void saveVeiwClassScheduleInfo(int courseId, String dayOfWeek, String startTime, String endTime,
+	public boolean saveVeiwClassScheduleInfo(int courseId, String dayOfWeek, String startTime, String endTime,
 			String unit) {
 		ClassSchedule classShedule = new ClassSchedule(0, 0, null, null, null, null);
 		classShedule.setCourseId(courseId);
@@ -652,9 +652,9 @@ public class ManagerController {
 		classShedule.setEndTime(endTime);
 		classShedule.setUnit(unit);
 		if (insertClassScheduleInfo(classShedule) == null) {
-			System.out.println("등록실패");
+			return false;
 		} else {
-			System.out.println("등록성공");
+			return true;
 		}
 	}
 
@@ -720,7 +720,7 @@ public class ManagerController {
 		return classScheduleDao.insertClassSchedule(newClassSchedule) ? newClassSchedule : null;
 	}
 
-	public void saveViewProfessorInfo(int professorId, String name, String phone, String birthDate, String email,
+	public boolean saveViewProfessorInfo(int professorId, String name, String phone, String birthDate, String email,
 			int departmentId) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -736,16 +736,16 @@ public class ManagerController {
 			pstmt.setString(5, birthDate);
 			pstmt.setInt(6, departmentId);
 			int affectedRows = pstmt.executeUpdate();
-			if (affectedRows > 0) {
-				System.out.println("등록되었습니다");
-			} else {
-				System.out.println("등록이 안되었습니다");
+			if (affectedRows < 0) {
+				return false;
 			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			DBConnector.close(conn, pstmt);
 		}
+		return true;
 	}
 
 	// 학생정보조회 학생정보등록 나가기 화면을 보여주면서 선택할 수 있는 메소드
@@ -902,7 +902,7 @@ public class ManagerController {
 	}
 
 	// view용
-	public void insertViewStudentInfo(String studentName, String phone, String birthDate, String email,
+	public boolean insertViewStudentInfo(String studentName, String phone, String birthDate, String email,
 			int department_id) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -917,16 +917,15 @@ public class ManagerController {
 			pstmt.setString(5, birthDate);
 			pstmt.setInt(6, department_id);
 			int affectedRows = pstmt.executeUpdate();
-			if (affectedRows > 0) {
-				System.out.println("등록되었습니다");
-			} else {
-				System.out.println("등록이 안되었습니다");
+			if (affectedRows < 0) {
+				return false;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			DBConnector.close(conn, pstmt);
 		}
+		return true;
 	}
 
 }
