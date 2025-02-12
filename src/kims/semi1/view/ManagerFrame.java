@@ -9,6 +9,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -21,8 +24,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
+import kims.semi1.config.DBConnector;
 import kims.semi1.controller.ManagerController;
 import kims.semi1.dao.ClassScheduleDao;
 import kims.semi1.dao.GenericDao;
@@ -50,20 +55,39 @@ public class ManagerFrame extends JFrame {
 		JPanel homePanel = new JPanel(new BorderLayout());
 
 		// 상단 패널 (제목 + 로그아웃 버튼)
+//		JPanel topPanel = new JPanel(new BorderLayout());
+//		JLabel titleLabel = new JLabel("학사관리시스템(교직원)", JLabel.LEFT);
+//		titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 15));
+//		topPanel.setBackground(Color.DARK_GRAY);
+//		topPanel.setPreferredSize(new Dimension(400, 50));
+//		titleLabel.setForeground(Color.WHITE);
+		
+		
 		JPanel topPanel = new JPanel(new BorderLayout());
-		JLabel titleLabel = new JLabel("학사관리시스템(교직원)", JLabel.LEFT);
-		titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 15));
-		topPanel.setBackground(Color.BLACK);
+		topPanel.setBackground(Color.DARK_GRAY);
 		topPanel.setPreferredSize(new Dimension(400, 50));
+
+		// 제목 라벨을 감싸는 패널 (가운데 정렬을 위해 추가)
+		JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		titlePanel.setBackground(Color.DARK_GRAY);
+
+		JLabel titleLabel = new JLabel("학사관리시스템(교직원)", JLabel.CENTER);
+		titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 20));
 		titleLabel.setForeground(Color.WHITE);
 
-		JButton btnLogout = new JButton("로그아웃");
-		btnLogout.setPreferredSize(new Dimension(100, 30)); // 버튼 크기 조정
-		btnLogout.setFont(new Font("맑은 고딕", Font.BOLD, 13));
-
-		topPanel.add(titleLabel, BorderLayout.WEST);
-		topPanel.add(btnLogout, BorderLayout.EAST);
+		titlePanel.add(titleLabel, BorderLayout.CENTER);
+		topPanel.add(titlePanel, BorderLayout.CENTER);
+		
+		topPanel.add(titleLabel, BorderLayout.CENTER);
 		homePanel.add(topPanel, BorderLayout.NORTH);
+		
+		/* 로그아웃 버튼
+		 * JButton btnLogout = new JButton("로그아웃"); btnLogout.setPreferredSize(new
+		 * Dimension(100, 30)); // 버튼 크기 조정 btnLogout.setFont(new Font("맑은 고딕",
+		 * Font.BOLD, 13));
+		 */
+
+		//topPanel.add(btnLogout, BorderLayout.EAST);
 
 		// 메뉴 버튼 패널
 		JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10));
@@ -74,7 +98,7 @@ public class ManagerFrame extends JFrame {
 		JButton btnStudent = new JButton("학생 정보 관리");
 		JButton btnCourse = new JButton("강의 정보 조회");
 
-		Font buttonFont = new Font("맑은 고딕", Font.BOLD, 14);
+		Font buttonFont = new Font("맑은 고딕", Font.BOLD, 16);
 		btnSchedule.setFont(buttonFont);
 		btnProfessor.setFont(buttonFont);
 		btnStudent.setFont(buttonFont);
@@ -88,9 +112,18 @@ public class ManagerFrame extends JFrame {
 		homePanel.add(buttonPanel, BorderLayout.CENTER);
 
 		// 버튼 이벤트 (시간표 관리 화면으로 이동)
+<<<<<<< HEAD
 		btnLogout.addActionListener(e -> {
 			new LoginFrame();
 		});
+=======
+		
+//		btnLogout.addActionListener(e -> {
+//			new LoginFrame();
+//			dispose();
+//		});
+		
+>>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
 		btnSchedule.addActionListener(e -> {
 			new ManagerScheduleFrame();
 			dispose();
@@ -139,17 +172,17 @@ public class ManagerFrame extends JFrame {
 			JButton btnProfessor = new JButton("교수정보관리");
 			JButton btnStudent = new JButton("학생정보관리");
 			JButton btnCourse = new JButton("강의정보");
-			JButton btnLogout = new JButton("로그아웃");
+			//JButton btnLogout = new JButton("로그아웃");
 
 			// 로그아웃 버튼 크기 통일
-			btnLogout.setPreferredSize(new Dimension(100, 30));
+			//btnLogout.setPreferredSize(new Dimension(100, 30));
 			Font tabFont = new Font("맑은 고딕", Font.BOLD, 13);
 			btnHome.setFont(tabFont);
 			btnSchedule.setFont(tabFont);
 			btnProfessor.setFont(tabFont);
 			btnStudent.setFont(tabFont);
 			btnCourse.setFont(tabFont);
-			btnLogout.setFont(tabFont);
+			//btnLogout.setFont(tabFont);
 
 			// 현재 페이지 표시 (시간표관리 버튼 색상 변경)
 			btnSchedule.setBackground(Color.LIGHT_GRAY);
@@ -160,21 +193,27 @@ public class ManagerFrame extends JFrame {
 			tabPanel.add(btnStudent);
 			tabPanel.add(btnCourse);
 
+			//topPanel.add(btnLogout, BorderLayout.EAST);
 			topPanel.add(tabPanel, BorderLayout.WEST);
-			topPanel.add(btnLogout, BorderLayout.EAST);
 			schedulePanel.add(topPanel, BorderLayout.NORTH);
 
 			// 입력 폼 패널
 			JPanel formPanel = new JPanel(new GridBagLayout());
-			formPanel.setBorder(BorderFactory.createTitledBorder("강의 시간표 등록"));
-			formPanel.setPreferredSize(new Dimension(350, 300)); // 크기 확장
+			
+			formPanel.setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createEtchedBorder(), "강의 시간표 등록", 
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, 
+					new Font("맑은 고딕", Font.BOLD, 18) // formPanel 제목 글씨 크기 적용
+				));
+		
+			formPanel.setPreferredSize(new Dimension(410, 300)); // 크기 확장
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.insets = new Insets(20, 10, 10, 30); // 간격 조정
 			gbc.anchor = GridBagConstraints.WEST;
 
-			Font labelFont = new Font("맑은 고딕", Font.BOLD, 13);
-			Font fieldFont = new Font("맑은 고딕", Font.BOLD, 12);
-
+			Font labelFont = new Font("맑은 고딕", Font.BOLD, 14);
+			Font fieldFont = new Font("맑은 고딕", Font.PLAIN, 14);
+		
 			txtLectureID = new JTextField(15); // 크기 확장
 			txtDay = new JTextField(15);
 			txtStartTime = new JTextField(15);
@@ -191,34 +230,47 @@ public class ManagerFrame extends JFrame {
 
 			gbc.gridx = 0;
 			gbc.gridy = 0;
-			formPanel.add(new JLabel("강의 ID:", JLabel.RIGHT), gbc);
+			JLabel lblID = new JLabel("강의 ID:", JLabel.RIGHT);
+			lblID.setFont(labelFont);
+			formPanel.add(lblID, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtLectureID, gbc);
-
+			
 			gbc.gridx = 0;
 			gbc.gridy = 1;
-			formPanel.add(new JLabel("요일:", JLabel.RIGHT), gbc);
+			JLabel lblDay = new JLabel("요일:", JLabel.RIGHT);
+			lblDay.setFont(labelFont);
+			formPanel.add(lblDay, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtDay, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 2;
-			formPanel.add(new JLabel("시작시간:", JLabel.RIGHT), gbc);
+			JLabel lblTime = new JLabel("시작시간:", JLabel.RIGHT);
+			lblTime.setFont(labelFont);
+			formPanel.add(lblTime, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtStartTime, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 3;
-			formPanel.add(new JLabel("종료시간:", JLabel.RIGHT), gbc);
+			JLabel lblTimeend = new JLabel("종료시간:", JLabel.RIGHT);
+			formPanel.add(lblTimeend, gbc);
+			lblTimeend.setFont(labelFont);
+			formPanel.add(lblTimeend, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtEndTime, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 4;
-			formPanel.add(new JLabel("강의실번호:", JLabel.RIGHT), gbc);
+			JLabel lblUnitID = new JLabel("강의실번호:", JLabel.RIGHT);
+			formPanel.add(lblUnitID, gbc);
+			lblUnitID.setFont(labelFont);
+			formPanel.add(lblUnitID, gbc);
+	
 			gbc.gridx = 1;
 			formPanel.add(txtUnit, gbc);
-
+			
 			gbc.gridx = 1;
 			gbc.gridy = 5;
 			formPanel.add(btnRegister, gbc);
@@ -227,8 +279,16 @@ public class ManagerFrame extends JFrame {
 			String[] columnNames = { "시간표ID", "강의명", "요일", "시작시간", "종료시간", "교수이름" };
 			tableModel = new DefaultTableModel(columnNames, 0);
 			scheduleTable = new JTable(tableModel);
+			
+			// 테이블 칼럼명 글씨 크기 및 스타일 설정
+			scheduleTable.getTableHeader().setFont(new Font("맑은 고딕", Font.BOLD, 14));
+			// 테이블 내용 글씨 크기 설정
+			scheduleTable.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+			scheduleTable.setRowHeight(25); // 행 높이 조정
+			
+			
 			JScrollPane scrollPane = new JScrollPane(scheduleTable);
-
+			
 			// 전체조회 & 삭제 버튼
 			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			JButton btnViewAll = new JButton("전체시간표조회");
@@ -249,9 +309,16 @@ public class ManagerFrame extends JFrame {
 			schedulePanel.add(buttonPanel, BorderLayout.SOUTH);
 
 			// 버튼 이벤트 추가
+<<<<<<< HEAD
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
 			});
+=======
+//			btnLogout.addActionListener(e -> {
+//				new LoginFrame();
+//				dispose();
+//			});
+>>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
 
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
@@ -303,10 +370,39 @@ public class ManagerFrame extends JFrame {
 				String unit = txtUnit.getText();
 				managerController.saveVeiwClassScheduleInfo(courseID, dayOfWeek, startTime, endTime, unit);
 			});
+			
+			//'등록이 되었습니다' 창 추가 부분
+			btnRegister.addActionListener(e -> {
+			    try {
+			        int courseID = Integer.parseInt(txtLectureID.getText());
+			        String dayOfWeek = txtDay.getText();
+			        String startTime = txtStartTime.getText();
+			        String endTime = txtEndTime.getText();
+			        String unit = txtUnit.getText();
+
+			        managerController.saveVeiwClassScheduleInfo(courseID, dayOfWeek, startTime, endTime, unit);
+
+			        // 성공 메시지 창 띄우기
+			        JOptionPane.showMessageDialog(
+			            this, 
+			            "등록이 되었습니다.", 
+			            "등록 완료", 
+			            JOptionPane.INFORMATION_MESSAGE
+			        );
+
+			    } catch (NumberFormatException ex) {
+			        JOptionPane.showMessageDialog(
+			            this, 
+			            "강의 ID는 숫자로 입력해야 합니다.", 
+			            "입력 오류", 
+			            JOptionPane.ERROR_MESSAGE
+			        );
+			    }
+			});
+
 			add(schedulePanel);
 			setVisible(true);
 		}
-
 	}
 
 	/// 3.교수정보관리(조회/등록)
@@ -335,17 +431,17 @@ public class ManagerFrame extends JFrame {
 			JButton btnProfessor = new JButton("교수정보관리");
 			JButton btnStudent = new JButton("학생정보관리");
 			JButton btnCourse = new JButton("강의정보");
-			JButton btnLogout = new JButton("로그아웃");
+			//JButton btnLogout = new JButton("로그아웃");
 
 			// 로그아웃 버튼 크기 통일 - 고정
-			btnLogout.setPreferredSize(new Dimension(100, 30));
-			Font tabFont = new Font("맑은 고딕", Font.BOLD, 12);
+			//btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("맑은 고딕", Font.BOLD, 13);
 			btnHome.setFont(tabFont);
 			btnSchedule.setFont(tabFont);
 			btnProfessor.setFont(tabFont);
 			btnStudent.setFont(tabFont);
 			btnCourse.setFont(tabFont);
-			btnLogout.setFont(tabFont);
+			//btnLogout.setFont(tabFont);
 
 			// 현재 페이지 표시 (버튼 색상 변경) - 고정
 			btnProfessor.setBackground(Color.LIGHT_GRAY);
@@ -356,22 +452,26 @@ public class ManagerFrame extends JFrame {
 			tabPanel.add(btnStudent);
 			tabPanel.add(btnCourse);
 
+			//topPanel.add(btnLogout, BorderLayout.EAST);
 			topPanel.add(tabPanel, BorderLayout.WEST);
-			topPanel.add(btnLogout, BorderLayout.EAST);
 			professorPanel.add(topPanel, BorderLayout.NORTH);
 
 			// 입력 폼 패널
 			JPanel formPanel = new JPanel(new GridBagLayout());
-			formPanel.setBorder(BorderFactory.createTitledBorder("교수 등록"));
-			formPanel.setPreferredSize(new Dimension(320, 300)); // 크기 확장
+			formPanel.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createEtchedBorder(), "교수 등록 관리", 
+				TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, 
+				new Font("맑은 고딕", Font.BOLD, 18) // formPanel 제목 글씨 크기 적용
+			));
+			formPanel.setPreferredSize(new Dimension(400, 300)); // 크기 확장
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.insets = new Insets(20, 10, 10, 30); // 간격 조정
 			gbc.anchor = GridBagConstraints.WEST;
 
-			Font labelFont = new Font("맑은 고딕", Font.BOLD, 13);
-			Font fieldFont = new Font("맑은 고딕", Font.BOLD, 12);
+			Font labelFont = new Font("맑은 고딕", Font.BOLD, 14); // JLabel 폰트 크기 설정
+			Font fieldFont = new Font("맑은 고딕", Font.PLAIN, 14); // 입력 필드 폰트 크기 설정
 
-			txtName = new JTextField(15); // 크기 확장
+			txtName = new JTextField(15);
 			txtPhone = new JTextField(15);
 			txtBirthday = new JTextField(15);
 			txtEmail = new JTextField(15);
@@ -387,31 +487,41 @@ public class ManagerFrame extends JFrame {
 
 			gbc.gridx = 0;
 			gbc.gridy = 0;
-			formPanel.add(new JLabel("교수 이름:", JLabel.RIGHT), gbc);
+			JLabel lblName = new JLabel("교수 이름:", JLabel.RIGHT);
+			lblName.setFont(labelFont);
+			formPanel.add(lblName, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtName, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 1;
-			formPanel.add(new JLabel("전화번호:", JLabel.RIGHT), gbc);
+			JLabel lblPhone = new JLabel("전화번호:", JLabel.RIGHT);
+			lblPhone.setFont(labelFont);
+			formPanel.add(lblPhone, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtPhone, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 2;
-			formPanel.add(new JLabel("생년월일:", JLabel.RIGHT), gbc);
+			JLabel lblBirthday = new JLabel("생년월일:", JLabel.RIGHT);
+			lblBirthday.setFont(labelFont);
+			formPanel.add(lblBirthday, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtBirthday, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 3;
-			formPanel.add(new JLabel("이메일:", JLabel.RIGHT), gbc);
+			JLabel lblEmail = new JLabel("이메일:", JLabel.RIGHT);
+			lblEmail.setFont(labelFont);
+			formPanel.add(lblEmail, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtEmail, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 4;
-			formPanel.add(new JLabel("학과번호:", JLabel.RIGHT), gbc);
+			JLabel lblDepartment = new JLabel("학과번호:", JLabel.RIGHT);
+			lblDepartment.setFont(labelFont);
+			formPanel.add(lblDepartment, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtDepartmentID, gbc);
 
@@ -423,18 +533,20 @@ public class ManagerFrame extends JFrame {
 			String[] columnNames = { "교수ID", "교수이름", "전화번호", "생년월일", "이메일", "채용일자" };
 			tableModel = new DefaultTableModel(columnNames, 0);
 			professorTable = new JTable(tableModel);
+			
+			// 테이블 칼럼명 글씨 크기 및 스타일 설정
+			professorTable.getTableHeader().setFont(new Font("맑은 고딕", Font.BOLD, 14));
+			// 테이블 내용 글씨 크기 설정
+			professorTable.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+			professorTable.setRowHeight(25); // 행 높이 조정
+
 			JScrollPane scrollPane = new JScrollPane(professorTable);
 
-			// 전체조회 & 삭제 버튼
+			// 전체조회 버튼
 			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			JButton btnViewAll = new JButton("전체교수조회");
-			// JButton btnDelete = new JButton("삭제");
-
 			btnViewAll.setFont(labelFont);
-			// btnDelete.setFont(labelFont);
-
 			buttonPanel.add(btnViewAll);
-			// buttonPanel.add(btnDelete);
 
 			// 정렬 조정
 			JPanel centerPanel = new JPanel(new BorderLayout());
@@ -444,10 +556,20 @@ public class ManagerFrame extends JFrame {
 			professorPanel.add(centerPanel, BorderLayout.CENTER);
 			professorPanel.add(buttonPanel, BorderLayout.SOUTH);
 
+			add(professorPanel);
+			setVisible(true);
+			
 			// 버튼 이벤트 추가
+<<<<<<< HEAD
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
 			});
+=======
+//			btnLogout.addActionListener(e -> {
+//				new LoginFrame();
+//				dispose();
+//			});
+>>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
 
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
@@ -478,7 +600,7 @@ public class ManagerFrame extends JFrame {
 					tableModel.addRow(row);
 				});
 			});
-			// 등록기능
+			//등록기능
 			btnRegister.addActionListener(e -> {
 				String professorName = txtName.getText();
 				String phone = txtPhone.getText();
@@ -488,9 +610,8 @@ public class ManagerFrame extends JFrame {
 				managerController.saveViewProfessorInfo(department_id, professorName, phone, birthDate, email,
 						department_id);
 
-			});
-			add(professorPanel);
-			setVisible(true);
+			});			
+
 		}
 	}
 
@@ -520,17 +641,17 @@ public class ManagerFrame extends JFrame {
 			JButton btnProfessor = new JButton("교수정보관리");
 			JButton btnStudent = new JButton("학생정보관리");
 			JButton btnCourse = new JButton("강의정보");
-			JButton btnLogout = new JButton("로그아웃");
+			//JButton btnLogout = new JButton("로그아웃");
 
 			// 로그아웃 버튼 크기 통일 - 고정
-			btnLogout.setPreferredSize(new Dimension(100, 30));
-			Font tabFont = new Font("맑은 고딕", Font.BOLD, 12);
+			//btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("맑은 고딕", Font.BOLD, 13);
 			btnHome.setFont(tabFont);
 			btnSchedule.setFont(tabFont);
 			btnProfessor.setFont(tabFont);
 			btnStudent.setFont(tabFont);
 			btnCourse.setFont(tabFont);
-			btnLogout.setFont(tabFont);
+			//btnLogout.setFont(tabFont);
 
 			// 현재 페이지 표시 (버튼 색상 변경) - 고정
 			btnStudent.setBackground(Color.LIGHT_GRAY);
@@ -541,20 +662,24 @@ public class ManagerFrame extends JFrame {
 			tabPanel.add(btnStudent);
 			tabPanel.add(btnCourse);
 
+			//topPanel.add(btnLogout, BorderLayout.EAST);
 			topPanel.add(tabPanel, BorderLayout.WEST);
-			topPanel.add(btnLogout, BorderLayout.EAST);
 			studentPanel.add(topPanel, BorderLayout.NORTH);
 
 			// 입력 폼 패널
 			JPanel formPanel = new JPanel(new GridBagLayout());
-			formPanel.setBorder(BorderFactory.createTitledBorder("학생 등록"));
-			formPanel.setPreferredSize(new Dimension(350, 300)); // 크기 확장
+			formPanel.setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createEtchedBorder(), "학생 등록 관리", 
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, 
+					new Font("맑은 고딕", Font.BOLD, 18) // formPanel 제목 글씨 크기 적용
+					));
+			formPanel.setPreferredSize(new Dimension(400, 300)); // 크기 확장
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.insets = new Insets(20, 10, 10, 30); // 간격 조정
 			gbc.anchor = GridBagConstraints.WEST;
 
-			Font labelFont = new Font("맑은 고딕", Font.BOLD, 13);
-			Font fieldFont = new Font("맑은 고딕", Font.PLAIN, 12);
+			Font labelFont = new Font("맑은 고딕", Font.BOLD, 14);
+			Font fieldFont = new Font("맑은 고딕", Font.PLAIN, 14);
 
 			txtName = new JTextField(15); // 크기 확장
 			txtPhone = new JTextField(15);
@@ -572,35 +697,45 @@ public class ManagerFrame extends JFrame {
 
 			gbc.gridx = 0;
 			gbc.gridy = 0;
-			formPanel.add(new JLabel("학생 이름:", JLabel.RIGHT), gbc);
+			JLabel lblName = new JLabel("학생 이름:", JLabel.RIGHT);
+			lblName.setFont(labelFont);
+			formPanel.add(lblName, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtName, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 1;
-			formPanel.add(new JLabel("전화번호:", JLabel.RIGHT), gbc);
+			JLabel lblPhone = new JLabel("전화번호:", JLabel.RIGHT);
+			lblPhone.setFont(labelFont);
+			formPanel.add(lblPhone, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtPhone, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 2;
-			formPanel.add(new JLabel("생년월일:", JLabel.RIGHT), gbc);
+			JLabel lblBirthDay = new JLabel("생년월일:", JLabel.RIGHT);
+			lblBirthDay.setFont(labelFont);
+			formPanel.add(lblBirthDay, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtBirthDay, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 3;
-			formPanel.add(new JLabel("이메일:", JLabel.RIGHT), gbc);
+			JLabel lblEmail = new JLabel("이메일:", JLabel.RIGHT);
+			lblEmail.setFont(labelFont);
+			formPanel.add(lblEmail, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtEmail, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 4;
-			formPanel.add(new JLabel("학과번호:", JLabel.RIGHT), gbc);
+			JLabel lblDepartmentID = new JLabel("학과번호:", JLabel.RIGHT);
+			lblDepartmentID.setFont(labelFont);
+			formPanel.add(lblDepartmentID, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtDepartmentID, gbc);
 
-			gbc.gridx = 0;
+			gbc.gridx = 1;
 			gbc.gridy = 6;
 			formPanel.add(btnRegister, gbc);
 
@@ -609,6 +744,12 @@ public class ManagerFrame extends JFrame {
 			tableModel = new DefaultTableModel(columnNames, 0);
 			studentTable = new JTable(tableModel);
 			JScrollPane scrollPane = new JScrollPane(studentTable);
+			
+			// 테이블 칼럼명 글씨 크기 및 스타일 설정
+			studentTable.getTableHeader().setFont(new Font("맑은 고딕", Font.BOLD, 14));
+			// 테이블 내용 글씨 크기 설정
+			studentTable.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+			studentTable.setRowHeight(25); // 행 높이 조정
 
 			// 전체조회 & 삭제 버튼
 			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -630,9 +771,16 @@ public class ManagerFrame extends JFrame {
 			studentPanel.add(buttonPanel, BorderLayout.SOUTH);
 
 			// 버튼 이벤트 추가
+<<<<<<< HEAD
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
 			});
+=======
+//			btnLogout.addActionListener(e -> {
+//				new LoginFrame();
+//				dispose();
+//			});
+>>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
 
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
@@ -671,7 +819,6 @@ public class ManagerFrame extends JFrame {
 				String email = txtEmail.getText();
 				int department_id = Integer.parseInt(txtDepartmentID.getText());
 				managerController.insertViewStudentInfo(studentName, phone, birthDate, email, department_id);
-
 			});
 
 			add(studentPanel);
@@ -705,17 +852,17 @@ public class ManagerFrame extends JFrame {
 			JButton btnProfessor = new JButton("교수정보관리");
 			JButton btnStudent = new JButton("학생정보관리");
 			JButton btnCourse = new JButton("강의정보");
-			JButton btnLogout = new JButton("로그아웃");
+			//JButton btnLogout = new JButton("로그아웃");
 
 			// 로그아웃 버튼 크기 통일 - 고정
-			btnLogout.setPreferredSize(new Dimension(100, 30));
-			Font tabFont = new Font("맑은 고딕", Font.BOLD, 12);
+			//btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("맑은 고딕", Font.BOLD, 13);
 			btnHome.setFont(tabFont);
 			btnSchedule.setFont(tabFont);
 			btnProfessor.setFont(tabFont);
 			btnStudent.setFont(tabFont);
 			btnCourse.setFont(tabFont);
-			btnLogout.setFont(tabFont);
+			//btnLogout.setFont(tabFont);
 
 			// 현재 페이지 표시 (버튼 색상 변경) - 고정
 			btnCourse.setBackground(Color.LIGHT_GRAY);
@@ -726,20 +873,24 @@ public class ManagerFrame extends JFrame {
 			tabPanel.add(btnStudent);
 			tabPanel.add(btnCourse);
 
+			//topPanel.add(btnLogout, BorderLayout.EAST);
 			topPanel.add(tabPanel, BorderLayout.WEST);
-			topPanel.add(btnLogout, BorderLayout.EAST);
 			coursePanel.add(topPanel, BorderLayout.NORTH);
 
 			// 입력 폼 패널
 			JPanel formPanel = new JPanel(new GridBagLayout());
-			formPanel.setBorder(BorderFactory.createTitledBorder("강의정보 조회"));
-			formPanel.setPreferredSize(new Dimension(380, 400)); // 크기 확장
+			formPanel.setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createEtchedBorder(), "강의정보 조회", 
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, 
+					new Font("맑은 고딕", Font.BOLD, 18) // formPanel 제목 글씨 크기 적용
+					));
+			formPanel.setPreferredSize(new Dimension(410, 400)); // 크기 확장
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.insets = new Insets(20, 10, 10, 20); // 간격 조정
 			gbc.anchor = GridBagConstraints.WEST;
 
-			Font labelFont = new Font("맑은 고딕", Font.BOLD, 13);
-			Font fieldFont = new Font("맑은 고딕", Font.PLAIN, 12);
+			Font labelFont = new Font("맑은 고딕", Font.BOLD, 14);
+			Font fieldFont = new Font("맑은 고딕", Font.PLAIN, 14);
 
 			txtLectureID = new JTextField(15); // 크기 확장
 			txtDay = new JTextField(15);
@@ -755,7 +906,10 @@ public class ManagerFrame extends JFrame {
 
 			gbc.gridx = 0;
 			gbc.gridy = 0;
-			formPanel.add(new JLabel("강의실 번호:", JLabel.LEFT), gbc);
+			JLabel lblID = new JLabel("강의실 번호:", JLabel.RIGHT);
+			lblID.setFont(labelFont);
+			formPanel.add(lblID, gbc);
+			gbc.gridx = 1;
 			gbc.gridx = 1;
 			formPanel.add(txtLectureID, gbc);
 
@@ -768,8 +922,14 @@ public class ManagerFrame extends JFrame {
 			tableModel = new DefaultTableModel(columnNames, 0);
 			CourseTable = new JTable(tableModel);
 			JScrollPane scrollPane = new JScrollPane(CourseTable);
-
-			// 전체시간표조회 & 삭제 버튼
+			
+			// 테이블 칼럼명 글씨 크기 및 스타일 설정
+			CourseTable.getTableHeader().setFont(new Font("맑은 고딕", Font.BOLD, 14));
+			// 테이블 내용 글씨 크기 설정
+			CourseTable.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+			CourseTable.setRowHeight(25); // 행 높이 조정
+			
+			// 전체조회 & 삭제 버튼
 			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			JButton btnViewAll = new JButton("전체강의조회");
 
@@ -790,9 +950,16 @@ public class ManagerFrame extends JFrame {
 			coursePanel.add(buttonPanel, BorderLayout.SOUTH);
 
 			// 버튼 이벤트 추가
+<<<<<<< HEAD
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
 			});
+=======
+//			btnLogout.addActionListener(e -> {
+//				new LoginFrame();
+//				dispose();
+//			});
+>>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
 
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
@@ -869,41 +1036,45 @@ public class ManagerFrame extends JFrame {
 			JButton btnPrevios = new JButton("이전화면으로 돌아가기");
 			JButton btnBuilding = new JButton("건물 관리");
 			JButton btnUnit = new JButton("강의실 관리");
-			JButton btnLogout = new JButton("로그아웃");
+			//JButton btnLogout = new JButton("로그아웃");
 
 			// 로그아웃 버튼 크기 통일 - 고정
-			btnLogout.setPreferredSize(new Dimension(100, 30));
-			Font tabFont = new Font("맑은 고딕", Font.BOLD, 12);
+			//btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("맑은 고딕", Font.BOLD, 13);
 			btnPrevios.setFont(tabFont);
 			btnBuilding.setFont(tabFont);
 			btnUnit.setFont(tabFont);
-			btnLogout.setFont(tabFont);
+			//btnLogout.setFont(tabFont);
 
 			// 현재 페이지 표시 (버튼 색상 변경) - 고정
 			btnBuilding.setBackground(Color.LIGHT_GRAY);
-
 			tabPanel.add(btnPrevios);
 			tabPanel.add(btnBuilding);
 			tabPanel.add(btnUnit);
-			tabPanel.add(btnLogout);
+			//tabPanel.add(btnLogout);
 
+			//topPanel.add(btnLogout, BorderLayout.EAST);
 			topPanel.add(tabPanel, BorderLayout.WEST);
-			topPanel.add(btnLogout, BorderLayout.EAST);
 			BuildingPanel.add(topPanel, BorderLayout.NORTH);
 
 			// 입력 폼 패널
 			JPanel formPanel = new JPanel(new GridBagLayout());
-			formPanel.setBorder(BorderFactory.createTitledBorder("건물 등록 및 조회"));
-			formPanel.setPreferredSize(new Dimension(320, 300)); // 크기 확장
+			
+			formPanel.setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createEtchedBorder(), "건물 등록 및 조회", 
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, 
+					new Font("맑은 고딕", Font.BOLD, 18) // formPanel 제목 글씨 크기 적용
+					));
+			formPanel.setPreferredSize(new Dimension(450, 300)); // 크기 확장
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.insets = new Insets(20, 10, 10, 30); // 간격 조정
 			gbc.anchor = GridBagConstraints.WEST;
 
-			Font labelFont = new Font("맑은 고딕", Font.BOLD, 13);
-			Font fieldFont = new Font("맑은 고딕", Font.PLAIN, 12);
+			Font labelFont = new Font("맑은 고딕", Font.BOLD, 14);
+			Font fieldFont = new Font("맑은 고딕", Font.PLAIN, 14);
 
-			txtBuildingID = new JTextField(10); // 크기 확장
-			txtBuildingName = new JTextField(10);
+			txtBuildingID = new JTextField(15); // 크기 확장
+			txtBuildingName = new JTextField(15);
 
 			JButton btnSearch = new JButton("조회하기");
 			JButton btnRegister = new JButton("등록하기");
@@ -916,13 +1087,17 @@ public class ManagerFrame extends JFrame {
 
 			gbc.gridx = 0;
 			gbc.gridy = 0;
-			formPanel.add(new JLabel("건물 번호:", JLabel.RIGHT), gbc);
+			JLabel lblBuildingID = new JLabel("건물 번호:", JLabel.RIGHT);
+			lblBuildingID.setFont(labelFont);
+			formPanel.add(lblBuildingID, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtBuildingID, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 1;
-			formPanel.add(new JLabel("건물 이름:", JLabel.RIGHT), gbc);
+			JLabel lblBuildingName = new JLabel("건물 이름:", JLabel.RIGHT);
+			lblBuildingName.setFont(labelFont);
+			formPanel.add(lblBuildingName, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtBuildingName, gbc);
 
@@ -939,10 +1114,15 @@ public class ManagerFrame extends JFrame {
 			tableModel = new DefaultTableModel(columnNames, 0);
 			BuildingTable = new JTable(tableModel);
 			JScrollPane scrollPane = new JScrollPane(BuildingTable);
+			
+			BuildingTable.getTableHeader().setFont(new Font("맑은 고딕", Font.BOLD, 14));
+			// 테이블 내용 글씨 크기 설정
+			BuildingTable.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+			BuildingTable.setRowHeight(25); // 행 높이 조정
 
-			// 전체시간표조회 & 삭제 버튼
+			// 조회 & 삭제 버튼
 			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-			JButton btnViewAll = new JButton("전체강의실 조회");
+			JButton btnViewAll = new JButton("전체건물 조회");
 
 			btnViewAll.setFont(labelFont);
 			buttonPanel.add(btnViewAll);
@@ -960,13 +1140,149 @@ public class ManagerFrame extends JFrame {
 				new ManagerCourseFrame();
 				dispose();
 			});
-
 			btnUnit.addActionListener(e -> {
 				new ManagerUnitFrame();
 				dispose();
 			});
+<<<<<<< HEAD
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
+=======
+//			btnLogout.addActionListener(e -> {
+//				new LoginFrame();
+//				dispose();
+//			});
+			
+			
+			//등록기능
+			btnRegister.addActionListener(e -> {
+			    Connection conn = null;
+			    PreparedStatement ps = null;
+			    ResultSet rs = null;
+
+			    try {
+			        int buildingId = Integer.parseInt(txtBuildingID.getText());
+			        String buildingName = txtBuildingName.getText();
+
+			        conn = DBConnector.getConnection();
+
+			        // 기존 건물번호가 있는지 확인
+			        String buildingIDSearchsql = "SELECT COUNT(*) FROM buildings WHERE building_id = ?";
+			        ps = conn.prepareStatement(buildingIDSearchsql);
+			        ps.setInt(1, buildingId);
+			        rs = ps.executeQuery();
+
+			        if (rs.next() && rs.getInt(1) > 0) {
+			            // 이미 존재하는 건물 번호일 경우
+			            JOptionPane.showMessageDialog(
+			                this, 
+			                "이미 건물번호가 등록되어있습니다. 다른 번호를 입력해주세요.", 
+			                "등록 실패", 
+			                JOptionPane.WARNING_MESSAGE
+			            );
+			        } else {
+			            // 새로운 건물 등록
+			            String buildingSavesql = "INSERT INTO buildings (building_id, name) VALUES (?, ?)";
+			            ps = conn.prepareStatement(buildingSavesql);
+			            ps.setInt(1, buildingId);
+			            ps.setString(2, buildingName);
+			            ps.executeUpdate();
+
+			            JOptionPane.showMessageDialog(
+			                this, 
+			                "등록이 완료되었습니다.", 
+			                "등록 성공", 
+			                JOptionPane.INFORMATION_MESSAGE
+			            );
+			        }
+			    } catch (NumberFormatException ex) {
+			        JOptionPane.showMessageDialog(
+			            this, 
+			            "건물 번호는 숫자로 입력해야 합니다.", 
+			            "입력 오류", 
+			            JOptionPane.ERROR_MESSAGE
+			        );
+			    } catch (Exception e2) {
+			        e2.printStackTrace();
+			    } finally {
+			        DBConnector.close(conn, ps, rs);
+			    }
+			});
+
+			
+			//전체 건물 조회 
+			btnViewAll.addActionListener(e -> {
+				Connection conn = null;
+				PreparedStatement ps = null;
+				ResultSet rs = null;
+				
+				try {
+					conn = DBConnector.getConnection();
+					String buildingSearchsql = "select * from buildings";
+					
+					ps = conn.prepareStatement(buildingSearchsql);
+					rs = ps.executeQuery();
+					
+					tableModel.setRowCount(0);
+					
+					while (rs.next()) {
+						int buildingId = rs.getInt("building_id");
+						String buildingName = rs.getString("name");
+						Object[] row = {buildingId,buildingName};
+						tableModel.addRow(row);
+					}			
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}finally {
+					DBConnector.close(conn, ps, rs);
+				}				
+			});
+			
+			//특정 건물 조회 기능
+			btnSearch.addActionListener(e -> {
+			    Connection conn = null;
+			    PreparedStatement ps = null;
+			    ResultSet rs = null;
+
+			    try {
+			        int buildingId = Integer.parseInt(txtBuildingID.getText());
+			        tableModel.setRowCount(0); // 기존 테이블 초기화
+
+			        conn = DBConnector.getConnection();
+			        String buildingSearchsql = "select * from buildings where building_id = ?";
+			        
+			        ps = conn.prepareStatement(buildingSearchsql);
+			        ps.setInt(1, buildingId);
+			        rs = ps.executeQuery();
+
+			        if (rs.next()) {
+			            do {
+			                String buildingName = rs.getString("name");
+			                Object[] row = { buildingId, buildingName };
+			                tableModel.addRow(row);
+			            } while (rs.next());
+			        } else {
+			            // 검색된 건물이 없을 경우 팝업 표시
+			            JOptionPane.showMessageDialog(
+			                this, 
+			                "검색된 건물이 없습니다.", 
+			                "검색 결과", 
+			                JOptionPane.INFORMATION_MESSAGE
+			            );
+			        }
+			    } catch (NumberFormatException ex) {
+			        JOptionPane.showMessageDialog(
+			            this, 
+			            "올바른 건물 번호를 입력해주세요.", 
+			            "입력 오류", 
+			            JOptionPane.ERROR_MESSAGE
+			        );
+			    } catch (Exception e2) {
+			        e2.printStackTrace();
+			    } finally {
+			        DBConnector.close(conn, ps, rs);
+			    }
+>>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
 			});
 
 			add(BuildingPanel);
@@ -998,15 +1314,15 @@ public class ManagerFrame extends JFrame {
 			JButton btnPrevios = new JButton("이전화면으로 돌아가기");
 			JButton btnBuilding = new JButton("건물 관리");
 			JButton btnUnit = new JButton("강의실 관리");
-			JButton btnLogout = new JButton("로그아웃");
+			//JButton btnLogout = new JButton("로그아웃");
 
 			// 로그아웃 버튼 크기 통일 - 고정
-			btnLogout.setPreferredSize(new Dimension(100, 30));
-			Font tabFont = new Font("맑은 고딕", Font.BOLD, 12);
+			//btnLogout.setPreferredSize(new Dimension(100, 30));
+			Font tabFont = new Font("맑은 고딕", Font.BOLD, 13);
 			btnPrevios.setFont(tabFont);
 			btnBuilding.setFont(tabFont);
 			btnUnit.setFont(tabFont);
-			btnLogout.setFont(tabFont);
+			//btnLogout.setFont(tabFont);
 
 			// 현재 페이지 표시 (버튼 색상 변경) - 고정
 			btnUnit.setBackground(Color.LIGHT_GRAY);
@@ -1014,26 +1330,30 @@ public class ManagerFrame extends JFrame {
 			tabPanel.add(btnPrevios);
 			tabPanel.add(btnBuilding);
 			tabPanel.add(btnUnit);
-			tabPanel.add(btnLogout);
+			//tabPanel.add(btnLogout);
 
+			//topPanel.add(btnLogout, BorderLayout.EAST);
 			topPanel.add(tabPanel, BorderLayout.WEST);
-			topPanel.add(btnLogout, BorderLayout.EAST);
 			BuildingPanel.add(topPanel, BorderLayout.NORTH);
 
 			// 입력 폼 패널
 			JPanel formPanel = new JPanel(new GridBagLayout());
-
-			formPanel.setBorder(BorderFactory.createTitledBorder("강의실 등록 및 조회"));
-			formPanel.setPreferredSize(new Dimension(320, 300)); // 크기 확장
+			
+			formPanel.setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createEtchedBorder(), "강의실 등록 및 조회", 
+					TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, 
+					new Font("맑은 고딕", Font.BOLD, 18) // formPanel 제목 글씨 크기 적용
+					));
+			formPanel.setPreferredSize(new Dimension(450, 300)); // 크기 확장
 			GridBagConstraints gbc = new GridBagConstraints();
 			gbc.insets = new Insets(20, 10, 10, 30); // 간격 조정
 			gbc.anchor = GridBagConstraints.WEST;
 
-			Font labelFont = new Font("맑은 고딕", Font.BOLD, 13);
-			Font fieldFont = new Font("맑은 고딕", Font.BOLD, 12);
+			Font labelFont = new Font("맑은 고딕", Font.BOLD, 14);
+			Font fieldFont = new Font("맑은 고딕", Font.BOLD, 14);
 
-			txtBuildingID = new JTextField(10); // 크기 확장
-			txtUnitID = new JTextField(10);
+			txtBuildingID = new JTextField(15); // 크기 확장
+			txtUnitID = new JTextField(15);
 
 			JButton btnSearch = new JButton("조회하기");
 			JButton btnRegister = new JButton("등록하기");
@@ -1046,13 +1366,17 @@ public class ManagerFrame extends JFrame {
 
 			gbc.gridx = 0;
 			gbc.gridy = 0;
-			formPanel.add(new JLabel("건물 번호:", JLabel.RIGHT), gbc);
+			JLabel lblBuildingID = new JLabel("건물 번호:", JLabel.RIGHT);
+			lblBuildingID.setFont(labelFont);
+			formPanel.add(lblBuildingID, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtBuildingID, gbc);
 
 			gbc.gridx = 0;
 			gbc.gridy = 1;
-			formPanel.add(new JLabel("강의실 번호:", JLabel.RIGHT), gbc);
+			JLabel lblUnitID = new JLabel("강의실 번호:", JLabel.RIGHT);
+			lblUnitID.setFont(labelFont);
+			formPanel.add(lblUnitID, gbc);
 			gbc.gridx = 1;
 			formPanel.add(txtUnitID, gbc);
 
@@ -1069,8 +1393,13 @@ public class ManagerFrame extends JFrame {
 			tableModel = new DefaultTableModel(columnNames, 0);
 			UnitTable = new JTable(tableModel);
 			JScrollPane scrollPane = new JScrollPane(UnitTable);
+			
+			UnitTable.getTableHeader().setFont(new Font("맑은 고딕", Font.BOLD, 14));
+			// 테이블 내용 글씨 크기 설정
+			UnitTable.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+			UnitTable.setRowHeight(25); // 행 높이 조정
 
-			// 전체시간표조회 & 삭제 버튼
+			// 전체조회 & 삭제 버튼
 			JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
 			JButton btnViewAll = new JButton("전체강의실 조회");
@@ -1100,9 +1429,16 @@ public class ManagerFrame extends JFrame {
 				dispose();
 			});
 
+<<<<<<< HEAD
 			btnLogout.addActionListener(e -> {
 				new LoginFrame();
 			});
+=======
+//			btnLogout.addActionListener(e -> {
+//				new LoginFrame();
+//				dispose();
+//			});
+>>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
 
 			btnViewAll.addActionListener(e -> {
 				tableModel.setRowCount(0);
