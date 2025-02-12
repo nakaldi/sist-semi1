@@ -112,18 +112,7 @@ public class ManagerFrame extends JFrame {
 		homePanel.add(buttonPanel, BorderLayout.CENTER);
 
 		// 버튼 이벤트 (시간표 관리 화면으로 이동)
-<<<<<<< HEAD
-		btnLogout.addActionListener(e -> {
-			new LoginFrame();
-		});
-=======
-		
-//		btnLogout.addActionListener(e -> {
-//			new LoginFrame();
-//			dispose();
-//		});
-		
->>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
+
 		btnSchedule.addActionListener(e -> {
 			new ManagerScheduleFrame();
 			dispose();
@@ -309,16 +298,7 @@ public class ManagerFrame extends JFrame {
 			schedulePanel.add(buttonPanel, BorderLayout.SOUTH);
 
 			// 버튼 이벤트 추가
-<<<<<<< HEAD
-			btnLogout.addActionListener(e -> {
-				new LoginFrame();
-			});
-=======
-//			btnLogout.addActionListener(e -> {
-//				new LoginFrame();
-//				dispose();
-//			});
->>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
+
 
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
@@ -560,16 +540,7 @@ public class ManagerFrame extends JFrame {
 			setVisible(true);
 			
 			// 버튼 이벤트 추가
-<<<<<<< HEAD
-			btnLogout.addActionListener(e -> {
-				new LoginFrame();
-			});
-=======
-//			btnLogout.addActionListener(e -> {
-//				new LoginFrame();
-//				dispose();
-//			});
->>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
+
 
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
@@ -771,16 +742,6 @@ public class ManagerFrame extends JFrame {
 			studentPanel.add(buttonPanel, BorderLayout.SOUTH);
 
 			// 버튼 이벤트 추가
-<<<<<<< HEAD
-			btnLogout.addActionListener(e -> {
-				new LoginFrame();
-			});
-=======
-//			btnLogout.addActionListener(e -> {
-//				new LoginFrame();
-//				dispose();
-//			});
->>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
 
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
@@ -950,16 +911,7 @@ public class ManagerFrame extends JFrame {
 			coursePanel.add(buttonPanel, BorderLayout.SOUTH);
 
 			// 버튼 이벤트 추가
-<<<<<<< HEAD
-			btnLogout.addActionListener(e -> {
-				new LoginFrame();
-			});
-=======
-//			btnLogout.addActionListener(e -> {
-//				new LoginFrame();
-//				dispose();
-//			});
->>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
+
 
 			btnHome.addActionListener(e -> {
 				new ManagerFrame();
@@ -1144,14 +1096,7 @@ public class ManagerFrame extends JFrame {
 				new ManagerUnitFrame();
 				dispose();
 			});
-<<<<<<< HEAD
-			btnLogout.addActionListener(e -> {
-				new LoginFrame();
-=======
-//			btnLogout.addActionListener(e -> {
-//				new LoginFrame();
-//				dispose();
-//			});
+
 			
 			
 			//등록기능
@@ -1282,7 +1227,7 @@ public class ManagerFrame extends JFrame {
 			    } finally {
 			        DBConnector.close(conn, ps, rs);
 			    }
->>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
+
 			});
 
 			add(BuildingPanel);
@@ -1429,16 +1374,7 @@ public class ManagerFrame extends JFrame {
 				dispose();
 			});
 
-<<<<<<< HEAD
-			btnLogout.addActionListener(e -> {
-				new LoginFrame();
-			});
-=======
-//			btnLogout.addActionListener(e -> {
-//				new LoginFrame();
-//				dispose();
-//			});
->>>>>>> a2a64efe5cae380830475d92036af6a77891d1ee
+
 
 			btnViewAll.addActionListener(e -> {
 				tableModel.setRowCount(0);
