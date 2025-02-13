@@ -1642,7 +1642,7 @@ public class ManagerFrame extends JFrame {
 			btnDelete.addActionListener(e -> {
 				int selectedRow = UnitTable.getSelectedRow(); // 선택된 행 가져오기
 				if (selectedRow != -1) { // 선택된 행이 있다면
-					String UnitId = tableModel.getValueAt(selectedRow, 2) + "";
+					String UnitId = tableModel.getValueAt(selectedRow, 0) + "";
 					managerController.deleteVeiwUnit(UnitId);
 					tableModel.removeRow(selectedRow); // 행 삭제
 				} else {

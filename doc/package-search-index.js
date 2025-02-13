@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"kims.semi1.config"},{"l":"kims.semi1.controller"},{"l":"kims.semi1.dao"},{"l":"kims.semi1.main"},{"l":"kims.semi1.model"},{"l":"kims.semi1.service"},{"l":"kims.semi1.util"},{"l":"kims.semi1.view"}];updateSearchResults();
