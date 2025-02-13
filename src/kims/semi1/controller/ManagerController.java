@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import kims.semi1.config.DBConnector;
@@ -418,6 +420,7 @@ public class ManagerController {
 			DBConnector.close(conn, pstmt, rs);
 		}
 	}
+
 	// 강의실 추가 메소드
 	public void insertUnit(Scanner sc) {
 		Connection conn = null;
@@ -447,6 +450,28 @@ public class ManagerController {
 		}
 	}
 
+	public boolean insertVeiwUnit(int buildingId,String unitName) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			String insertUnit = "insert into units (building_id, unit) values (?, ?)";
+			unitName = buildingId + "-" + unitName;
+			conn = DBConnector.getConnection();
+			pstmt = conn.prepareStatement(insertUnit);
+			pstmt.setInt(1, buildingId);
+			pstmt.setString(2, unitName);
+			int affectedRows = pstmt.executeUpdate();
+			if (affectedRows > 0) {
+				return true;
+			} 
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, pstmt);
+		}
+		return false;
+	}
 	// 강의실 삭제 메소드
 	public void deleteUnit(Scanner sc) {
 		System.out.println("삭제하시겠습니까? 1. 삭제 2. 취소");
@@ -481,6 +506,29 @@ public class ManagerController {
 		case 2:
 			System.out.println("취소했습니다");
 			break;
+		}
+	}
+
+	public void deleteVeiwUnit(String unitId) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		System.out.print("강의실ID>> ");
+		try {
+			conn = DBConnector.getConnection();
+			String DeleteUnit = "DELETE FROM units WHERE unit = ?";
+			pstmt = conn.prepareStatement(DeleteUnit);
+			pstmt.setString(1, unitId);
+			int affectedRows = pstmt.executeUpdate();
+			if (affectedRows > 0) {
+				System.out.println("삭제되었습니다");
+			} else {
+				System.out.println("삭제가 안되었습니다");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBConnector.close(conn, pstmt);
 		}
 	}
 
@@ -585,7 +633,8 @@ public class ManagerController {
 	}
 
 	// view용 등록
-	public void saveVeiwClassScheduleInfo(int courseId, String dayOfWeek, String startTime, String endTime, String unit) {
+	public boolean saveVeiwClassScheduleInfo(int courseId, String dayOfWeek, String startTime, String endTime,
+			String unit) {
 		ClassSchedule classShedule = new ClassSchedule(0, 0, null, null, null, null);
 		classShedule.setCourseId(courseId);
 		classShedule.setDayOfWeek(dayOfWeek);
@@ -603,9 +652,9 @@ public class ManagerController {
 		classShedule.setEndTime(endTime);
 		classShedule.setUnit(unit);
 		if (insertClassScheduleInfo(classShedule) == null) {
-			System.out.println("등록실패");
+			return false;
 		} else {
-			System.out.println("등록성공");
+			return true;
 		}
 	}
 
@@ -670,8 +719,9 @@ public class ManagerController {
 	public ClassSchedule insertClassScheduleInfo(ClassSchedule newClassSchedule) {
 		return classScheduleDao.insertClassSchedule(newClassSchedule) ? newClassSchedule : null;
 	}
-	
-	public void saveViewProfessorInfo(int professorId, String name, String phone, String birthDate, String email, int departmentId) {
+
+	public boolean saveViewProfessorInfo(int professorId, String name, String phone, String birthDate, String email,
+			int departmentId) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		String professorSaveSql = "insert into professors(professor_id,name,phone,birth_date,email,password,department_id,hire_date )\r\n"
@@ -686,16 +736,16 @@ public class ManagerController {
 			pstmt.setString(5, birthDate);
 			pstmt.setInt(6, departmentId);
 			int affectedRows = pstmt.executeUpdate();
-			if (affectedRows > 0) {
-				System.out.println("등록되었습니다");
-			} else {
-				System.out.println("등록이 안되었습니다");
+			if (affectedRows < 0) {
+				return false;
 			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			DBConnector.close(conn, pstmt);
 		}
+		return true;
 	}
 
 	// 학생정보조회 학생정보등록 나가기 화면을 보여주면서 선택할 수 있는 메소드
@@ -850,8 +900,10 @@ public class ManagerController {
 			DBConnector.close(conn, pstmt);
 		}
 	}
+
 	// view용
-	public void insertViewStudentInfo(String studentName,String phone,String birthDate,String email,int department_id ) {
+	public boolean insertViewStudentInfo(String studentName, String phone, String birthDate, String email,
+			int department_id) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		String insertStudentInfo = "insert into students values(to_char(sysdate,'yyyy')||LPAD(seq_student_num.nextval,6,'0'), ?, ?, ?, ?, to_char(to_date(?,'yyyy/mm/dd'),'yyyymmdd'), ?, to_char(sysdate,'yyyy'))";
@@ -865,16 +917,15 @@ public class ManagerController {
 			pstmt.setString(5, birthDate);
 			pstmt.setInt(6, department_id);
 			int affectedRows = pstmt.executeUpdate();
-			if (affectedRows > 0) {
-				System.out.println("등록되었습니다");
-			} else {
-				System.out.println("등록이 안되었습니다");
+			if (affectedRows < 0) {
+				return false;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			DBConnector.close(conn, pstmt);
 		}
+		return true;
 	}
 
 }

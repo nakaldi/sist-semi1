@@ -791,7 +791,12 @@ public class ProfessorFrame extends Frame {
 				}
 
 				// 폭을 맞추기 위해 String.format() 사용
+<<<<<<< HEAD
 				String courseInfo = String.format("%-4s | %-24s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
+=======
+
+				String courseInfo = String.format("%-4s | %-30s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
+>>>>>>> 620d2a4a8424e44c03e2352a32c7288d8b186165
 						building, semester, syllabus);
 
 				courseList.add(courseInfo);

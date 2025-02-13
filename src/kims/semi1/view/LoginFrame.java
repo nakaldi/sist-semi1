@@ -26,7 +26,8 @@ public class LoginFrame extends Frame {
 	private Button btnLogin;
 	private Button btnFindId;
 	private Panel panel;
-
+	
+//TODO 이놈쉬끼만 하믄 된다
 	public LoginFrame() {
 		setTitle("학사관리시스템 로그인");
 		setSize(1200, 800);

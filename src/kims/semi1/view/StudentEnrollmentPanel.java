@@ -25,13 +25,11 @@ import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
 import kims.semi1.controller.StudentController;
@@ -134,6 +132,8 @@ public class StudentEnrollmentPanel {
 			table1.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
 			table1.setRowHeight(26);
 			table1.setIntercellSpacing(new Dimension(1, 1));
+			table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
 			GridBagConstraints gbc_table1 = new GridBagConstraints();
 			gbc_table1.anchor = GridBagConstraints.NORTH;
 			gbc_table1.weighty = 0.2;
@@ -271,7 +271,7 @@ public class StudentEnrollmentPanel {
 			}
 
 		});
-		
+
 		table2.getSelectionModel().addListSelectionListener(e -> {
 			if (!e.getValueIsAdjusting() && table2.getSelectedRow() != -1) {
 				int selectedRow = table1.getSelectedRow();
@@ -287,14 +287,19 @@ public class StudentEnrollmentPanel {
 		btnConditionSearchButton.addActionListener(e -> sortTable1ByFilter());
 
 		setTablesByRadioButton();
-		setCourseinfoTable(courseInfos, columnNames);
 		sortTable1ByFilter();
 		StudentFrame.setBackgroundDisableForAllComponents(innerPanel);
 		return innerPanel;
 	}
 
 	public void setCourseinfoTable(Object[][] courseInfos, String[] columnNames) {
-		DefaultTableModel tableModel = new DefaultTableModel(courseInfos, columnNames);
+		DefaultTableModel tableModel = new DefaultTableModel(courseInfos, columnNames) {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false; // 모든 셀 편집 불가
+			}
+		};
+
 		table1.setModel(tableModel);
 		sorter = new TableRowSorter<>(tableModel);
 		table1.setRowSorter(sorter);
@@ -316,20 +321,17 @@ public class StudentEnrollmentPanel {
 	}
 
 	public void sortTable1ByFilter() {
-
 		String condition = searchField.getText();
 		int comboIndex = comboBox.getSelectedIndex() - 1;
 		if (comboIndex == -1) {
 			searchField.setText("");
 		}
-
 		if (condition.trim().length() == 0 || comboIndex == -1) {
 			sorter.setRowFilter(null);
 		} else {
-			// 특정 열에서 검색 - 이 예제에서는 Name 열 (인덱스 1)을 검색
+			// 특정 열에서 검색
 			sorter.setRowFilter(RowFilter.regexFilter("(?i)" + condition, comboIndex));
 		}
-
 	}
 
 	// 강의계획서 팝업 창

@@ -15,6 +15,7 @@ import kims.semi1.model.Course;
 import kims.semi1.model.CourseInfo;
 import kims.semi1.model.Department;
 import kims.semi1.model.Enrollment;
+import kims.semi1.model.Grade;
 import kims.semi1.model.Professor;
 import kims.semi1.model.Student;
 import kims.semi1.service.StudentService;
@@ -227,22 +228,82 @@ public class StudentController {
 				.toArray(size -> new Object[size][8]);
 	}
 
+	public boolean updateStudentReview(int courseId, String review) {
+		List<Enrollment> enrollmentInfos = studentService
+				.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(), "1");
+		enrollmentInfos.addAll(studentService.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(), "2"));
+		Grade grade = enrollmentInfos.stream().filter(t -> t.getCourseId() == courseId).findFirst().get().getGrade();
+		grade.setStudentReview(review);
+
+		return studentDao.updateReviewFromGrade(grade);
+	}
+
 	public Object[][] searchEnrollmentInfosToArray(String semester) {
 		List<Enrollment> enrollmentInfos = studentService
 				.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(), semester);
 
 		if (enrollmentInfos.size() == 0) {
-			return new Object[][] { { "", "아직", "신청된", "강의가", "없습니다", "", "", "" } };
+			return new Object[][] { { "", "아직", "신청된", "강의가", "없습니다", "", "" } };
 		}
 		return enrollmentInfos.stream()
 				.map(t -> new Object[] { t.getCourseInfo().getCourse().getCourseId(),
 						t.getCourseInfo().getCourse().getName(), t.getCourseInfo().getProfessor().getName(),
 						t.getCourseInfo().getDepartment().getName(), t.getCourseInfo().getCourse().getCredit(),
-						t.getCourseInfo().getCourse().getSemester(),
 						t.getCourseInfo().getClassSchedule().getDayOfWeek(),
 						(t.getCourseInfo().getClassSchedule().getStartTime() + "-"
 								+ t.getCourseInfo().getClassSchedule().getEndTime()) })
-				.toArray(size -> new Object[size][8]);
+				.toArray(size -> new Object[size][7]);
+	}
+
+	public Object[][] makeTimeTableInfoBySemester(String semester) {
+		List<Enrollment> enrollmentInfos = studentService
+				.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(), semester);
+
+		return generateSchedule(enrollmentInfos);
+	}
+
+	public Object[][] generateSchedule(List<Enrollment> enrollmentInfos) {
+		String[] header = new String[] { "시간", "월", "화", "수", "목", "금" };
+		Object[][] schedule = new Object[10][6];
+		System.arraycopy(header, 0, schedule[0], 0, header.length);
+
+		String[] timeSlots = new String[9];
+		for (int i = 0; i < timeSlots.length; i++) {
+			timeSlots[i] = String.format("%02d:00", 9 + i);
+			schedule[i + 1][0] = timeSlots[i]; // 첫 번째 열에 시간 추가
+		}
+		for (Enrollment enrollment : enrollmentInfos) {
+			ClassSchedule scheduleInfo = enrollment.getCourseInfo().getClassSchedule();
+			String day = scheduleInfo.getDayOfWeek();
+			String startTime = scheduleInfo.getStartTime();
+			String endTime = scheduleInfo.getEndTime();
+
+			int col = getDayColumn(day);
+			int startRow = Integer.parseInt(startTime.split(":")[0]) - 8;
+			int endRow = Integer.parseInt(endTime.split(":")[0]) - 8;
+
+			for (int row = startRow; row < endRow; row++) {
+				schedule[row][col] = enrollment.getCourseInfo().getCourse().getName();
+			}
+		}
+		return schedule;
+	}
+
+	private int getDayColumn(String day) {
+		switch (day) {
+		case "월":
+			return 1;
+		case "화":
+			return 2;
+		case "수":
+			return 3;
+		case "목":
+			return 4;
+		case "금":
+			return 5;
+		default:
+			return -1;
+		}
 	}
 
 	public String makeSyllabus(int courseId) {
@@ -391,9 +452,29 @@ public class StudentController {
 				t -> System.out.println(t.getCourseInfo().getCourse().getName() + "  " + t.getGrade().getGrade()));
 	}
 
-	private void searchGrades() {
-		
+	public Object[][] searchGrades(String semester) {
+		Integer sum = 0;
+		Double avg = 0.0;
+		List<Enrollment> enrollmentInfos = studentService
+				.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(), semester);
+		sum = enrollmentInfos.stream().mapToInt(t -> Integer.parseInt(t.getCourseInfo().getCourse().getCredit())).sum();
+		avg = enrollmentInfos.stream().mapToDouble(t -> t.getGrade().getGrade()).average().orElse(0.0);
+
+		String[] footer = new String[] { "", "", "총 이수학점 :", Integer.toString(sum), "평균 학점 :",
+				String.format("%.2f", avg) };
+		Object[][] grades = enrollmentInfos.stream()
+				.map(t -> new Object[] { t.getCourseInfo().getCourse().getCourseId(),
+						t.getCourseInfo().getCourse().getName(), t.getCourseInfo().getProfessor().getName(),
+						t.getCourseInfo().getCourse().getCredit(), t.getGrade().getGrade(),
+						t.getGrade().getStudentReview() })
+				.toArray(size -> new Object[size][6]);
+		Object[][] newGrades = new Object[grades.length + 1][footer.length];
+		System.arraycopy(grades, 0, newGrades, 0, grades.length);
+		System.arraycopy(footer, 0, newGrades[grades.length], 0, footer.length);
+		return newGrades;
+
 	}
+
 	// 한 학기 취득학점 , 성적 평균 조회
 	private void searchPrintGrades(Scanner sc) {
 		String input = selectSemester(sc);

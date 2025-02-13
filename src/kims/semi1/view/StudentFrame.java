@@ -1,17 +1,12 @@
 package kims.semi1.view;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Label;
 import java.awt.Panel;
 
 import javax.swing.ImageIcon;
@@ -19,8 +14,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
-import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import kims.semi1.controller.StudentController;
@@ -36,12 +29,14 @@ public class StudentFrame {
 	public StudentEnrollmentPanel studentEnrollmentPanel;
 	public StudentMypagePanel studentMypagePanel;
 	public StudentEnrollSpecPanel studentEnrollSpecPanel;
+	public StudentTimeTablePanel studentTimeTablePanel;
+	public StudentGradePanel studentGradePanel;
 
 	public StudentFrame(StudentController studentController) {
 		this.studentController = studentController;
 		createStudentFrame();
 	}
-	
+
 	public void createStudentFrame() {
 		frame = new JFrame();
 		frame.setBounds(50, 50, 1200, 800);
@@ -87,9 +82,17 @@ public class StudentFrame {
 		btnNewButton_3.setBounds(0, 145, 250, 45);
 		sidePanel.add(btnNewButton_3);
 
+		JButton btnNewButton_4 = new JButton("시간표 확인                    ", icon);
+		btnNewButton_4.setHorizontalTextPosition(SwingConstants.CENTER);
+		btnNewButton_4.setVerticalTextPosition(SwingConstants.CENTER);
+		btnNewButton_4.setBorderPainted(false); // 경계선 제거
+		btnNewButton_4.setFocusPainted(false); // 포커스 표시 제거
+		btnNewButton_4.setBounds(0, 190, 250, 45);
+		sidePanel.add(btnNewButton_4);
+
 		JSeparator separator = new JSeparator();
 		separator.setForeground(new Color(192, 192, 192));
-		separator.setBounds(0, 210, 250, 2);
+		separator.setBounds(0, 255, 250, 2);
 		sidePanel.add(separator);
 
 		Font newFont = new Font("Malgun Gothic", Font.PLAIN, 15);
@@ -98,20 +101,23 @@ public class StudentFrame {
 		studentMypagePanel = new StudentMypagePanel(studentController);
 		studentEnrollmentPanel = new StudentEnrollmentPanel(frame, studentController);
 		studentEnrollSpecPanel = new StudentEnrollSpecPanel(frame, studentController);
-		// 메인 패널 (CardLayout 사용)
+		studentTimeTablePanel = new StudentTimeTablePanel(frame, studentController);
+		studentGradePanel = new StudentGradePanel(frame, studentController);
+	
+		// 메인 패널 CardLayout 으로 버튼 클릭시마다 버튼과 연결된 패널로 바뀌도록함
 		cardLayout = new CardLayout();
 		mainPanel = new Panel(cardLayout);
 		mainPanel.setBackground(new Color(245, 245, 245));
 		mainPanel.add(studentMypagePanel.createMyPagePanel(), "마이페이지");
 		mainPanel.add(studentEnrollmentPanel.createEnrollmentPanel(), "수강신청");
 		mainPanel.add(studentEnrollSpecPanel.createEnrollSpecPanel(), "수강현황");
-		mainPanel.add(new Label("성적관리 화면 (추후 구현)"), "성적확인");
+		mainPanel.add(studentGradePanel.createGradePanel(), "성적확인");
+		mainPanel.add(studentTimeTablePanel.createTimeTablePanel(), "시간표");
 		frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 
 		btnNewButton.setIcon(selectedIcon);
 
 		// 버튼 클릭 시 화면 변경
-
 		btnNewButton.addActionListener(e -> {
 			cardLayout.show(mainPanel, "마이페이지");
 			mainPanel.revalidate();
@@ -120,6 +126,7 @@ public class StudentFrame {
 			btnNewButton_1.setIcon(icon);
 			btnNewButton_2.setIcon(icon);
 			btnNewButton_3.setIcon(icon);
+			btnNewButton_4.setIcon(icon);
 		});
 
 		btnNewButton_1.addActionListener(e -> {
@@ -128,6 +135,8 @@ public class StudentFrame {
 			btnNewButton.setIcon(icon);
 			btnNewButton_2.setIcon(icon);
 			btnNewButton_3.setIcon(icon);
+			btnNewButton_4.setIcon(icon);
+			studentEnrollmentPanel.setTablesByRadioButton();
 		});
 
 		btnNewButton_2.addActionListener(e -> {
@@ -136,6 +145,8 @@ public class StudentFrame {
 			btnNewButton_1.setIcon(icon);
 			btnNewButton.setIcon(icon);
 			btnNewButton_3.setIcon(icon);
+			btnNewButton_4.setIcon(icon);
+			studentEnrollSpecPanel.setTablesByRadioButton();
 		});
 
 		btnNewButton_3.addActionListener(e -> {
@@ -143,7 +154,19 @@ public class StudentFrame {
 			btnNewButton_3.setIcon(selectedIcon);
 			btnNewButton_1.setIcon(icon);
 			btnNewButton_2.setIcon(icon);
+			btnNewButton_4.setIcon(icon);
 			btnNewButton.setIcon(icon);
+			studentGradePanel.setTablesByRadioButton();
+		});
+
+		btnNewButton_4.addActionListener(e -> {
+			cardLayout.show(mainPanel, "시간표");
+			btnNewButton_4.setIcon(selectedIcon);
+			btnNewButton_1.setIcon(icon);
+			btnNewButton_2.setIcon(icon);
+			btnNewButton_3.setIcon(icon);
+			btnNewButton.setIcon(icon);
+			studentTimeTablePanel.setTablesByRadioButton();
 		});
 
 		frame.setVisible(true);
@@ -166,7 +189,5 @@ public class StudentFrame {
 			}
 		}
 	}
-
-
 
 }
