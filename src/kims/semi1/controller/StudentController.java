@@ -266,7 +266,7 @@ public class StudentController {
 
 	public Object[][] generateSchedule(List<Enrollment> enrollmentInfos) {
 		String[] header = new String[] { "시간", "월", "화", "수", "목", "금" };
-		Object[][] schedule = new Object[10][6];
+		Object[][] schedule = new Object[10][7];
 		System.arraycopy(header, 0, schedule[0], 0, header.length);
 
 		String[] timeSlots = new String[9];
@@ -281,6 +281,7 @@ public class StudentController {
 			String endTime = scheduleInfo.getEndTime();
 
 			int col = getDayColumn(day);
+		
 			int startRow = Integer.parseInt(startTime.split(":")[0]) - 8;
 			int endRow = Integer.parseInt(endTime.split(":")[0]) - 8;
 
@@ -304,7 +305,7 @@ public class StudentController {
 		case "금":
 			return 5;
 		default:
-			return -1;
+			return 6;
 		}
 	}
 
