@@ -1635,7 +1635,7 @@ public class ManagerFrame extends JFrame {
 					Building b = t.getBuilding();
 					Unit u = t.getUnit();
 					Object[] row = { b.getBuildingId(), b.getName(), u.getUnitId() };
-					
+					tableModel.addRow(row);
 				});
 			});
 
@@ -1688,6 +1688,17 @@ public class ManagerFrame extends JFrame {
 				int buildingId = Integer.parseInt(txtBuildingID.getText());
 				String unitId = txtUnitID.getText();
 				if (managerController.insertVeiwUnit(buildingId, unitId)) {
+					List<CourseInfo> unitBuildingInfos = classScheduleDao
+							.findUnitBuildingInfos(Integer.parseInt(txtBuildingID.getText()), txtUnitID.getText());
+					unitBuildingInfos.stream().forEach(t -> {
+						Building b = t.getBuilding();
+						Unit u = t.getUnit();
+						Object[] row = { b.getBuildingId(), b.getName(), u.getUnitId() };
+						tableModel.addRow(row);
+					});
+
+		            txtBuildingID.setText("");
+		            txtUnitID.setText("");
 					JOptionPane.showMessageDialog(BuildingPanel, "등록되었습니다.", "확인", JOptionPane.INFORMATION_MESSAGE);
 				} else {
 					JOptionPane.showMessageDialog(BuildingPanel, "등록실패했습니다.", "확인", JOptionPane.INFORMATION_MESSAGE);
