@@ -355,17 +355,18 @@ public class ProfessorFrame extends Frame {
 		// 컬럼 헤더 패널 (성적 입력 완료)
 		Panel columnHeaderPanelRegistered = new Panel(new FlowLayout(FlowLayout.LEFT));
 		columnHeaderPanelRegistered.setBackground(Color.LIGHT_GRAY);
-		Label lblCompletionStatusRegistered = new Label("성적 입력 완료|");
 		Label lblCourseIdHeaderRegistered = new Label("강의 ID");
 		lblCourseIdHeaderRegistered.setPreferredSize(new Dimension(50, 20));
 		Label lblStudentIdHeaderRegistered = new Label("학생 ID"); // 학생 ID 컬럼
-		lblStudentIdHeaderRegistered.setPreferredSize(new Dimension(50, 20));
+		lblStudentIdHeaderRegistered.setPreferredSize(new Dimension(70, 20));
 		Label lblCourseNameHeaderRegistered = new Label("강의 이름");
-		lblCourseNameHeaderRegistered.setPreferredSize(new Dimension(70, 20));
+		lblCourseNameHeaderRegistered.setPreferredSize(new Dimension(90, 20));
 		Label lblStudentNameHeaderRegistered = new Label("학생 이름");
 		lblStudentNameHeaderRegistered.setPreferredSize(new Dimension(70, 20));
 		Label lblGradeHeaderRegistered = new Label("성적");
-		lblGradeHeaderRegistered.setPreferredSize(new Dimension(40, 20));
+		lblGradeHeaderRegistered.setPreferredSize(new Dimension(750, 20));
+		Label lblCompletionStatusRegistered = new Label("성적 입력 완료 목록");
+
 
 		columnHeaderPanelRegistered.add(lblCourseIdHeaderRegistered);
 		columnHeaderPanelRegistered.add(lblStudentIdHeaderRegistered); // 학생 ID 컬럼
@@ -382,21 +383,22 @@ public class ProfessorFrame extends Frame {
 		// 컬럼 헤더 패널 (성적 입력 미완료)
 		Panel columnHeaderPanelUnregistered = new Panel(new FlowLayout(FlowLayout.LEFT));
 		columnHeaderPanelUnregistered.setBackground(Color.LIGHT_GRAY);
-		Label lblCompletionStatusUnregistered = new Label("성적 입력 미완료|");
+		
 		Label lblCourseIdHeaderUnregistered = new Label("강의 ID");
 		lblCourseIdHeaderUnregistered.setPreferredSize(new Dimension(50, 20));
 		Label lblStudentIdHeaderUnregistered = new Label("학생 ID"); // 학생 ID 컬럼
-		lblStudentIdHeaderUnregistered.setPreferredSize(new Dimension(50, 20));
+		lblStudentIdHeaderUnregistered.setPreferredSize(new Dimension(70, 20));
 		Label lblCourseNameHeaderUnregistered = new Label("강의 이름");
-		lblCourseNameHeaderUnregistered.setPreferredSize(new Dimension(70, 20));
+		lblCourseNameHeaderUnregistered.setPreferredSize(new Dimension(90, 20));
 		Label lblStudentNameHeaderUnregistered = new Label("학생 이름");
-		lblStudentNameHeaderUnregistered.setPreferredSize(new Dimension(70, 20));
-
+		lblStudentNameHeaderUnregistered.setPreferredSize(new Dimension(800, 20));
+		Label lblGradeInputSuccess = new Label("성적 입력 미완료 목록");
+		
 		columnHeaderPanelUnregistered.add(lblCourseIdHeaderUnregistered);
 		columnHeaderPanelUnregistered.add(lblStudentIdHeaderUnregistered); // 학생 ID 컬럼
 		columnHeaderPanelUnregistered.add(lblCourseNameHeaderUnregistered);
 		columnHeaderPanelUnregistered.add(lblStudentNameHeaderUnregistered);
-		columnHeaderPanelUnregistered.add(lblCompletionStatusUnregistered);
+		columnHeaderPanelUnregistered.add(lblGradeInputSuccess);
 
 		// 성적 입력 미완료 리스트 패널
 		Panel unregisteredPanel = new Panel(new BorderLayout());
@@ -672,63 +674,63 @@ public class ProfessorFrame extends Frame {
 		return courseId;
 	}
 
-	private void loadTimetableData(Panel displayPanel) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
-
-			// SQL 쿼리 실행
-			String sql = "SELECT cs.day_of_week, cs.start_time, cs.end_time, c.name AS course_name "
-					+ "FROM class_schedules cs " + "JOIN courses c ON cs.course_id = c.course_id "
-					+ "WHERE c.professor_id = ? " + "ORDER BY cs.day_of_week, cs.start_time";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, professorId);
-			rs = pstmt.executeQuery();
-
-			// 기존 내용 지우기
-			displayPanel.removeAll();
-
-			while (rs.next()) {
-				String dayOfWeek = rs.getString("day_of_week");
-				String startTime = rs.getString("start_time");
-				String endTime = rs.getString("end_time");
-				String courseName = rs.getString("course_name");
-
-				// 시간표 정보 문자열 생성
-				String timetableInfo = String.format("%s: %s-%s, %s", dayOfWeek, startTime, endTime, courseName);
-
-				// Label 생성 및 Panel에 추가
-				Label label = new Label(timetableInfo);
-				displayPanel.add(label);
-			}
-
-			// UI 갱신
-			displayPanel.revalidate();
-			displayPanel.repaint();
-
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
-		} catch (SQLException e) {
-			System.err.println("SQL 에러: " + e.getMessage());
-			e.printStackTrace();
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+//	private void loadTimetableData(Panel displayPanel) {
+//		Connection conn = null;
+//		PreparedStatement pstmt = null;
+//		ResultSet rs = null;
+//
+//		try {
+//			Class.forName(JDBC_DRIVER);
+//			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+//
+//			// SQL 쿼리 실행
+//			String sql = "SELECT cs.day_of_week, cs.start_time, cs.end_time, c.name AS course_name "
+//					+ "FROM class_schedules cs " + "JOIN courses c ON cs.course_id = c.course_id "
+//					+ "WHERE c.professor_id = ? " + "ORDER BY cs.day_of_week, cs.start_time";
+//			pstmt = conn.prepareStatement(sql);
+//			pstmt.setInt(1, professorId);
+//			rs = pstmt.executeQuery();
+//
+//			// 기존 내용 지우기
+//			displayPanel.removeAll();
+//
+//			while (rs.next()) {
+//				String dayOfWeek = rs.getString("day_of_week");
+//				String startTime = rs.getString("start_time");
+//				String endTime = rs.getString("end_time");
+//				String courseName = rs.getString("course_name");
+//
+//				// 시간표 정보 문자열 생성
+//				String timetableInfo = String.format("%s: %s-%s, %s", dayOfWeek, startTime, endTime, courseName);
+//
+//				// Label 생성 및 Panel에 추가
+//				Label label = new Label(timetableInfo);
+//				displayPanel.add(label);
+//			}
+//
+//			// UI 갱신
+//			displayPanel.revalidate();
+//			displayPanel.repaint();
+//
+//		} catch (ClassNotFoundException e) {
+//			System.err.println("드라이버 로딩 실패: " + e.getMessage());
+//			e.printStackTrace();
+//		} catch (SQLException e) {
+//			System.err.println("SQL 에러: " + e.getMessage());
+//			e.printStackTrace();
+//		} finally {
+//			try {
+//				if (rs != null)
+//					rs.close();
+//				if (pstmt != null)
+//					pstmt.close();
+//				if (conn != null)
+//					conn.close();
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 
 	// Label과 TextField를 추가하는 메소드
 	private void addLabelAndTextField(Panel panel, String labelText, TextField textField) {
@@ -764,6 +766,7 @@ public class ProfessorFrame extends Frame {
 		buttonPanel.add(btnModify);
 		buttonPanel.add(btnSearch);
 		buttonPanel.add(btnDelete);
+		
 
 		btnDelete.addActionListener(new ActionListener() {
 			@Override
@@ -785,6 +788,8 @@ public class ProfessorFrame extends Frame {
 				loadCourse();
 			}
 		});
+		
+		
 
 		// register 버튼 액션 리스너
 		btnRegister.addActionListener(new ActionListener() {
@@ -848,13 +853,13 @@ public class ProfessorFrame extends Frame {
 		columnHeaderPanel.setBackground(Color.LIGHT_GRAY);
 
 		Label lblCourseIdHeader = new Label("강좌 ID");
-		lblCourseIdHeader.setPreferredSize(new Dimension(60, 20));
+		lblCourseIdHeader.setPreferredSize(new Dimension(100, 20));
 		Label lblCourseNameHeader = new Label("강의명");
-		lblCourseNameHeader.setPreferredSize(new Dimension(220, 20));
+		lblCourseNameHeader.setPreferredSize(new Dimension(130, 20));
 		Label lblCreditsHeader = new Label("학점");
 		lblCreditsHeader.setPreferredSize(new Dimension(50, 20));
-		Label lblBuildingHeader = new Label("강의 건물");
-		lblBuildingHeader.setPreferredSize(new Dimension(100, 20));
+		Label lblBuildingHeader = new Label("건물 번호");
+		lblBuildingHeader.setPreferredSize(new Dimension(60, 20));
 		Label lblSemesterHeader = new Label("학기");
 		lblSemesterHeader.setPreferredSize(new Dimension(50, 20));
 		Label lblSyllabusHeader = new Label("강의계획");
@@ -885,6 +890,21 @@ public class ProfessorFrame extends Frame {
 				loadCourse();
 			}
 		});
+		
+		courseList.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        if (e.getClickCount() == 2) {
+		            int selectedIndex = courseList.getSelectedIndex();
+		            if (selectedIndex != -1) {
+		                String selectedCourse = courseList.getItem(selectedIndex);
+		                String courseId = selectedCourse.split("\\|")[0].trim();
+		                openCourseReviewPopup(courseId);
+		            }
+		        }
+		    }
+		});
+
 
 		listPanel.add(courseList, BorderLayout.CENTER);
 		listPanel.add(listButtonPanel, BorderLayout.SOUTH);
@@ -894,6 +914,11 @@ public class ProfessorFrame extends Frame {
 		panel.add(listPanel, BorderLayout.CENTER);
 
 		return panel;
+	}
+	
+	private void openCourseReviewPopup(String courseId) {
+	    CourseReviewPopup popup = new CourseReviewPopup(this, "강의평가", true, courseId);
+	    popup.setVisible(true);
 	}
 
 	public void addCourseFromPopup(String courseName, String courseBuilding, String courseSemester, String courseCredit,
@@ -1018,6 +1043,8 @@ public class ProfessorFrame extends Frame {
 			}
 		}
 	}
+	
+	
 
 	private void updateCourse() {
 		Connection conn = null;
@@ -1144,9 +1171,7 @@ public class ProfessorFrame extends Frame {
 				String semester = rs.getString("semester");
 
 				// Syllabus 내용이 너무 길어지면 ...으로 줄여서 표시
-				if (syllabus.length() > 27) {
-					syllabus = syllabus.substring(0, 27) + "...";
-				}
+				
 
 				// 폭을 맞추기 위해 String.format() 사용
 				String courseInfo = String.format("%-4s | %-18s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
@@ -1380,6 +1405,7 @@ public class ProfessorFrame extends Frame {
 				dispose(); // 팝업 닫기
 			}
 		}
+		
 
 		// 검색 수행 메서드
 		private void performGradeSearch(String courseID, String studentName, String studentID) {
@@ -1486,6 +1512,10 @@ public class ProfessorFrame extends Frame {
 		txtStudentName.setText("");
 		txtStudentGrade.setText("");
 	}
+	
+	
+	
+	
 
 	// 해당 강의를 수강하는 학생인지 확인하고 enrollment_id 가져오기
 	private int getEnrollmentId(Connection conn, String courseID, String studentID) throws SQLException {
@@ -1578,6 +1608,7 @@ public class ProfessorFrame extends Frame {
 				dispose(); // 팝업 닫기
 			}
 		}
+
 
 		// 데이터베이스 업데이트 메서드
 		private void updateGrade(String courseId, String studentName, String newGrade, String grade) {
