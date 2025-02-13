@@ -351,15 +351,6 @@ public class ManagerFrame extends JFrame {
 					tableModel.addRow(row);
 				});
 			});
-			// 저장기능
-			btnRegister.addActionListener(e -> {
-				int courseID = Integer.parseInt(txtLectureID.getText());
-				String dayOfWeek = txtDay.getText();
-				String startTime = txtStartTime.getText();
-				String endTime = txtEndTime.getText();
-				String unit = txtUnit.getText();
-				managerController.saveVeiwClassScheduleInfo(courseID, dayOfWeek, startTime, endTime, unit);
-			});
 
 			// '등록이 되었습니다' 창 추가 부분
 			btnRegister.addActionListener(e -> {
