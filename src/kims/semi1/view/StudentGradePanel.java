@@ -208,7 +208,6 @@ public class StudentGradePanel {
 		radio2.addActionListener(e -> setTablesByRadioButton());
 
 		setTablesByRadioButton();
-		setEnrollmentInfoTable(enrollmentInfos, columnNames);
 		StudentFrame.setBackgroundDisableForAllComponents(innerPanel);
 		return innerPanel;
 	}

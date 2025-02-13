@@ -287,7 +287,6 @@ public class StudentEnrollmentPanel {
 		btnConditionSearchButton.addActionListener(e -> sortTable1ByFilter());
 
 		setTablesByRadioButton();
-		setCourseinfoTable(courseInfos, columnNames);
 		sortTable1ByFilter();
 		StudentFrame.setBackgroundDisableForAllComponents(innerPanel);
 		return innerPanel;

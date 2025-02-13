@@ -198,7 +198,6 @@ public class StudentTimeTablePanel {
 		radio2.addActionListener(e -> setTablesByRadioButton());
 
 		setTablesByRadioButton();
-		setTimeTablefoTable(enrollmentInfos, columnNames);
 		StudentFrame.setBackgroundDisableForAllComponents(innerPanel);
 		return innerPanel;
 	}
