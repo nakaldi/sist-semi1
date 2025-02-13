@@ -12,6 +12,9 @@ import java.util.Scanner;
 import kims.semi1.config.DBConnector;
 import kims.semi1.dao.ClassScheduleDao;
 import kims.semi1.model.ClassSchedule;
+import kims.semi1.model.Course;
+import kims.semi1.model.CourseInfo;
+import kims.semi1.model.Professor;
 import kims.semi1.view.ManagerFrame;
 
 public class ManagerController {
@@ -264,7 +267,7 @@ public class ManagerController {
 			System.out.print("메뉴 >> ");
 			int ubMenuInput = sc.next().charAt(0) - '0';
 			sc.nextLine();
-			
+
 			Connection conn = null;
 			PreparedStatement ps = null;
 			ResultSet rs = null;
@@ -302,7 +305,7 @@ public class ManagerController {
 					System.out.println("학사관리시스템 메인화면으로 돌아갑니다.");
 					return;
 				case 7:
-			
+
 				default:
 					System.out.println("올바른 메뉴를 선택해주세요.");
 					break;
@@ -317,10 +320,10 @@ public class ManagerController {
 		}
 
 	}
-	
+
 	// 건물 등록 메소드
 	public void saveBuilding(Scanner sc) {
-		
+
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -328,11 +331,11 @@ public class ManagerController {
 		try {
 			String buildingIDSearch = "select building_id from buildings where building_id = ?";
 			ps = conn.prepareStatement(buildingIDSearch);
-			
+
 			System.out.print("건물 번호 : ");
 			int buildingId = sc.nextInt();
 			sc.nextLine();
-			
+
 			ps.setInt(1, buildingId);
 			rs = ps.executeQuery();
 			if (rs.next()) {
@@ -340,26 +343,26 @@ public class ManagerController {
 			} else {
 				String buildingSavesql = "insert into buildings values(?,?)";
 				ps = conn.prepareStatement(buildingSavesql);
-				
+
 				ps.setInt(1, buildingId);
-				
+
 				System.out.print("건물 이름 : ");
 				String buildingName = sc.nextLine();
 				ps.setString(2, buildingName);
-				
+
 				ps.executeUpdate();
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			DBConnector.close(conn, ps, rs);
 		}
 	}
-	
-	//view용 건물 등록
+
+	// view용 건물 등록
 	public void saveViewBuilding(int buildingId, String buildingName) {
-		
+
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -370,26 +373,25 @@ public class ManagerController {
 			ps = conn.prepareStatement(buildingIDSearchsql);
 			ps.setInt(1, buildingId);
 			rs = ps.executeQuery();
-			
+
 			if (rs.next()) {
 				System.out.println("이미 존재하는 건물 번호 입니다. 다른 번호로 입력해주세요.");
 			} else {
 				String buildingSavesql = "insert into buildings values(?,?)";
 				ps = conn.prepareStatement(buildingSavesql);
-				
+
 				ps.setInt(1, buildingId);
 				ps.setString(2, buildingName);
-				
+
 				ps.executeUpdate();
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			DBConnector.close(conn, ps, rs);
 		}
 	}
-
 
 	// 강의실 조회 메소드
 	public void searchUnitInfo() {
@@ -450,7 +452,7 @@ public class ManagerController {
 		}
 	}
 
-	public boolean insertVeiwUnit(int buildingId,String unitName) {
+	public boolean insertVeiwUnit(int buildingId, String unitName) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -464,7 +466,7 @@ public class ManagerController {
 			int affectedRows = pstmt.executeUpdate();
 			if (affectedRows > 0) {
 				return true;
-			} 
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -472,6 +474,7 @@ public class ManagerController {
 		}
 		return false;
 	}
+
 	// 강의실 삭제 메소드
 	public void deleteUnit(Scanner sc) {
 		System.out.println("삭제하시겠습니까? 1. 삭제 2. 취소");
@@ -635,27 +638,27 @@ public class ManagerController {
 	// view용 등록
 	public boolean saveVeiwClassScheduleInfo(int courseId, String dayOfWeek, String startTime, String endTime,
 			String unit) {
-		ClassSchedule classShedule = new ClassSchedule(0, 0, null, null, null, null);
-		classShedule.setCourseId(courseId);
-		classShedule.setDayOfWeek(dayOfWeek);
-		if (startTime.length() == 1) {
-			startTime = "0" + startTime + ":00";
-		} else {
-			startTime = startTime + ":00";
-		}
-		classShedule.setStartTime(startTime);
-		if (endTime.length() == 1) {
-			endTime = "0" + endTime + ":00";
-		} else {
-			endTime = endTime + ":00";
-		}
-		classShedule.setEndTime(endTime);
-		classShedule.setUnit(unit);
-		if (insertClassScheduleInfo(classShedule) == null) {
-			return false;
-		} else {
-			return true;
-		}
+			ClassSchedule classShedule = new ClassSchedule(0, 0, null, null, null, null);
+			classShedule.setCourseId(courseId);
+			classShedule.setDayOfWeek(dayOfWeek);
+			if (startTime.length() == 1) {
+				startTime = "0" + startTime + ":00";
+			} else {
+				startTime = startTime + ":00";
+			}
+			classShedule.setStartTime(startTime);
+			if (endTime.length() == 1) {
+				endTime = "0" + endTime + ":00";
+			} else {
+				endTime = endTime + ":00";
+			}
+			classShedule.setEndTime(endTime);
+			classShedule.setUnit(unit);
+			if (insertClassScheduleInfo(classShedule) == null) {
+				return false;
+			} else {
+				return true;
+			}
 	}
 
 	// 시간표 삭제
