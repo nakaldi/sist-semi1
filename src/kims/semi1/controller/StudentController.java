@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import kims.semi1.dao.GenericDao;
 import kims.semi1.dao.StudentDao;
@@ -453,15 +455,21 @@ public class StudentController {
 	}
 
 	public Object[][] searchGrades(String semester) {
-		Integer sum = 0;
+		Integer totalCredit = 0;
 		Double avg = 0.0;
+		Integer realCredit = 0;
 		List<Enrollment> enrollmentInfos = studentService
 				.getEnrollmentInfosByStudentIdAndSemester(student.getStudentId(), semester);
-		sum = enrollmentInfos.stream().mapToInt(t -> Integer.parseInt(t.getCourseInfo().getCourse().getCredit())).sum();
-		avg = enrollmentInfos.stream().mapToDouble(t -> t.getGrade().getGrade()).average().orElse(0.0);
+		totalCredit = enrollmentInfos.stream()
+				.mapToInt(t -> Integer.parseInt(t.getCourseInfo().getCourse().getCredit())).sum();
+		List<Enrollment> enrollmentInfosExceptGradeZero = enrollmentInfos.stream()
+				.filter(t -> t.getGrade().getGrade() != 0.0).collect(Collectors.toList());
+		realCredit = enrollmentInfosExceptGradeZero.stream()
+				.mapToInt(t -> Integer.parseInt(t.getCourseInfo().getCourse().getCredit())).sum();
+		avg = enrollmentInfosExceptGradeZero.stream().mapToDouble(t -> t.getGrade().getGrade()).average().orElse(0.0);
 
-		String[] footer = new String[] { "", "", "총 이수학점 :", Integer.toString(sum), "평균 학점 :",
-				String.format("%.2f", avg) };
+		String[] footer = new String[] { "총 신청학점 :", Integer.toString(totalCredit), "실 이수학점 :",
+				Integer.toString(realCredit), "평균 학점 :", String.format("%.2f", avg) };
 		Object[][] grades = enrollmentInfos.stream()
 				.map(t -> new Object[] { t.getCourseInfo().getCourse().getCourseId(),
 						t.getCourseInfo().getCourse().getName(), t.getCourseInfo().getProfessor().getName(),

@@ -348,6 +348,8 @@ public class StudentEnrollmentPanel {
 		textArea.setEditable(false);
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
+		textArea.setBorder(null);
+		textArea.setBackground(null);
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		JButton saveButton = new JButton("수강 등록");
@@ -370,6 +372,7 @@ public class StudentEnrollmentPanel {
 		panel.setBackground(new Color(245, 245, 245));
 		panel.add(saveButton);
 		panel.add(closeButton);
+		panel.setBackground(null);
 
 		dialog.getContentPane().setLayout(new BorderLayout());
 		dialog.getContentPane().add(scrollPane, BorderLayout.CENTER);

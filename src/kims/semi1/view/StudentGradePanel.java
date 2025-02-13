@@ -195,7 +195,8 @@ public class StudentGradePanel {
 		centerPanel.add(filterPanel, gbc_filterPanel);
 
 		table1.getSelectionModel().addListSelectionListener(e -> {
-			if (!e.getValueIsAdjusting() && table1.getSelectedRow() != -1) {
+			if (!e.getValueIsAdjusting() && table1.getSelectedRow() != -1
+					&& table1.getSelectedRow() != table1.getRowCount() - 1) {
 				int selectedRow = table1.getSelectedRow();
 				int courseId = (Integer) table1.getValueAt(selectedRow, 0);
 				showCourseEvaluationDialog(frame, courseId);
@@ -220,14 +221,16 @@ public class StudentGradePanel {
 		JLabel label = new JLabel("강의 평가 입력", JLabel.CENTER);
 		label.setFont(new Font("Malgun Gothic", Font.PLAIN, 17));
 		label.setAlignmentY(10);
+		label.setBackground(null);
 
 		// 텍스트 필드 (100글자 제한)
-		JTextField textField = new JTextField();
+		JTextArea textField = new JTextArea();
 		textField.setColumns(30); // 글자 수 제한을 위해 컬럼 수 설정 (기본 글자수 제한은 100자)
 		textField.setFont(new Font("Malgun Gothic", Font.PLAIN, 15));
-
+		textField.setBackground(null);
+		textField.setBorder(null);
 		JPanel buttonPanel = new JPanel();
-		buttonPanel.setBackground(new Color(245, 245, 245));
+		buttonPanel.setBackground(null);
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
 		JButton registerButton = new JButton("등록");
@@ -255,7 +258,7 @@ public class StudentGradePanel {
 		dialog.add(textField, BorderLayout.CENTER);
 		dialog.add(buttonPanel, BorderLayout.SOUTH);
 
-		dialog.setSize(360, 160); 
+		dialog.setSize(360, 180);
 		dialog.setLocationRelativeTo(parentFrame);
 		dialog.setVisible(true);
 	}
