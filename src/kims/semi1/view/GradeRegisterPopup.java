@@ -1,12 +1,14 @@
 package kims.semi1.view;
 
+// GradeRegisterPopup.java
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.*;
 
-public class GradeRegisterPopup extends Dialog implements ActionListener {
-    private TextField txtCourseIDGrade, txtStudentName, txtStudentGrade;
-    private Button btnRegister, btnCancel;
+class GradeRegisterPopup extends Dialog implements ActionListener {
     private ProfessorFrame parentFrame;
+    private Button btnRegister, btnCancel;
+    private TextField txtCourseID, txtStudentID, txtGrade;
 
     public GradeRegisterPopup(ProfessorFrame parentFrame, String title, boolean modal) {
         super(parentFrame, title, modal);
@@ -15,22 +17,22 @@ public class GradeRegisterPopup extends Dialog implements ActionListener {
         setSize(400, 200);
         setLayout(new GridLayout(4, 2));
 
-        Label lblCourseIDGrade = new Label("강의 ID:");
-        txtCourseIDGrade = new TextField(20);
-        Label lblStudentName = new Label("학생 이름:");
-        txtStudentName = new TextField(20);
-        Label lblStudentGrade = new Label("성적:");
-        txtStudentGrade = new TextField(20);
+        Label lblCourseID = new Label("강의 ID:");
+        txtCourseID = new TextField(10);
+        Label lblStudentID = new Label("학생 ID:");
+        txtStudentID = new TextField(10);
+        Label lblGrade = new Label("성적:");
+        txtGrade = new TextField(10);
 
         btnRegister = new Button("등록");
         btnCancel = new Button("취소");
 
-        add(lblCourseIDGrade);
-        add(txtCourseIDGrade);
-        add(lblStudentName);
-        add(txtStudentName);
-        add(lblStudentGrade);
-        add(txtStudentGrade);
+        add(lblCourseID);
+        add(txtCourseID);
+        add(lblStudentID);
+        add(txtStudentID);
+        add(lblGrade);
+        add(txtGrade);
         add(btnRegister);
         add(btnCancel);
 
@@ -56,19 +58,13 @@ public class GradeRegisterPopup extends Dialog implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnRegister) {
-            // 1. 팝업 창에서 입력된 값 가져오기
-            String courseId = txtCourseIDGrade.getText();
-            String studentName = txtStudentName.getText();
-            String grade = txtStudentGrade.getText();
+            // 1. 텍스트 필드에서 값 가져오기
+            String courseID = txtCourseID.getText();
+            String studentID = txtStudentID.getText();
+            String grade = txtGrade.getText();
 
-            // parentFrame이 null인지 확인
-            if (parentFrame == null) {
-                System.err.println("오류: parentFrame이 null입니다.");
-                return;
-            }
-
-            // 2. ProfessorFrame의 registerGradeFromPopup() 메서드 호출하여 성적 등록
-            parentFrame.registerGradeFromPopup(courseId, studentName, grade);
+            // 2. ProfessorFrame의 registerGrade 메서드 호출하여 성적 등록
+            parentFrame.registerGrade(courseID, studentID, grade);
 
             // 3. 팝업 닫기
             dispose();
