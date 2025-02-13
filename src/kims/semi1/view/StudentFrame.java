@@ -103,7 +103,8 @@ public class StudentFrame {
 		studentEnrollSpecPanel = new StudentEnrollSpecPanel(frame, studentController);
 		studentTimeTablePanel = new StudentTimeTablePanel(frame, studentController);
 		studentGradePanel = new StudentGradePanel(frame, studentController);
-		// 메인 패널 (CardLayout 사용)
+	
+		// 메인 패널 CardLayout 으로 버튼 클릭시마다 버튼과 연결된 패널로 바뀌도록함
 		cardLayout = new CardLayout();
 		mainPanel = new Panel(cardLayout);
 		mainPanel.setBackground(new Color(245, 245, 245));
@@ -117,7 +118,6 @@ public class StudentFrame {
 		btnNewButton.setIcon(selectedIcon);
 
 		// 버튼 클릭 시 화면 변경
-
 		btnNewButton.addActionListener(e -> {
 			cardLayout.show(mainPanel, "마이페이지");
 			mainPanel.revalidate();
@@ -136,6 +136,7 @@ public class StudentFrame {
 			btnNewButton_2.setIcon(icon);
 			btnNewButton_3.setIcon(icon);
 			btnNewButton_4.setIcon(icon);
+			studentEnrollmentPanel.setTablesByRadioButton();
 		});
 
 		btnNewButton_2.addActionListener(e -> {
@@ -145,6 +146,7 @@ public class StudentFrame {
 			btnNewButton.setIcon(icon);
 			btnNewButton_3.setIcon(icon);
 			btnNewButton_4.setIcon(icon);
+			studentEnrollSpecPanel.setTablesByRadioButton();
 		});
 
 		btnNewButton_3.addActionListener(e -> {
@@ -154,6 +156,7 @@ public class StudentFrame {
 			btnNewButton_2.setIcon(icon);
 			btnNewButton_4.setIcon(icon);
 			btnNewButton.setIcon(icon);
+			studentGradePanel.setTablesByRadioButton();
 		});
 
 		btnNewButton_4.addActionListener(e -> {
@@ -163,6 +166,7 @@ public class StudentFrame {
 			btnNewButton_2.setIcon(icon);
 			btnNewButton_3.setIcon(icon);
 			btnNewButton.setIcon(icon);
+			studentTimeTablePanel.setTablesByRadioButton();
 		});
 
 		frame.setVisible(true);
