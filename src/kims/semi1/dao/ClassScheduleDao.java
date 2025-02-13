@@ -24,9 +24,11 @@ public class ClassScheduleDao {
 	}
 
 	public List<CourseInfo> findCourseInfos() {
-		String sql = "select * " + "FROM courses c,professors p,departments d,class_schedules s, buildings b,units u "
-				+ " WHERE s.course_id = c.course_id " + "AND p.professor_id = c.professor_id "
-				+ "AND c.department_id = d.department_id " + "AND d.building_id = b.building_id " + "AND s.unit = u.unit ";
+		String sql = "select *  from (((((courses c inner join professors p on c.professor_id = p.professor_id) \r\n"
+				+ "   inner join departments d on c.department_id = d.department_id) \r\n"
+				+ "   left outer join class_schedules s on c.course_id = s.course_id) \r\n"
+				+ "   inner join buildings b on d.building_id = b.building_id) "
+				+ "   left outer join units u on s.unit = u.unit)";
 		List<CourseInfo> courseInfo = new ArrayList<CourseInfo>();
 		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			try (ResultSet rs = pstmt.executeQuery()) {
@@ -251,7 +253,6 @@ public class ClassScheduleDao {
 		}
 		return unitBuildingInfo;
 	}
-	
 	public List<CourseInfo> findUnitBuildingInfos(int buildingId , String unit) {
 		String sql = " select * FROM buildings b,units u where u.building_id = b.building_id and unit = ? and b.building_id = ?   ";
 		List<CourseInfo> unitBuildingInfo = new ArrayList<CourseInfo>();

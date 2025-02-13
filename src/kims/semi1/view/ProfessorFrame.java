@@ -990,7 +990,7 @@ public class ProfessorFrame extends Frame {
 				}
 
 				// 폭을 맞추기 위해 String.format() 사용
-				String courseInfo = String.format("%-4s | %-24s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
+				String courseInfo = String.format("%-4s | %-30s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
 						building, semester, syllabus);
 
 				courseList.add(courseInfo);
