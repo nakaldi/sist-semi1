@@ -19,6 +19,8 @@ import java.awt.TextField;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
@@ -61,6 +63,7 @@ public class ProfessorFrame extends Frame {
 	private ActionListener registerActionListener;
 	private Panel timetablePanel;
 	private GradeRegisterPopup gradeRegisterPopup;
+	private List timetableList;
 
 	public ProfessorFrame(LoginFrame loginFrame, int professorId) {
 		this.loginFrame = loginFrame;
@@ -95,6 +98,60 @@ public class ProfessorFrame extends Frame {
 		loadProfessorInfo(); // 교수 정보 로딩
 
 		setVisible(true);
+	}
+
+	private void loadTimetableData() {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+			// SQL 쿼리 실행 및 정렬 조건 추가
+			String sql = "SELECT cs.day_of_week, cs.start_time, cs.end_time, c.name AS course_name "
+					+ "FROM class_schedules cs " + "JOIN courses c ON cs.course_id = c.course_id "
+					+ "WHERE c.professor_id = ? " + "ORDER BY cs.day_of_week DESC, cs.start_time DESC"; // 일별, 시간별 내림차순
+																										// 정렬
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, professorId);
+			rs = pstmt.executeQuery();
+
+			// 기존 내용 지우기
+			timetableList.removeAll();
+
+			while (rs.next()) {
+				String dayOfWeek = rs.getString("day_of_week");
+				String startTime = rs.getString("start_time");
+				String endTime = rs.getString("end_time");
+				String courseName = rs.getString("course_name");
+
+				// 시간표 정보 문자열 생성
+				String timetableInfo = String.format("%s | %s, %s-%s", courseName, dayOfWeek, startTime, endTime);
+
+				// List에 추가
+				timetableList.add(timetableInfo);
+			}
+
+		} catch (ClassNotFoundException e) {
+			System.err.println("드라이버 로딩 실패: " + e.getMessage());
+			e.printStackTrace();
+		} catch (SQLException e) {
+			System.err.println("SQL 에러: " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	// 교수 정보 로딩 메서드
@@ -298,19 +355,94 @@ public class ProfessorFrame extends Frame {
 		timetablePanel = new Panel(new BorderLayout());
 		timetablePanel.setBackground(Color.WHITE);
 
-		// 시간표 데이터를 표시할 Panel 생성
-		Panel timetableDisplayPanel = new Panel(new GridLayout(0, 1)); // 행 자동 조정, 열 1개
-		timetableDisplayPanel.setBackground(Color.WHITE);
-
-		// 시간표 데이터 로딩 및 UI에 표시
-		loadTimetableData(timetableDisplayPanel);
+		// 시간표 데이터를 표시할 List 생성
+		timetableList = new List();
+		timetableList.setFont(new Font("Monospaced", Font.PLAIN, 14));
+		timetablePanel.add(new Label("강의 시간표:"), BorderLayout.NORTH); // 레이블 추가
+		timetablePanel.add(timetableList, BorderLayout.CENTER);
 
 		// 스크롤 기능 추가
 		ScrollPane scrollPane = new ScrollPane();
-		scrollPane.add(timetableDisplayPanel);
+		scrollPane.add(timetableList);
 		timetablePanel.add(scrollPane, BorderLayout.CENTER);
 
+		loadTimetableData(); // 시간표 데이터 로딩
+
+		// 시간표 리스트 더블클릭 이벤트 리스너 추가
+		timetableList.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) { // 더블클릭
+					// 1. 선택된 시간표 내역 가져오기
+					int selectedIndex = timetableList.getSelectedIndex();
+					if (selectedIndex == -1) {
+						System.out.println("시간표를 선택해주세요.");
+						return;
+					}
+					String selectedTimetable = timetableList.getItem(selectedIndex);
+
+					// 2. 강의 ID 추출 (시간표 정보 문자열 파싱)
+					String courseName = selectedTimetable.split("\\|")[0].trim(); // 강의 이름 추출
+					String courseId = getCourseIdByName(courseName); // 강의 이름으로 강의 ID 조회
+
+					// 3. 학생 목록 팝업창 열기
+					if (courseId != null) {
+						openStudentListPopup(courseId);
+					} else {
+						System.out.println("강의 ID를 찾을 수 없습니다.");
+					}
+				}
+			}
+		});
+
 		return timetablePanel;
+	}
+
+	private void openStudentListPopup(String courseId) {
+		StudentListPopup popup = new StudentListPopup(this, "수강 학생 목록", true, courseId);
+		popup.setVisible(true);
+	}
+
+	private String getCourseIdByName(String courseName) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String courseId = null;
+
+		try {
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+			String sql = "SELECT course_id FROM courses WHERE name = ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, courseName);
+			rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				courseId = rs.getString("course_id");
+			}
+
+		} catch (ClassNotFoundException e) {
+			System.err.println("드라이버 로딩 실패: " + e.getMessage());
+			e.printStackTrace();
+		} catch (SQLException e) {
+			System.err.println("SQL 에러: " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return courseId;
 	}
 
 	private void loadTimetableData(Panel displayPanel) {
@@ -993,7 +1125,7 @@ public class ProfessorFrame extends Frame {
 		// 컬럼 헤더 패널 (성적 입력 미완료)
 		Panel columnHeaderPanelUnregistered = new Panel(new FlowLayout(FlowLayout.LEFT));
 		columnHeaderPanelUnregistered.setBackground(Color.LIGHT_GRAY);
-		Label lblCompletionStatusUnregistered = new Label("성적 입력 미완료");
+		Label lblCompletionStatusUnregistered = new Label("성적 입력 미완료|");
 		Label lblCourseIdHeaderUnregistered = new Label("강의 ID");
 		lblCourseIdHeaderUnregistered.setPreferredSize(new Dimension(50, 20));
 		Label lblCourseNameHeaderUnregistered = new Label("강의 이름");
@@ -1514,64 +1646,62 @@ public class ProfessorFrame extends Frame {
 	}
 
 	private void loadGradesData() {
-	    Connection conn = null;
-	    PreparedStatement pstmt = null;
-	    ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-	    try {
-	        Class.forName(JDBC_DRIVER);
-	        conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		try {
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
-	        // grades 테이블에서 필요한 컬럼들을 선택 (강의 이름 추가)
-	        String sql = "SELECT c.course_id, c.name AS course_name, s.name AS student_name, g.grade "
-	                + "FROM enrollments e "
-	                + "JOIN courses c ON e.course_id = c.course_id "
-	                + "JOIN students s ON e.student_id = s.student_id "
-	                + "LEFT JOIN grades g ON e.enrollment_id = g.enrollment_id "
-	                + "WHERE c.professor_id = ?";
+			// grades 테이블에서 필요한 컬럼들을 선택 (강의 이름 추가)
+			String sql = "SELECT c.course_id, c.name AS course_name, s.name AS student_name, g.grade "
+					+ "FROM enrollments e " + "JOIN courses c ON e.course_id = c.course_id "
+					+ "JOIN students s ON e.student_id = s.student_id "
+					+ "LEFT JOIN grades g ON e.enrollment_id = g.enrollment_id " + "WHERE c.professor_id = ?";
 
-	        pstmt = conn.prepareStatement(sql);
-	        pstmt.setInt(1, professorId);
-	        rs = pstmt.executeQuery();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, professorId);
+			rs = pstmt.executeQuery();
 
-	        gradeListRegistered.removeAll();
-	        gradeListUnregistered.removeAll();
+			gradeListRegistered.removeAll();
+			gradeListUnregistered.removeAll();
 
-	        while (rs.next()) {
-	            String courseId = rs.getString("course_id");
-	            String courseName = rs.getString("course_name");
-	            String studentName = rs.getString("student_name");
-	            String grade = rs.getString("grade");
+			while (rs.next()) {
+				String courseId = rs.getString("course_id");
+				String courseName = rs.getString("course_name");
+				String studentName = rs.getString("student_name");
+				String grade = rs.getString("grade");
 
-	            // 리스트에 표시할 문자열 생성
-	            String gradeInfo = String.format("%-10s | %-15s | %-15s | %-5s",
-	                    courseId, courseName, studentName, grade != null ? grade : "");
+				// 리스트에 표시할 문자열 생성
+				String gradeInfo = String.format("%-10s | %-15s | %-15s | %-5s", courseId, courseName, studentName,
+						grade != null ? grade : "");
 
-	            if (grade != null && !grade.isEmpty()) {
-	                gradeListRegistered.add(gradeInfo);
-	            } else {
-	                gradeListUnregistered.add(gradeInfo);
-	            }
-	        }
+				if (grade != null && !grade.isEmpty()) {
+					gradeListRegistered.add(gradeInfo);
+				} else {
+					gradeListUnregistered.add(gradeInfo);
+				}
+			}
 
-	    } catch (ClassNotFoundException e) {
-	        System.err.println("드라이버 로딩 실패: " + e.getMessage());
-	        e.printStackTrace();
-	    } catch (SQLException e) {
-	        System.err.println("SQL 에러: " + e.getMessage());
-	        e.printStackTrace();
-	    } finally {
-	        try {
-	            if (rs != null)
-	                rs.close();
-	            if (pstmt != null)
-	                pstmt.close();
-	            if (conn != null)
-	                conn.close();
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        }
-	    }
+		} catch (ClassNotFoundException e) {
+			System.err.println("드라이버 로딩 실패: " + e.getMessage());
+			e.printStackTrace();
+		} catch (SQLException e) {
+			System.err.println("SQL 에러: " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static void main(String[] args) {
