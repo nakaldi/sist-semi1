@@ -586,17 +586,11 @@ public class ProfessorFrame extends Frame {
 	    listButtonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 	    listButtonPanel.setBackground(Color.LIGHT_GRAY);
 
-	    btnSearchAll = new Button("전체조회");	
+	    btnSearchAll = new Button("전체조회");
 	    listButtonPanel.add(btnSearchAll);
 
 
 	    
-	    btnSearchAll.addActionListener(new ActionListener() {
-	      @Override
-	      public void actionPerformed(ActionEvent e) {
-	        loadCourse();
-	      }
-	    });
 
 	    listPanel.add(courseList, BorderLayout.CENTER);
 	    listPanel.add(listButtonPanel, BorderLayout.SOUTH);
@@ -790,7 +784,7 @@ public class ProfessorFrame extends Frame {
 				}
 
 				// 폭을 맞추기 위해 String.format() 사용
-				String courseInfo = String.format("%-4s | %-24s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
+				String courseInfo = String.format("%-4s | %-30s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
 						building, semester, syllabus);
 
 				courseList.add(courseInfo);
