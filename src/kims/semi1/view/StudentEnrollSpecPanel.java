@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -289,6 +288,8 @@ public class StudentEnrollSpecPanel {
 		textArea.setEditable(true);
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
+		textArea.setBorder(null);
+		textArea.setBackground(null);
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		JButton saveButton = new JButton("수강 취소");
@@ -311,6 +312,7 @@ public class StudentEnrollSpecPanel {
 		panel.setBackground(new Color(245, 245, 245));
 		panel.add(saveButton);
 		panel.add(closeButton);
+		panel.setBackground(null);
 
 		dialog.getContentPane().setLayout(new BorderLayout());
 		dialog.getContentPane().add(scrollPane, BorderLayout.CENTER);
