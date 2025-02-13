@@ -26,6 +26,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import kims.semi1.view.GradeRegisterPopup;
 
 public class ProfessorFrame extends Frame {
 
@@ -59,6 +60,7 @@ public class ProfessorFrame extends Frame {
 	private String selectedCourseId;
 	private ActionListener registerActionListener;
 	private Panel timetablePanel;
+	private GradeRegisterPopup gradeRegisterPopup;
 
 	public ProfessorFrame(LoginFrame loginFrame, int professorId) {
 		this.loginFrame = loginFrame;
@@ -453,241 +455,212 @@ public class ProfessorFrame extends Frame {
 	}
 
 	private Panel createSugangPanel() {
-		Panel panel = new Panel(new BorderLayout());
-		panel.setBackground(Color.WHITE);
+	    Panel panel = new Panel(new BorderLayout());
+	    panel.setBackground(Color.WHITE);
 
-		// 1. 입력 영역
-		Panel inputPanel = new Panel();
-		inputPanel.setLayout(new GridLayout(5, 1, 0, 15)); // 세로로 배치, 간격 조정
-		inputPanel.setPreferredSize(new Dimension(220, 220)); // 폭을 줄임, 높이를 늘림
-		inputPanel.setBackground(Color.WHITE);
+	    // 2. 버튼 영역
+	    Panel buttonPanel = new Panel();
+	    buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+	    buttonPanel.setPreferredSize(new Dimension(200, 40));
+	    buttonPanel.setBackground(Color.WHITE);
 
-		Label lblCourseName = new Label("강의명:");
-		txtCourseName = new TextField(12); // 텍스트 필드 크기 줄임
-		Panel courseNamePanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // 간격 없앰
-		courseNamePanel.setBackground(Color.WHITE);
-		lblCourseName.setPreferredSize(new Dimension(60, 20)); // 라벨 크기 고정
-		txtCourseName.setPreferredSize(new Dimension(120, 20)); // 텍스트 필드 크기 고정
-		courseNamePanel.add(lblCourseName);
-		courseNamePanel.add(txtCourseName);
-		inputPanel.add(courseNamePanel);
-
-		Label lblCourseBuilding = new Label("강의 건물:");
-		txtCourseBuilding = new TextField(12);
-		Panel courseBuildingPanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		courseBuildingPanel.setBackground(Color.WHITE);
-		lblCourseBuilding.setPreferredSize(new Dimension(60, 20));
-		txtCourseBuilding.setPreferredSize(new Dimension(120, 20));
-		courseBuildingPanel.add(lblCourseBuilding);
-		courseBuildingPanel.add(txtCourseBuilding);
-		inputPanel.add(courseBuildingPanel);
-
-		Label lblCourseSemester = new Label("학기:");
-		txtCourseSemester = new TextField(12);
-		Panel courseSemesterPanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		courseSemesterPanel.setBackground(Color.WHITE);
-		lblCourseSemester.setPreferredSize(new Dimension(60, 20));
-		txtCourseSemester.setPreferredSize(new Dimension(120, 20));
-		courseSemesterPanel.add(lblCourseSemester);
-		courseSemesterPanel.add(txtCourseSemester);
-		inputPanel.add(courseSemesterPanel);
-
-		Label lblCourseCredit = new Label("학점:");
-		txtCourseCredit = new TextField(12); // 텍스트 필드 크기 줄임
-		Panel courseCreditPanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // 간격 없앰
-		courseCreditPanel.setBackground(Color.WHITE);
-		lblCourseCredit.setPreferredSize(new Dimension(60, 20)); // 라벨 크기 고정
-		txtCourseCredit.setPreferredSize(new Dimension(120, 20)); // 텍스트 필드 크기 고정
-		courseCreditPanel.add(lblCourseCredit);
-		courseCreditPanel.add(txtCourseCredit);
-		inputPanel.add(courseCreditPanel);
-
-		Label lblCourseDescription = new Label("강의 설명:");
-		txtCourseDescription = new TextField(12); // 텍스트 필드 크기 줄임
-		Panel courseDescriptionPanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // 간격 없앰
-		courseDescriptionPanel.setBackground(Color.WHITE);
-		lblCourseDescription.setPreferredSize(new Dimension(60, 20)); // 라벨 크기 고정
-		txtCourseDescription.setPreferredSize(new Dimension(120, 20)); // 텍스트 필드 크기 고정
-		courseDescriptionPanel.add(lblCourseDescription);
-		courseDescriptionPanel.add(txtCourseDescription);
-		inputPanel.add(courseDescriptionPanel);
-
-		// 2. 버튼 영역
-		Panel buttonPanel = new Panel();
-		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		buttonPanel.setPreferredSize(new Dimension(200, 40)); // 적절한 크기 설정
-		buttonPanel.setBackground(Color.WHITE);
-
-		btnRegister = new Button("등록");
-		btnModify = new Button("수정");
-		btnSearch = new Button("검색");
-		buttonPanel.add(btnRegister);
-		buttonPanel.add(btnModify);
-		buttonPanel.add(btnSearch);
-
-		btnSearch.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// 검색 팝업창 생성 및 표시
-				SearchCoursePopup searchPopup = new SearchCoursePopup(ProfessorFrame.this, "강의 검색", true);
-				searchPopup.setVisible(true);
-			}
-		});
-
-		btnModify.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// 1. 리스트에서 선택된 강의 정보 가져오기
-				int selectedIndex = courseList.getSelectedIndex();
-				if (selectedIndex == -1) {
-					System.out.println("수정할 강의를 선택해주세요.");
-					return;
-				}
-
-				String selectedCourse = courseList.getItem(selectedIndex);
-				String[] courseInfo = selectedCourse.split("\\|");
-
-				// courseInfo 배열의 길이가 예상대로인지 확인
-				if (courseInfo.length < 6) {
-					System.err.println("오류: 잘못된 강좌 데이터 형식입니다.");
-					return;
-				}
-
-				// 2. 텍스트 필드에 강의 정보 표시
-				String courseId = courseInfo[0].trim();
-				String name = courseInfo[1].trim();
-				String credits = courseInfo[2].trim();
-				String building = courseInfo[3].trim();
-				String semester = courseInfo[4].trim();
-				String syllabus = courseInfo[5].trim();
-
-				txtCourseName.setText(name);
-				txtCourseCredit.setText(credits);
-				txtCourseBuilding.setText(building);
-				txtCourseSemester.setText(semester);
-				txtCourseDescription.setText(syllabus);
-
-				// 3. 수정할 courseId 저장 (updateCourse() 메서드에서 사용)
-				selectedCourseId = courseId;
-				btnRegister.setLabel("수정");
-
-				// 기존 액션 리스너 제거 후 새로운 액션 리스너 추가
-				ActionListener[] listeners = btnRegister.getActionListeners();
-				for (ActionListener listener : listeners) {
-					btnRegister.removeActionListener(listener);
-				}
-				btnRegister.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						if (btnRegister.getLabel().equals("등록")) {
-							addCourse(); // 강의 추가 메서드 호출
-						} else if (btnRegister.getLabel().equals("수정")) {
-							updateCourse(); // 강의 수정 메서드 호출
-						}
-						clearInputFields();
-					}
-				});
-			}
-		});
-
-		// register 버튼 액션 리스너
-		btnRegister.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				addCourse(); // 강의 추가 메서드 호출
-				clearInputFields();
-			}
-		});
-
-		btnRegister.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				addCourse(); // 강의 추가 메서드 호출
-			}
-		});
-
-		// 3. 리스트 영역 (표 형태)
-		Panel listPanel = new Panel();
-		listPanel.setLayout(new BorderLayout());
-		listPanel.setBackground(Color.LIGHT_GRAY);
-
-		// **컬럼명을 표시할 Panel 생성**
-		Panel columnHeaderPanel = new Panel(new FlowLayout(FlowLayout.LEFT));
-		columnHeaderPanel.setBackground(Color.LIGHT_GRAY);
-
-		Label lblCourseIdHeader = new Label("강좌 ID");
-		lblCourseIdHeader.setPreferredSize(new Dimension(60, 20)); // 폭 조정
-		Label lblCourseNameHeader = new Label("강의명");
-		lblCourseNameHeader.setPreferredSize(new Dimension(220, 20)); // 폭 조정
-		Label lblCreditsHeader = new Label("학점");
-		lblCreditsHeader.setPreferredSize(new Dimension(50, 20)); // 폭 조정
-		Label lblBuildingHeader = new Label("강의 건물");
-		lblBuildingHeader.setPreferredSize(new Dimension(100, 20)); // 폭 조정
-		Label lblSemesterHeader = new Label("학기");
-		lblSemesterHeader.setPreferredSize(new Dimension(50, 20)); // 폭 조정
-		Label lblSyllabusHeader = new Label("강의계획");
-		lblSyllabusHeader.setPreferredSize(new Dimension(240, 20)); // 폭 조정
-
-		columnHeaderPanel.add(lblCourseIdHeader);
-		columnHeaderPanel.add(lblCourseNameHeader);
-		columnHeaderPanel.add(lblCreditsHeader);
-		columnHeaderPanel.add(lblBuildingHeader);
-		columnHeaderPanel.add(lblSemesterHeader);
-		columnHeaderPanel.add(lblSyllabusHeader);
-
-		listPanel.add(columnHeaderPanel, BorderLayout.NORTH);
-
-		courseList = new List();
-		courseList.setFont(new Font("Monospaced", Font.PLAIN, 14)); // 고정 폭 폰트 설정
-
-		Panel listButtonPanel = new Panel();
-		listButtonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-		listButtonPanel.setBackground(Color.LIGHT_GRAY);
-
+	    btnRegister = new Button("등록");
+	    btnModify = new Button("수정");
+	    btnSearch = new Button("검색");
 		btnDelete = new Button("삭제");
-		btnSearchAll = new Button("전체조회");
-		listButtonPanel.add(btnDelete);
-		listButtonPanel.add(btnSearchAll);
 
-		btnDelete.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// 1. 리스트에서 선택된 강의 정보 가져오기
-				int selectedIndex = courseList.getSelectedIndex();
-				if (selectedIndex == -1) {
-					System.out.println("삭제할 강의를 선택해주세요.");
-					return;
-				}
+	    buttonPanel.add(btnRegister);
+	    buttonPanel.add(btnModify);
+	    buttonPanel.add(btnSearch);
+		buttonPanel.add(btnDelete);
 
-				String selectedCourse = courseList.getItem(selectedIndex);
-				String courseId = selectedCourse.split("\\|")[0].trim(); // courseId 추출
 
-				// 2. 데이터베이스에서 해당 강의 삭제
-				deleteCourse(courseId);
+	    // register 버튼 액션 리스너
+	    btnRegister.addActionListener(new ActionListener() {
+	      @Override
+	      public void actionPerformed(ActionEvent e) {
+	        // 등록 팝업창 생성 및 표시
+	        AddCoursePopup addCoursePopup = new AddCoursePopup(ProfessorFrame.this);
+	        addCoursePopup.setVisible(true);
+	      }
+	    });
 
-				// 3. 리스트 갱신
-				loadCourse();
+	    btnSearch.addActionListener(new ActionListener() {
+	      @Override
+	      public void actionPerformed(ActionEvent e) {
+	        // 검색 팝업창 생성 및 표시
+	        SearchCoursePopup searchPopup = new SearchCoursePopup(ProfessorFrame.this, "강의 검색", true);
+	        searchPopup.setVisible(true);
+	      }
+	    });
+
+	    btnModify.addActionListener(new ActionListener() {
+	      @Override
+	      public void actionPerformed(ActionEvent e) {
+	        // 1. 리스트에서 선택된 강의 정보 가져오기
+	        int selectedIndex = courseList.getSelectedIndex();
+	        if (selectedIndex == -1) {
+	          System.out.println("수정할 강의를 선택해주세요.");
+	          return;
+	        }
+
+	        String selectedCourse = courseList.getItem(selectedIndex);
+	        String[] courseInfo = selectedCourse.split("\\|");
+
+	        // courseInfo 배열의 길이가 예상대로인지 확인
+	        if (courseInfo.length < 6) {
+	          System.err.println("오류: 잘못된 강좌 데이터 형식입니다.");
+	          return;
+	        }
+
+	        // 2. 팝업 창 생성 및 표시
+	        String courseId = courseInfo[0].trim();
+	        String name = courseInfo[1].trim();
+	        String credits = courseInfo[2].trim();
+	        String building = courseInfo[3].trim();
+	        String semester = courseInfo[4].trim();
+	        String syllabus = courseInfo[5].trim();
+
+	        CourseModifyPopup modifyPopup = new CourseModifyPopup(ProfessorFrame.this, courseId, name, credits,
+	            building, semester, syllabus);
+	        modifyPopup.setVisible(true);
+	      }
+	    });
+
+	    // 3. 리스트 영역 (표 형태)
+	    Panel listPanel = new Panel();
+	    listPanel.setLayout(new BorderLayout());
+	    listPanel.setBackground(Color.LIGHT_GRAY);
+
+	    // **컬럼명을 표시할 Panel 생성**
+	    Panel columnHeaderPanel = new Panel(new FlowLayout(FlowLayout.LEFT));
+	    columnHeaderPanel.setBackground(Color.LIGHT_GRAY);
+
+	    Label lblCourseIdHeader = new Label("강좌 ID");
+	    lblCourseIdHeader.setPreferredSize(new Dimension(60, 20));
+	    Label lblCourseNameHeader = new Label("강의명");
+	    lblCourseNameHeader.setPreferredSize(new Dimension(220, 20));
+	    Label lblCreditsHeader = new Label("학점");
+	    lblCreditsHeader.setPreferredSize(new Dimension(50, 20));
+	    Label lblBuildingHeader = new Label("강의 건물");
+	    lblBuildingHeader.setPreferredSize(new Dimension(100, 20));
+	    Label lblSemesterHeader = new Label("학기");
+	    lblSemesterHeader.setPreferredSize(new Dimension(50, 20));
+	    Label lblSyllabusHeader = new Label("강의계획");
+	    lblSyllabusHeader.setPreferredSize(new Dimension(240, 20));
+
+	    columnHeaderPanel.add(lblCourseIdHeader);
+	    columnHeaderPanel.add(lblCourseNameHeader);
+	    columnHeaderPanel.add(lblCreditsHeader);
+	    columnHeaderPanel.add(lblBuildingHeader);
+	    columnHeaderPanel.add(lblSemesterHeader);
+	    columnHeaderPanel.add(lblSyllabusHeader);
+
+	    listPanel.add(columnHeaderPanel, BorderLayout.NORTH);
+
+	    courseList = new List();
+	    courseList.setFont(new Font("Monospaced", Font.PLAIN, 14));
+
+	    Panel listButtonPanel = new Panel();
+	    listButtonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+	    listButtonPanel.setBackground(Color.LIGHT_GRAY);
+
+	    btnSearchAll = new Button("전체조회");
+		 btnSearch = new Button("검색");
+		 btnDelete = new Button("삭제");
+	    listButtonPanel.add(btnSearch);
+	    listButtonPanel.add(btnDelete);	
+	    listButtonPanel.add(btnSearchAll);
+
+
+	    btnDelete.addActionListener(new ActionListener() {
+	      @Override
+	      public void actionPerformed(ActionEvent e) {
+	        // 1. 리스트에서 선택된 강의 정보 가져오기
+	        int selectedIndex = courseList.getSelectedIndex();
+	        if (selectedIndex == -1) {
+	          System.out.println("삭제할 강의를 선택해주세요.");
+	          return;
+	        }
+
+	        String selectedCourse = courseList.getItem(selectedIndex);
+	        String courseId = selectedCourse.split("\\|")[0].trim();
+
+	        // 2. 데이터베이스에서 해당 강의 삭제
+	        deleteCourse(courseId);
+
+	        // 3. 리스트 갱신
+	        loadCourse();
+	      }
+	    });
+
+	    btnSearchAll.addActionListener(new ActionListener() {
+	      @Override
+	      public void actionPerformed(ActionEvent e) {
+	        loadCourse();
+	      }
+	    });
+
+	    listPanel.add(courseList, BorderLayout.CENTER);
+	    listPanel.add(listButtonPanel, BorderLayout.SOUTH);
+
+	    // 전체 패널에 각 영역 배치
+	    panel.add(buttonPanel, BorderLayout.SOUTH);
+	    panel.add(listPanel, BorderLayout.CENTER);
+
+	    return panel;
+	  }
+
+	public void addCourseFromPopup(String courseName, String courseBuilding, String courseSemester, String courseCredit,
+			String courseDescription) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+
+		try {
+			// 1. DB 연결
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+			// 2. 텍스트 필드에서 입력된 값 가져오기
+			// 입력값 검증
+			if (courseName.isEmpty() || courseCredit.isEmpty() || courseDescription.isEmpty()
+					|| courseBuilding.isEmpty() || courseSemester.isEmpty()) {
+				System.out.println("모든 필드를 채워주세요.");
+				return;
 			}
-		});
 
-		btnSearchAll.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				loadCourse();
+			String sql = "INSERT INTO courses (course_id, name, credits, syllabus, professor_id, department_id, semester) VALUES (seq_courses.NEXTVAL, ?, ?, ?, ?, ?, ?)";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, courseName);
+			pstmt.setString(2, courseCredit);
+			pstmt.setString(3, courseDescription);
+			pstmt.setInt(4, professorId);
+			pstmt.setString(5, courseBuilding);
+			pstmt.setString(6, courseSemester);
+
+			// 4. 쿼리 실행
+			int rowsAffected = pstmt.executeUpdate();
+			if (rowsAffected > 0) {
+				System.out.println("강의가 성공적으로 추가되었습니다.");
+				loadCourse(); // GUI 업데이트
+			} else {
+				System.out.println("강의 추가에 실패했습니다.");
 			}
-		});
 
-		listPanel.add(courseList, BorderLayout.CENTER);
-		listPanel.add(listButtonPanel, BorderLayout.SOUTH);
-
-		// loadCourse();
-
-		// 전체 패널에 각 영역 배치
-		panel.add(inputPanel, BorderLayout.WEST);
-		panel.add(buttonPanel, BorderLayout.SOUTH);
-		panel.add(listPanel, BorderLayout.CENTER);
-
-		return panel;
+		} catch (ClassNotFoundException e) {
+			System.err.println("드라이버 로딩 실패: " + e.getMessage());
+		} catch (SQLException e) {
+			System.err.println("SQL 에러: " + e.getMessage());
+		} finally {
+			try {
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private void updateCourse() {
@@ -788,7 +761,7 @@ public class ProfessorFrame extends Frame {
 	}
 
 	// 수강 목록 로딩 메서드
-	private void loadCourse() {
+	public void loadCourse() {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -818,7 +791,7 @@ public class ProfessorFrame extends Frame {
 				}
 
 				// 폭을 맞추기 위해 String.format() 사용
-				String courseInfo = String.format("%-4s | %-30s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
+				String courseInfo = String.format("%-4s | %-24s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
 						building, semester, syllabus);
 
 				courseList.add(courseInfo);
@@ -844,156 +817,194 @@ public class ProfessorFrame extends Frame {
 		}
 	}
 
-	private Panel createGradePanel() {
-		Panel panel = new Panel(new BorderLayout());
-		panel.setBackground(Color.WHITE);
+	   private Panel createGradePanel() {
+	        Panel panel = new Panel(new BorderLayout());
+	        panel.setBackground(Color.WHITE);
 
-		// 1. 입력 영역
-		Panel inputPanel = new Panel();
-		inputPanel.setLayout(new GridLayout(3, 1, 0, 15)); // 세로로 배치, 간격 조정
-		inputPanel.setPreferredSize(new Dimension(220, 150)); // 적절한 크기 설정
-		inputPanel.setBackground(Color.WHITE);
+	        // 1. 입력 영역 제거
 
-		Label lblCourseIDGrade = new Label("강의 ID:");
-		txtCourseIDGrade = new TextField(12); // 텍스트 필드 크기 줄임
-		Panel courseIDGradePanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // 간격 없앰
-		courseIDGradePanel.setBackground(Color.WHITE);
-		lblCourseIDGrade.setPreferredSize(new Dimension(60, 20)); // 라벨 크기 고정
-		txtCourseIDGrade.setPreferredSize(new Dimension(120, 20)); // 텍스트 필드 크기 고정
-		courseIDGradePanel.add(lblCourseIDGrade);
-		courseIDGradePanel.add(txtCourseIDGrade);
-		inputPanel.add(courseIDGradePanel);
+	        // 2. 버튼 영역
+	        Panel buttonPanel = new Panel();
+	        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+	        buttonPanel.setPreferredSize(new Dimension(220, 40));
+	        buttonPanel.setBackground(Color.WHITE);
 
-		Label lblStudentName = new Label("학생 이름:");
-		txtStudentName = new TextField(12); // 텍스트 필드 크기 줄임
-		Panel studentNamePanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // 간격 없앰
-		studentNamePanel.setBackground(Color.WHITE);
-		lblStudentName.setPreferredSize(new Dimension(60, 20)); // 라벨 크기 고정
-		txtStudentName.setPreferredSize(new Dimension(120, 20)); // 텍스트 필드 크기 고정
-		studentNamePanel.add(lblStudentName);
-		studentNamePanel.add(txtStudentName);
-		inputPanel.add(studentNamePanel);
+	        btnGradeRegister = new Button("성적 등록");
+	        btnGradeModify = new Button("성적 수정");
+	        btnGradeSearch = new Button("검색 조회");
+	        btnGradeSearchAll = new Button("성적순 조회");
 
-		Label lblStudentGrade = new Label("성적:");
-		txtStudentGrade = new TextField(12); // 텍스트 필드 크기 줄임
-		Panel studentGradePanel = new Panel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // 간격 없앰
-		studentGradePanel.setBackground(Color.WHITE);
-		lblStudentGrade.setPreferredSize(new Dimension(60, 20)); // 라벨 크기 고정
-		txtStudentGrade.setPreferredSize(new Dimension(120, 20)); // 텍스트 필드 크기 고정
-		studentGradePanel.add(lblStudentGrade);
-		studentGradePanel.add(txtStudentGrade);
-		inputPanel.add(studentGradePanel);
+	        buttonPanel.add(btnGradeRegister);
+	        buttonPanel.add(btnGradeModify);
+	        buttonPanel.add(btnGradeSearch);
+	        buttonPanel.add(btnGradeSearchAll);
 
-		// 2. 버튼 영역
-		Panel buttonPanel = new Panel();
-		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		buttonPanel.setPreferredSize(new Dimension(220, 40)); // 적절한 크기 설정
-		buttonPanel.setBackground(Color.WHITE);
+	        // 4. 액션 리스너 등록
+	        btnGradeRegister.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                // 등록 팝업창 생성 및 표시
+	                openGradeRegisterPopup();
+	            }
+	        });
 
-		btnGradeRegister = new Button("성적 등록");
-		btnGradeModify = new Button("성적 수정");
-		btnGradeSearch = new Button("검색 조회");
-		btnGradeSearchAll = new Button("성적순 조회");
+	        btnGradeModify.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                // 1. 리스트에서 선택된 성적 정보 가져오기
+	                int selectedIndex = gradeList.getSelectedIndex();
+	                if (selectedIndex == -1) {
+	                    System.out.println("수정할 성적을 선택해주세요.");
+	                    return;
+	                }
 
-		buttonPanel.add(btnGradeRegister);
-		buttonPanel.add(btnGradeModify);
-		buttonPanel.add(btnGradeSearch);
-		buttonPanel.add(btnGradeSearchAll);
+	                String selectedGrade = gradeList.getItem(selectedIndex);
+	                String[] gradeInfo = selectedGrade.split("\\|");
 
-		// 3. 리스트 영역 (표 형태)
-		Panel listPanel = new Panel();
-		listPanel.setLayout(new BorderLayout()); // 리스트와 버튼을 배치하기 위한 레이아웃
-		listPanel.setBackground(Color.LIGHT_GRAY); // 보기 좋게 배경색 설정
+	                // gradeInfo 배열의 길이가 예상대로인지 확인
+	                if (gradeInfo.length < 4) {
+	                    System.err.println("오류: 잘못된 성적 데이터 형식입니다.");
+	                    return;
+	                }
 
-		// **컬럼명을 표시할 Panel 생성**
-		Panel columnHeaderPanel = new Panel(new FlowLayout(FlowLayout.LEFT));
-		columnHeaderPanel.setBackground(Color.LIGHT_GRAY);
+	                // 2. 팝업창 생성 및 표시
+	                String courseId = gradeInfo[0].trim();
+	                String studentName = gradeInfo[1].trim();
+	                String currentGrade = gradeInfo[2].trim();
+	                String student_review = gradeInfo[3].trim();
 
-		Label lblCourseIdHeader = new Label("강의 ID");
-		lblCourseIdHeader.setPreferredSize(new Dimension(50, 20)); // 폭 조정
-		Label lblStudentNameHeader = new Label("학생 이름");
-		lblStudentNameHeader.setPreferredSize(new Dimension(70, 20)); // 폭 조정
-		Label lblGradeHeader = new Label("성적");
-		lblGradeHeader.setPreferredSize(new Dimension(40, 20)); // 폭 조정
-		Label lblStudentReview = new Label("학생리뷰");
-		lblGradeHeader.setPreferredSize(new Dimension(50, 20)); // 폭 조정
+	                openGradeModifyPopup(courseId, studentName, currentGrade, student_review);
 
-		columnHeaderPanel.add(lblCourseIdHeader);
-		columnHeaderPanel.add(lblStudentNameHeader);
-		columnHeaderPanel.add(lblGradeHeader);
-		columnHeaderPanel.add(lblStudentReview);
+	            }
+	        });
+	        btnGradeSearchAll.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                loadGradesDataSorted(); // 성적순으로 조회
+	            }
+	        });
+	        btnGradeSearch.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                // 검색 팝업창 생성 및 표시
+	                openGradeSearchPopup();
+	            }
+	        });
 
-		listPanel.add(columnHeaderPanel, BorderLayout.NORTH); // 컬럼 헤더를 리스트 상단에 추가
+	        // 3. 리스트 영역 (표 형태)
+	        Panel listPanel = new Panel();
+	        listPanel.setLayout(new BorderLayout()); // 리스트와 버튼을 배치하기 위한 레이아웃
+	        listPanel.setBackground(Color.LIGHT_GRAY); // 보기 좋게 배경색 설정
 
-		gradeList = new List();
+	        // **컬럼명을 표시할 Panel 생성**
+	        Panel columnHeaderPanel = new Panel(new FlowLayout(FlowLayout.LEFT));
+	        columnHeaderPanel.setBackground(Color.LIGHT_GRAY);
 
-		Panel listButtonPanel = new Panel();
-		listButtonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-		listButtonPanel.setBackground(Color.LIGHT_GRAY);
+	        Label lblCourseIdHeader = new Label("강의 ID");
+	        lblCourseIdHeader.setPreferredSize(new Dimension(50, 20)); // 폭 조정
+	        Label lblStudentNameHeader = new Label("학생 이름");
+	        lblStudentNameHeader.setPreferredSize(new Dimension(70, 20)); // 폭 조정
+	        Label lblGradeHeader = new Label("성적");
+	        lblGradeHeader.setPreferredSize(new Dimension(40, 20)); // 폭 조정
+	        Label lblStudentReview = new Label("학생리뷰");
+	        lblGradeHeader.setPreferredSize(new Dimension(50, 20)); // 폭 조정
 
-		listPanel.add(gradeList, BorderLayout.CENTER); // 리스트를 중앙에 배치
-		listPanel.add(listButtonPanel, BorderLayout.SOUTH); // 버튼을 하단에 배치
+	        columnHeaderPanel.add(lblCourseIdHeader);
+	        columnHeaderPanel.add(lblStudentNameHeader);
+	        columnHeaderPanel.add(lblGradeHeader);
+	        columnHeaderPanel.add(lblStudentReview);
 
-		// 4. 액션 리스너 등록
-		btnGradeModify.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// 1. 리스트에서 선택된 성적 정보 가져오기
-				int selectedIndex = gradeList.getSelectedIndex();
-				if (selectedIndex == -1) {
-					System.out.println("수정할 성적을 선택해주세요.");
-					return;
-				}
+	        listPanel.add(columnHeaderPanel, BorderLayout.NORTH); // 컬럼 헤더를 리스트 상단에 추가
 
-				String selectedGrade = gradeList.getItem(selectedIndex);
-				String[] gradeInfo = selectedGrade.split("\\|");
+	        gradeList = new List();
 
-				// gradeInfo 배열의 길이가 예상대로인지 확인
-				if (gradeInfo.length < 4) {
-					System.err.println("오류: 잘못된 성적 데이터 형식입니다.");
-					return;
-				}
+	        Panel listButtonPanel = new Panel();
+	        listButtonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+	        listButtonPanel.setBackground(Color.LIGHT_GRAY);
 
-				// 2. 팝업창 생성 및 표시
-				String courseId = gradeInfo[0].trim();
-				String studentName = gradeInfo[1].trim();
-				String currentGrade = gradeInfo[2].trim();
-				String student_review = gradeInfo[3].trim();
+	        listPanel.add(gradeList, BorderLayout.CENTER); // 리스트를 중앙에 배치
+	        listPanel.add(listButtonPanel, BorderLayout.SOUTH); // 버튼을 하단에 배치
 
-				openGradeModifyPopup(courseId, studentName, currentGrade, student_review);
+	        // grades 테이블 데이터 로딩
+	        loadGradesData();
 
+	        // 전체 패널에 각 영역 배치
+	        panel.add(buttonPanel, BorderLayout.SOUTH);
+	        panel.add(listPanel, BorderLayout.CENTER);
+
+	        return panel;
+	    }
+
+
+	public void registerGradeFromPopup(String courseId, String studentName, String grade) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			// 1. DB 연결
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+			// 2. 입력값 검증
+			if (courseId.isEmpty() || studentName.isEmpty() || grade.isEmpty()) {
+				System.out.println("모든 필드를 채워주세요.");
+				return;
 			}
-		});
-		btnGradeSearchAll.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				loadGradesDataSorted(); // 성적순으로 조회
+
+			// 3. 강의 ID와 학생 이름이 데이터베이스에 존재하는지 확인
+			if (!isValidCourseId(conn, courseId) || !isValidStudentName(conn, studentName)) {
+				System.out.println("유효하지 않은 강의 ID 또는 학생 이름입니다.");
+				return;
 			}
-		});
-		btnGradeRegister.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				registerGrade(); // 성적 등록 메서드 호출
+
+			// 4. 해당 강의를 수강하는 학생인지 확인하고 enrollment_id 가져오기
+			int enrollmentId = getEnrollmentId(conn, courseId, studentName);
+			if (enrollmentId == -1) {
+				System.out.println("해당 강의를 수강하는 학생이 아닙니다.");
+				return;
 			}
-		});
 
-		btnGradeSearch.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// 검색 팝업창 생성 및 표시
-				openGradeSearchPopup();
+			// 5. 이미 등록된 성적인지 확인
+			if (isGradeAlreadyRegistered(conn, enrollmentId)) {
+				System.out.println("이미 등록된 성적입니다.");
+				return;
 			}
-		});
 
-		// grades 테이블 데이터 로딩
-		loadGradesData();
+			// 6. SQL 쿼리 준비 (grade_id 컬럼 제거, student_review 컬럼 추가)
+			String sql = "INSERT INTO grades (grade_id,enrollment_id, grade, student_review) "
+					+ "VALUES (seq_grades.nextval,?, ?, '')";
 
-		// 전체 패널에 각 영역 배치
-		panel.add(inputPanel, BorderLayout.WEST);
-		panel.add(buttonPanel, BorderLayout.SOUTH);
-		panel.add(listPanel, BorderLayout.CENTER);
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, enrollmentId);
+			pstmt.setString(2, grade);
 
-		return panel;
+			// 7. 쿼리 실행
+			int rowsAffected = pstmt.executeUpdate();
+
+			if (rowsAffected > 0) {
+				System.out.println("성적이 성공적으로 등록되었습니다.");
+				loadGradesData(); // 성적 목록 갱신
+			} else {
+				System.out.println("성적 등록에 실패했습니다.");
+			}
+
+		} catch (ClassNotFoundException e) {
+			System.err.println("드라이버 로딩 실패: " + e.getMessage());
+		} catch (SQLException e) {
+			System.err.println("SQL 에러: " + e.getMessage());
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private void loadGradesDataSorted() {
@@ -1052,6 +1063,13 @@ public class ProfessorFrame extends Frame {
 		GradeSearchPopup popup = new GradeSearchPopup(this, "성적 검색", true);
 		popup.setVisible(true);
 	}
+	
+	private void openGradeRegisterPopup() {
+        if (gradeRegisterPopup == null) {
+            gradeRegisterPopup = new GradeRegisterPopup(this, "성적 등록", true);
+        }
+        gradeRegisterPopup.setVisible(true);
+    }
 
 	// GradeSearchPopup 클래스 정의
 	class GradeSearchPopup extends Dialog implements ActionListener {
@@ -1222,85 +1240,6 @@ public class ProfessorFrame extends Frame {
 		txtCourseIDGrade.setText("");
 		txtStudentName.setText("");
 		txtStudentGrade.setText("");
-	}
-
-	private void registerGrade() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-
-		try {
-			// 1. DB 연결
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
-
-			// 2. 텍스트 필드에서 입력된 값 가져오기
-			String courseId = txtCourseIDGrade.getText();
-			String studentName = txtStudentName.getText();
-			String grade = txtStudentGrade.getText();
-
-			// 3. 입력값 검증
-			if (courseId.isEmpty() || studentName.isEmpty() || grade.isEmpty()) {
-				System.out.println("모든 필드를 채워주세요.");
-				return;
-			}
-
-			// 4. 강의 ID와 학생 이름이 데이터베이스에 존재하는지 확인
-			if (!isValidCourseId(conn, courseId) || !isValidStudentName(conn, studentName)) {
-				System.out.println("유효하지 않은 강의 ID 또는 학생 이름입니다.");
-				return;
-			}
-
-			// 5. 해당 강의를 수강하는 학생인지 확인하고 enrollment_id 가져오기
-			int enrollmentId = getEnrollmentId(conn, courseId, studentName);
-			if (enrollmentId == -1) {
-				System.out.println("해당 강의를 수강하는 학생이 아닙니다.");
-				return;
-			}
-
-			// 6. 이미 등록된 성적인지 확인
-			if (isGradeAlreadyRegistered(conn, enrollmentId)) {
-				System.out.println("이미 등록된 성적입니다.");
-				return;
-			}
-
-			// 7. SQL 쿼리 준비 (grade_id 컬럼 제거, student_review 컬럼 추가)
-			String sql = "INSERT INTO grades (grade_id,enrollment_id, grade, student_review) "
-					+ "VALUES (seq_grades.nextval,?, ?, '')";
-
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, enrollmentId);
-			pstmt.setString(2, grade);
-
-			// 8. 쿼리 실행
-			int rowsAffected = pstmt.executeUpdate();
-
-			if (rowsAffected > 0) {
-				System.out.println("성적이 성공적으로 등록되었습니다.");
-				loadGradesData(); // 성적 목록 갱신
-				clearGradeInputFields(); // 입력 필드 초기화
-			} else {
-				System.out.println("성적 등록에 실패했습니다.");
-			}
-
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
-		} catch (SQLException e) {
-			System.err.println("SQL 에러: " + e.getMessage());
-			e.printStackTrace();
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	// 해당 강의를 수강하는 학생인지 확인하고 enrollment_id 가져오기
