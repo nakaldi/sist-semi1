@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
+import kims.semi1.config.ResourceManager;
 import kims.semi1.controller.StudentController;
 
 public class StudentFrame {
@@ -23,8 +24,8 @@ public class StudentFrame {
 	private Panel mainPanel;
 	private JFrame frame;
 	private StudentController studentController;
-	private static final ImageIcon icon = new ImageIcon("resources/button_white.png");
-	private static final ImageIcon selectedIcon = new ImageIcon("resources/button_clicked.png");
+	private ImageIcon icon;
+	private ImageIcon selectedIcon;
 	JPanel sidePanel;
 	public StudentEnrollmentPanel studentEnrollmentPanel;
 	public StudentMypagePanel studentMypagePanel;
@@ -33,6 +34,8 @@ public class StudentFrame {
 	public StudentGradePanel studentGradePanel;
 
 	public StudentFrame(StudentController studentController) {
+		icon = ResourceManager.getIcon("button_white.png");
+		selectedIcon = ResourceManager.getIcon("button_clicked.png");
 		this.studentController = studentController;
 		createStudentFrame();
 	}

@@ -13,7 +13,6 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -26,23 +25,20 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 
+import kims.semi1.config.ResourceManager;
 import kims.semi1.controller.LoginController;
 
 public class LoginFrame extends JFrame {
 	private LoginController loginController;
-	private JTextField tfId;
-	private JPasswordField tfPassword;
-	private JLabel lblMessage;
-	private JButton btnLogin;
-	private JButton btnFindId;
-	private JPanel panel;
 	private JPanel backGroundPanel;
-	Image background_img = Toolkit.getDefaultToolkit().getImage("resources/background_sky.jpg");
-	ImageIcon loginButton_img = new ImageIcon("resources/button_login.png");
+	Image background_img;
+	ImageIcon loginButton_img;
 	private JTextField textField;
 	private JPasswordField passwordField;
 
 	public LoginFrame() {
+		background_img = ResourceManager.getImage("background_sky.jpg");
+		loginButton_img = ResourceManager.getIcon("button_login.png");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(50, 50, 1200, 800);
 		backGroundPanel = new BackgroundPanel(background_img);
@@ -170,7 +166,6 @@ public class LoginFrame extends JFrame {
 
 			loginController.handleLoginButtonClick(id, password);
 		});
-		
 
 		setVisible(true);
 
@@ -191,9 +186,6 @@ public class LoginFrame extends JFrame {
 		this.loginController = loginController;
 	}
 
-	public void showMessage(String message) {
-		lblMessage.setText(message);
-	}
 }
 
 class BackgroundPanel extends JPanel {

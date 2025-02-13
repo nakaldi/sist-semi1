@@ -38,17 +38,14 @@ public class LoginController {
 		try {
 			userId = Integer.parseInt(userIdStr);
 		} catch (NumberFormatException e) {
-			loginFrame.showMessage("아이디는 숫자만 입력 가능합니다.");
 			return;
 		}
 		int loggedInUserId = loginService.loginUser(userId, password);
 
 		if (loggedInUserId == -1) {
 			System.out.println("아이디가 없습니다. 최초화면으로 돌아갑니다.");
-			loginFrame.showMessage("아이디가 없습니다.");
 		} else if (loggedInUserId == -2) {
 			System.out.println("비밀번호가 일치하지 않습니다. 최초화면으로 돌아갑니다.");
-			loginFrame.showMessage("비밀번호가 다릅니다.");
 		} else {
 			currentUserId = loggedInUserId;
 			System.out.println("로그인 성공");
