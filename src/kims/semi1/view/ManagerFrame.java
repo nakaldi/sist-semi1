@@ -51,7 +51,7 @@ public class ManagerFrame extends JFrame {
 		managerController = new ManagerController();
 		setTitle("학사관리시스템(교직원)");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(400, 400); // 홈 화면 크기 줄임
+		setSize(400, 400); // 홈 화면 크기 줄임 
 		setLocationRelativeTo(null);
 
 		JPanel homePanel = new JPanel(new BorderLayout());
@@ -1373,7 +1373,13 @@ public class ManagerFrame extends JFrame {
 						ps = conn.prepareStatement(buildingSavesql);
 						ps.setInt(1, buildingId);
 						ps.setString(2, buildingName);
-						ps.executeUpdate();
+						ps.executeUpdate(); 
+						
+						Object[] newRow = { buildingId, buildingName };
+				        tableModel.addRow(newRow);
+				        
+				        txtBuildingID.setText("");
+				        txtBuildingName.setText("");
 
 						JOptionPane.showMessageDialog(this, "등록이 완료되었습니다.", "등록 성공", JOptionPane.INFORMATION_MESSAGE);
 					}
@@ -1384,6 +1390,7 @@ public class ManagerFrame extends JFrame {
 				} finally {
 					DBConnector.close(conn, ps, rs);
 				}
+
 			});
 
 			// 전체 건물 조회
@@ -1681,6 +1688,17 @@ public class ManagerFrame extends JFrame {
 				int buildingId = Integer.parseInt(txtBuildingID.getText());
 				String unitId = txtUnitID.getText();
 				if (managerController.insertVeiwUnit(buildingId, unitId)) {
+					List<CourseInfo> unitBuildingInfos = classScheduleDao
+							.findUnitBuildingInfos(Integer.parseInt(txtBuildingID.getText()), txtUnitID.getText());
+					unitBuildingInfos.stream().forEach(t -> {
+						Building b = t.getBuilding();
+						Unit u = t.getUnit();
+						Object[] row = { b.getBuildingId(), b.getName(), u.getUnitId() };
+						tableModel.addRow(row);
+					});
+
+		            txtBuildingID.setText("");
+		            txtUnitID.setText("");
 					JOptionPane.showMessageDialog(BuildingPanel, "등록되었습니다.", "확인", JOptionPane.INFORMATION_MESSAGE);
 				} else {
 					JOptionPane.showMessageDialog(BuildingPanel, "등록실패했습니다.", "확인", JOptionPane.INFORMATION_MESSAGE);
