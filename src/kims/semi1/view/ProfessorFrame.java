@@ -475,6 +475,27 @@ public class ProfessorFrame extends Frame {
 		buttonPanel.add(btnDelete);
 
 
+		btnDelete.addActionListener(new ActionListener() {
+		      @Override
+		      public void actionPerformed(ActionEvent e) {
+		        // 1. 리스트에서 선택된 강의 정보 가져오기
+		        int selectedIndex = courseList.getSelectedIndex();
+		        if (selectedIndex == -1) {
+		          System.out.println("삭제할 강의를 선택해주세요.");
+		          return;
+		        }
+
+		        String selectedCourse = courseList.getItem(selectedIndex);
+		        String courseId = selectedCourse.split("\\|")[0].trim();
+
+		        // 2. 데이터베이스에서 해당 강의 삭제
+		        deleteCourse(courseId);
+
+		        // 3. 리스트 갱신
+		        loadCourse();
+		      }
+		    });
+
 	    // register 버튼 액션 리스너
 	    btnRegister.addActionListener(new ActionListener() {
 	      @Override
@@ -565,35 +586,11 @@ public class ProfessorFrame extends Frame {
 	    listButtonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 	    listButtonPanel.setBackground(Color.LIGHT_GRAY);
 
-	    btnSearchAll = new Button("전체조회");
-		 btnSearch = new Button("검색");
-		 btnDelete = new Button("삭제");
-	    listButtonPanel.add(btnSearch);
-	    listButtonPanel.add(btnDelete);	
+	    btnSearchAll = new Button("전체조회");	
 	    listButtonPanel.add(btnSearchAll);
 
 
-	    btnDelete.addActionListener(new ActionListener() {
-	      @Override
-	      public void actionPerformed(ActionEvent e) {
-	        // 1. 리스트에서 선택된 강의 정보 가져오기
-	        int selectedIndex = courseList.getSelectedIndex();
-	        if (selectedIndex == -1) {
-	          System.out.println("삭제할 강의를 선택해주세요.");
-	          return;
-	        }
-
-	        String selectedCourse = courseList.getItem(selectedIndex);
-	        String courseId = selectedCourse.split("\\|")[0].trim();
-
-	        // 2. 데이터베이스에서 해당 강의 삭제
-	        deleteCourse(courseId);
-
-	        // 3. 리스트 갱신
-	        loadCourse();
-	      }
-	    });
-
+	    
 	    btnSearchAll.addActionListener(new ActionListener() {
 	      @Override
 	      public void actionPerformed(ActionEvent e) {
@@ -723,42 +720,44 @@ public class ProfessorFrame extends Frame {
 		selectedCourseId = null; // courseId 초기화
 	}
 
-	private void deleteCourse(String courseId) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+	 private void deleteCourse(String courseId) {
+	        Connection conn = null;
+	        PreparedStatement pstmt = null;
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+	        try {
+	            Class.forName(JDBC_DRIVER);
+	            conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
-			String sql = "DELETE FROM courses WHERE course_id = ?";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, courseId);
+	            String sql = "DELETE FROM courses WHERE course_id = ?";
+	            pstmt = conn.prepareStatement(sql);
+	            pstmt.setString(1, courseId);
 
-			int rowsAffected = pstmt.executeUpdate();
-			if (rowsAffected > 0) {
-				System.out.println("강의가 성공적으로 삭제되었습니다.");
-			} else {
-				System.out.println("강의 삭제에 실패했습니다.");
-			}
+	            int rowsAffected = pstmt.executeUpdate();
+	            if (rowsAffected > 0) {
+	                System.out.println("강의가 성공적으로 삭제되었습니다.");
+	            } else {
+	                System.out.println("강의 삭제에 실패했습니다.");
+	            }
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
-		} catch (SQLException e) {
-			System.err.println("SQL 에러: " + e.getMessage());
-			e.printStackTrace();
-		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+	            loadCourse(); // 삭제 후 리스트 갱신
+
+	        } catch (ClassNotFoundException e) {
+	            System.err.println("드라이버 로딩 실패: " + e.getMessage());
+	            e.printStackTrace();
+	        } catch (SQLException e) {
+	            System.err.println("SQL 에러: " + e.getMessage());
+	            e.printStackTrace();
+	        } finally {
+	            try {
+	                if (pstmt != null)
+	                    pstmt.close();
+	                if (conn != null)
+	                    conn.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
 
 	// 수강 목록 로딩 메서드
 	public void loadCourse() {
@@ -791,12 +790,7 @@ public class ProfessorFrame extends Frame {
 				}
 
 				// 폭을 맞추기 위해 String.format() 사용
-<<<<<<< HEAD
 				String courseInfo = String.format("%-4s | %-24s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
-=======
-
-				String courseInfo = String.format("%-4s | %-30s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
->>>>>>> 620d2a4a8424e44c03e2352a32c7288d8b186165
 						building, semester, syllabus);
 
 				courseList.add(courseInfo);
