@@ -24,10 +24,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import kims.semi1.config.DBConnector;
 
 public class ProfessorFrame extends Frame {
 
@@ -53,10 +54,7 @@ public class ProfessorFrame extends Frame {
 	private List gradeList;
 
 	// DB 연결 정보
-	static final String JDBC_DRIVER = "oracle.jdbc.driver.OracleDriver"; // JDBC 드라이버 클래스
-	static final String DB_URL = "jdbc:oracle:thin:@localhost:1521:XE"; // DB URL
-	static final String USER = "hamster2"; // DB 계정
-	static final String PASS = "1234"; // DB 비밀번호
+
 	private int professorId;
 
 	private String selectedCourseId;
@@ -367,7 +365,6 @@ public class ProfessorFrame extends Frame {
 		lblGradeHeaderRegistered.setPreferredSize(new Dimension(750, 20));
 		Label lblCompletionStatusRegistered = new Label("성적 입력 완료 목록");
 
-
 		columnHeaderPanelRegistered.add(lblCourseIdHeaderRegistered);
 		columnHeaderPanelRegistered.add(lblStudentIdHeaderRegistered); // 학생 ID 컬럼
 		columnHeaderPanelRegistered.add(lblCourseNameHeaderRegistered);
@@ -383,7 +380,7 @@ public class ProfessorFrame extends Frame {
 		// 컬럼 헤더 패널 (성적 입력 미완료)
 		Panel columnHeaderPanelUnregistered = new Panel(new FlowLayout(FlowLayout.LEFT));
 		columnHeaderPanelUnregistered.setBackground(Color.LIGHT_GRAY);
-		
+
 		Label lblCourseIdHeaderUnregistered = new Label("강의 ID");
 		lblCourseIdHeaderUnregistered.setPreferredSize(new Dimension(50, 20));
 		Label lblStudentIdHeaderUnregistered = new Label("학생 ID"); // 학생 ID 컬럼
@@ -393,7 +390,7 @@ public class ProfessorFrame extends Frame {
 		Label lblStudentNameHeaderUnregistered = new Label("학생 이름");
 		lblStudentNameHeaderUnregistered.setPreferredSize(new Dimension(800, 20));
 		Label lblGradeInputSuccess = new Label("성적 입력 미완료 목록");
-		
+
 		columnHeaderPanelUnregistered.add(lblCourseIdHeaderUnregistered);
 		columnHeaderPanelUnregistered.add(lblStudentIdHeaderUnregistered); // 학생 ID 컬럼
 		columnHeaderPanelUnregistered.add(lblCourseNameHeaderUnregistered);
@@ -419,20 +416,16 @@ public class ProfessorFrame extends Frame {
 	}
 
 	private void loadTimetableData() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		String sql = "SELECT cs.day_of_week, cs.start_time, cs.end_time, c.name AS course_name "
+				+ "FROM class_schedules cs " + "JOIN courses c ON cs.course_id = c.course_id "
+				+ "WHERE c.professor_id = ? " + "ORDER BY cs.day_of_week DESC, cs.start_time DESC"; // 일별, 시간별 내림차순
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			// SQL 쿼리 실행 및 정렬 조건 추가
-			String sql = "SELECT cs.day_of_week, cs.start_time, cs.end_time, c.name AS course_name "
-					+ "FROM class_schedules cs " + "JOIN courses c ON cs.course_id = c.course_id "
-					+ "WHERE c.professor_id = ? " + "ORDER BY cs.day_of_week DESC, cs.start_time DESC"; // 일별, 시간별 내림차순
-																										// 정렬
-			pstmt = conn.prepareStatement(sql);
+			// 정렬
 			pstmt.setInt(1, professorId);
 			rs = pstmt.executeQuery();
 
@@ -452,38 +445,21 @@ public class ProfessorFrame extends Frame {
 				timetableList.add(timetableInfo);
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
 	// 교수 정보 로딩 메서드
 	private void loadProfessorInfo() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		String sql = "SELECT name, birth_date, phone, department_id, email, hire_date FROM professors WHERE professor_id = ?";
 
-			String sql = "SELECT name, birth_date, phone, department_id, email, hire_date FROM professors WHERE professor_id = ?";
-			pstmt = conn.prepareStatement(sql);
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
 			pstmt.setInt(1, professorId);
 			rs = pstmt.executeQuery();
 
@@ -500,34 +476,18 @@ public class ProfessorFrame extends Frame {
 				txtMajor.setText(major);
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
 	private void addCourse() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+		String sql = "INSERT INTO courses (course_id, name, credits, syllabus, professor_id, department_id, semester) VALUES (seq_courses.NEXTVAL, ?, ?, ?, ?, ?, ?)";
 
-		try {
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			// 1. DB 연결
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
 			// 2. 텍스트 필드에서 입력된 값 가져오기
 			String courseName = txtCourseName.getText();
@@ -543,8 +503,6 @@ public class ProfessorFrame extends Frame {
 				return;
 			}
 
-			String sql = "INSERT INTO courses (course_id, name, credits, syllabus, professor_id, department_id, semester) VALUES (seq_courses.NEXTVAL, ?, ?, ?, ?, ?, ?)";
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, courseName);
 			pstmt.setString(2, courseCredit);
 			pstmt.setString(3, courseDescription);
@@ -562,19 +520,9 @@ public class ProfessorFrame extends Frame {
 				System.out.println("강의 추가에 실패했습니다.");
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
-		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 	}
 
@@ -588,17 +536,12 @@ public class ProfessorFrame extends Frame {
 
 	// 학과 이름 가져오는 메서드
 	private String getDepartmentName(int departmentId) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String departmentName = "";
+		String sql = "SELECT name FROM departments WHERE department_id = ?";
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-			String sql = "SELECT name FROM departments WHERE department_id = ?";
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, departmentId);
 			rs = pstmt.executeQuery();
 
@@ -606,23 +549,11 @@ public class ProfessorFrame extends Frame {
 				departmentName = rs.getString("name");
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 
 		return departmentName;
@@ -634,17 +565,14 @@ public class ProfessorFrame extends Frame {
 	}
 
 	private String getCourseIdByName(String courseName) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+
 		String courseId = null;
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		String sql = "SELECT course_id FROM courses WHERE name = ?";
 
-			String sql = "SELECT course_id FROM courses WHERE name = ?";
-			pstmt = conn.prepareStatement(sql);
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
 			pstmt.setString(1, courseName);
 			rs = pstmt.executeQuery();
 
@@ -652,23 +580,11 @@ public class ProfessorFrame extends Frame {
 				courseId = rs.getString("course_id");
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 
 		return courseId;
@@ -766,7 +682,6 @@ public class ProfessorFrame extends Frame {
 		buttonPanel.add(btnModify);
 		buttonPanel.add(btnSearch);
 		buttonPanel.add(btnDelete);
-		
 
 		btnDelete.addActionListener(new ActionListener() {
 			@Override
@@ -788,8 +703,6 @@ public class ProfessorFrame extends Frame {
 				loadCourse();
 			}
 		});
-		
-		
 
 		// register 버튼 액션 리스너
 		btnRegister.addActionListener(new ActionListener() {
@@ -890,21 +803,20 @@ public class ProfessorFrame extends Frame {
 				loadCourse();
 			}
 		});
-		
-		courseList.addMouseListener(new MouseAdapter() {
-		    @Override
-		    public void mouseClicked(MouseEvent e) {
-		        if (e.getClickCount() == 2) {
-		            int selectedIndex = courseList.getSelectedIndex();
-		            if (selectedIndex != -1) {
-		                String selectedCourse = courseList.getItem(selectedIndex);
-		                String courseId = selectedCourse.split("\\|")[0].trim();
-		                openCourseReviewPopup(courseId);
-		            }
-		        }
-		    }
-		});
 
+		courseList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					int selectedIndex = courseList.getSelectedIndex();
+					if (selectedIndex != -1) {
+						String selectedCourse = courseList.getItem(selectedIndex);
+						String courseId = selectedCourse.split("\\|")[0].trim();
+						openCourseReviewPopup(courseId);
+					}
+				}
+			}
+		});
 
 		listPanel.add(courseList, BorderLayout.CENTER);
 		listPanel.add(listButtonPanel, BorderLayout.SOUTH);
@@ -915,21 +827,18 @@ public class ProfessorFrame extends Frame {
 
 		return panel;
 	}
-	
+
 	private void openCourseReviewPopup(String courseId) {
-	    CourseReviewPopup popup = new CourseReviewPopup(this, "강의평가", true, courseId);
-	    popup.setVisible(true);
+		CourseReviewPopup popup = new CourseReviewPopup(this, "강의평가", true, courseId);
+		popup.setVisible(true);
 	}
 
 	public void addCourseFromPopup(String courseName, String courseBuilding, String courseSemester, String courseCredit,
 			String courseDescription) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+		String sql = "INSERT INTO courses (course_id, name, credits, syllabus, professor_id, department_id, semester) VALUES (seq_courses.NEXTVAL, ?, ?, ?, ?, ?, ?)";
 
-		try {
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			// 1. DB 연결
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
 			// 2. 텍스트 필드에서 입력된 값 가져오기
 			// 입력값 검증
@@ -939,8 +848,6 @@ public class ProfessorFrame extends Frame {
 				return;
 			}
 
-			String sql = "INSERT INTO courses (course_id, name, credits, syllabus, professor_id, department_id, semester) VALUES (seq_courses.NEXTVAL, ?, ?, ?, ?, ?, ?)";
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, courseName);
 			pstmt.setString(2, courseCredit);
 			pstmt.setString(3, courseDescription);
@@ -957,31 +864,21 @@ public class ProfessorFrame extends Frame {
 				System.out.println("강의 추가에 실패했습니다.");
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 	}
 
 	public void registerGrade(String courseID, String studentID, String grade) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		try {
+		String sql = "INSERT INTO grades (grade_id, enrollment_id, grade, student_review) "
+				+ "VALUES (seq_grades.nextval, ?, ?, '')";
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			// 1. DB 연결
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
 			// 2. 입력값 검증
 			if (courseID.isEmpty() || studentID.isEmpty() || grade.isEmpty()) {
@@ -1009,10 +906,7 @@ public class ProfessorFrame extends Frame {
 			}
 
 			// 6. SQL 쿼리 준비 (grade_id 컬럼 제거, student_review 컬럼 추가)
-			String sql = "INSERT INTO grades (grade_id, enrollment_id, grade, student_review) "
-					+ "VALUES (seq_grades.nextval, ?, ?, '')";
 
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, enrollmentId);
 			pstmt.setString(2, grade);
 
@@ -1026,33 +920,17 @@ public class ProfessorFrame extends Frame {
 				System.out.println("성적 등록에 실패했습니다.");
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 	}
-	
-	
 
 	private void updateCourse() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+		String sql = "UPDATE courses SET name = ?, credits = ?, syllabus = ?, department_id = ?, semester = ? WHERE course_id = ?";
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			String courseName = txtCourseName.getText().trim();
 			String courseCredit = txtCourseCredit.getText().trim();
@@ -1067,8 +945,6 @@ public class ProfessorFrame extends Frame {
 			}
 
 			// SQL 쿼리 수정: WHERE 절을 course_id 기반으로 변경
-			String sql = "UPDATE courses SET name = ?, credits = ?, syllabus = ?, department_id = ?, semester = ? WHERE course_id = ?";
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, courseName);
 			pstmt.setString(2, courseCredit);
 			pstmt.setString(3, courseDescription);
@@ -1083,21 +959,11 @@ public class ProfessorFrame extends Frame {
 				System.out.println("강의 수정에 실패했습니다.");
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 
 		// 리스트 갱신 및 텍스트 필드 초기화
@@ -1107,15 +973,10 @@ public class ProfessorFrame extends Frame {
 	}
 
 	private void deleteCourse(String courseId) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+		String sql = "DELETE FROM courses WHERE course_id = ?";
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-			String sql = "DELETE FROM courses WHERE course_id = ?";
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, courseId);
 
 			int rowsAffected = pstmt.executeUpdate();
@@ -1127,36 +988,21 @@ public class ProfessorFrame extends Frame {
 
 			loadCourse(); // 삭제 후 리스트 갱신
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 	}
 
 	// 수강 목록 로딩 메서드
 	public void loadCourse() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		String sql = "SELECT course_id, name, credits, syllabus, department_id, semester FROM courses WHERE professor_id = ?";
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-			String sql = "SELECT course_id, name, credits, syllabus, department_id, semester FROM courses WHERE professor_id = ?";
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, professorId);
 
 			rs = pstmt.executeQuery();
@@ -1171,7 +1017,6 @@ public class ProfessorFrame extends Frame {
 				String semester = rs.getString("semester");
 
 				// Syllabus 내용이 너무 길어지면 ...으로 줄여서 표시
-				
 
 				// 폭을 맞추기 위해 String.format() 사용
 				String courseInfo = String.format("%-4s | %-18s | %-4s | %-6s | %-4s | %-32s", courseId, name, credits,
@@ -1180,35 +1025,22 @@ public class ProfessorFrame extends Frame {
 				courseList.add(courseInfo);
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 	}
 
 	public void registerGradeFromPopup(String courseId, String studentName, String grade) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		try {
+		String sql = "INSERT INTO grades (grade_id,enrollment_id, grade, student_review) "
+				+ "VALUES (seq_grades.nextval,?, ?, '')";
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			// 1. DB 연결
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
 			// 2. 입력값 검증
 			if (courseId.isEmpty() || studentName.isEmpty() || grade.isEmpty()) {
@@ -1236,10 +1068,7 @@ public class ProfessorFrame extends Frame {
 			}
 
 			// 6. SQL 쿼리 준비 (grade_id 컬럼 제거, student_review 컬럼 추가)
-			String sql = "INSERT INTO grades (grade_id,enrollment_id, grade, student_review) "
-					+ "VALUES (seq_grades.nextval,?, ?, '')";
 
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, enrollmentId);
 			pstmt.setString(2, grade);
 
@@ -1253,39 +1082,25 @@ public class ProfessorFrame extends Frame {
 				System.out.println("성적 등록에 실패했습니다.");
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 	}
 
 	private void loadGradesDataSorted() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		String sql = "SELECT c.course_id, s.student_id, s.name AS student_name, g.grade, g.student_review "
+				+ "FROM grades g, enrollments e, courses c, students s " + "WHERE c.professor_id = ? "
+				+ "AND g.enrollment_id = e.enrollment_id " + "AND e.course_id = c.course_id "
+				+ "AND e.student_id = s.student_id " + "ORDER BY g.grade DESC"; // 성적 내림차순 정렬
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			// SQL 쿼리 수정: 성적을 기준으로 내림차순 정렬, 학생 ID 추가
-			String sql = "SELECT c.course_id, s.student_id, s.name AS student_name, g.grade, g.student_review "
-					+ "FROM grades g, enrollments e, courses c, students s " + "WHERE c.professor_id = ? "
-					+ "AND g.enrollment_id = e.enrollment_id " + "AND e.course_id = c.course_id "
-					+ "AND e.student_id = s.student_id " + "ORDER BY g.grade DESC"; // 성적 내림차순 정렬
-			pstmt = conn.prepareStatement(sql);
+
 			pstmt.setInt(1, professorId);
 			rs = pstmt.executeQuery();
 
@@ -1303,24 +1118,10 @@ public class ProfessorFrame extends Frame {
 						studentName, grade, student_review);
 				gradeListRegistered.add(gradeInfo);
 			}
-
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
@@ -1405,27 +1206,20 @@ public class ProfessorFrame extends Frame {
 				dispose(); // 팝업 닫기
 			}
 		}
-		
 
 		// 검색 수행 메서드
 		private void performGradeSearch(String courseID, String studentName, String studentID) {
-			Connection conn = null;
-			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 
-			try {
-				Class.forName(JDBC_DRIVER);
-				conn = DriverManager.getConnection(DB_URL, USER, PASS);
+			StringBuilder sql = new StringBuilder("SELECT c.course_id, s.name AS student_name, g.grade "
+					+ "FROM grades g, enrollments e, courses c, students s " + "WHERE c.professor_id = ? "
+					+ "AND g.enrollment_id = e.enrollment_id " + "AND e.course_id = c.course_id "
+					+ "AND e.student_id = s.student_id ");
+
+			try (Connection conn = DBConnector.getConnection();
+					PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
 
 				// 1. SQL 쿼리 생성 (검색 조건에 따라 동적으로 쿼리 생성)
-				StringBuilder sql = new StringBuilder("SELECT c.course_id, s.name AS student_name, g.grade "
-						+ "FROM grades g, enrollments e, courses c, students s " + "WHERE c.professor_id = ? " // 현재
-																												// 로그인한
-																												// 교수의
-																												// 강의만
-																												// 검색
-						+ "AND g.enrollment_id = e.enrollment_id " + "AND e.course_id = c.course_id "
-						+ "AND e.student_id = s.student_id ");
 
 				// 강의 ID 조건 추가
 				if (courseID != null && !courseID.isEmpty()) {
@@ -1443,7 +1237,6 @@ public class ProfessorFrame extends Frame {
 				}
 
 				// 2. PreparedStatement 생성 및 파라미터 설정
-				pstmt = conn.prepareStatement(sql.toString());
 				int parameterIndex = 1; // 시작 인덱스
 				pstmt.setInt(parameterIndex++, parentFrame.getProfessorId()); // 교수 ID 설정
 
@@ -1482,23 +1275,11 @@ public class ProfessorFrame extends Frame {
 					}
 				}
 
-			} catch (ClassNotFoundException e) {
-				System.err.println("드라이버 로딩 실패: " + e.getMessage());
-				e.printStackTrace();
 			} catch (SQLException e) {
 				System.err.println("SQL 에러: " + e.getMessage());
 				e.printStackTrace();
 			} finally {
-				try {
-					if (rs != null)
-						rs.close();
-					if (pstmt != null)
-						pstmt.close();
-					if (conn != null)
-						conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+
 			}
 		}
 
@@ -1512,10 +1293,6 @@ public class ProfessorFrame extends Frame {
 		txtStudentName.setText("");
 		txtStudentGrade.setText("");
 	}
-	
-	
-	
-	
 
 	// 해당 강의를 수강하는 학생인지 확인하고 enrollment_id 가져오기
 	private int getEnrollmentId(Connection conn, String courseID, String studentID) throws SQLException {
@@ -1599,7 +1376,7 @@ public class ProfessorFrame extends Frame {
 				String newGrade = txtNewGrade.getText();
 
 				// 2. 데이터베이스 업데이트
-				updateGrade(courseId, courseName, newGrade, grade);
+				updateGrade(courseId, courseName, newGrade,grade);
 
 				// 3. 팝업 닫기
 				dispose();
@@ -1609,31 +1386,23 @@ public class ProfessorFrame extends Frame {
 			}
 		}
 
-
 		// 데이터베이스 업데이트 메서드
 		private void updateGrade(String courseId, String studentName, String newGrade, String grade) {
-			Connection conn = null;
-			PreparedStatement pstmt = null;
 			ResultSet rs = null;
 
-			try {
-				// 1. DB 연결
-				Class.forName(JDBC_DRIVER);
-				conn = DriverManager.getConnection(DB_URL, USER, PASS);
+			String sql = "UPDATE grades SET grade = ? "
+					+ "WHERE enrollment_id = (SELECT enrollment_id FROM enrollments "
+					+ "WHERE course_id = ? AND student_id = (SELECT student_id FROM students WHERE name = ?))";
 
-				// 2. SQL 쿼리 준비
-				String sql = "UPDATE grades SET grade = ? "
-						+ "WHERE enrollment_id = (SELECT enrollment_id FROM enrollments "
-						+ "WHERE course_id = ? AND student_id = (SELECT student_id FROM students WHERE name = ?))";
-
-				pstmt = conn.prepareStatement(sql);
+			try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+				
 				pstmt.setDouble(1, Double.parseDouble(newGrade));
 				pstmt.setInt(2, Integer.parseInt(courseId));
 				pstmt.setString(3, studentName);
 
-				// 3. 쿼리 실행
 				int rowsAffected = pstmt.executeUpdate();
 
+				System.out.println(rowsAffected);
 				if (rowsAffected > 0) {
 					System.out.println("성적이 성공적으로 수정되었습니다.");
 					parentFrame.loadGradesData(); // ProfessorFrame의 loadGradesData() 호출
@@ -1641,23 +1410,9 @@ public class ProfessorFrame extends Frame {
 					System.out.println("성적 수정에 실패했습니다.");
 				}
 
-			} catch (ClassNotFoundException e) {
-				System.err.println("드라이버 로딩 실패: " + e.getMessage());
-				e.printStackTrace();
 			} catch (SQLException e) {
 				System.err.println("SQL 에러: " + e.getMessage());
 				e.printStackTrace();
-			} finally {
-				try {
-					if (rs != null)
-						rs.close();
-					if (pstmt != null)
-						pstmt.close();
-					if (conn != null)
-						conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
 			}
 		}
 
@@ -1698,21 +1453,17 @@ public class ProfessorFrame extends Frame {
 	}
 
 	private void loadGradesData() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		String sql = "SELECT c.course_id, c.name AS course_name, s.student_id, s.name AS student_name, g.grade "
+				+ "FROM enrollments e " + "JOIN courses c ON e.course_id = c.course_id "
+				+ "JOIN students s ON e.student_id = s.student_id "
+				+ "LEFT JOIN grades g ON e.enrollment_id = g.enrollment_id " + "WHERE c.professor_id = ?";
+
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			// grades 테이블에서 필요한 컬럼들을 선택 (강의 이름, 학생 ID 추가)
-			String sql = "SELECT c.course_id, c.name AS course_name, s.student_id, s.name AS student_name, g.grade "
-					+ "FROM enrollments e " + "JOIN courses c ON e.course_id = c.course_id "
-					+ "JOIN students s ON e.student_id = s.student_id "
-					+ "LEFT JOIN grades g ON e.enrollment_id = g.enrollment_id " + "WHERE c.professor_id = ?";
 
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, professorId);
 			rs = pstmt.executeQuery();
 
@@ -1736,24 +1487,10 @@ public class ProfessorFrame extends Frame {
 					gradeListUnregistered.add(gradeInfo);
 				}
 			}
-
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 	}
 
@@ -1770,16 +1507,11 @@ public class ProfessorFrame extends Frame {
 
 	// DB 업데이트 메서드 (EditMyPageFrame에서 호출)
 	public void updateProfessorInfo(String newName, String newContact, String newEmail, String newPw) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+		String sql = "UPDATE professors SET name = ?, phone = ?, email = ?, password = ? WHERE professor_id = ?";
 
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			// SQL 쿼리 준비
-			String sql = "UPDATE professors SET name = ?, phone = ?, email = ?, password = ? WHERE professor_id = ?";
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, newName);
 			pstmt.setString(2, newContact);
 			pstmt.setString(3, newEmail);
@@ -1795,21 +1527,10 @@ public class ProfessorFrame extends Frame {
 				System.out.println("교수 정보 업데이트에 실패했습니다.");
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
-		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 	}
 }
@@ -1911,17 +1632,13 @@ class EditMyPageFrame extends Frame {
 
 	// 기존 비밀번호 가져오는 메서드
 	private String getOriginalPassword(int professorId) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+
 		ResultSet rs = null;
 		String password = null;
+		String sql = "SELECT password FROM professors WHERE professor_id = ?";
 
-		try {
-			Class.forName(ProfessorFrame.JDBC_DRIVER);
-			conn = DriverManager.getConnection(ProfessorFrame.DB_URL, ProfessorFrame.USER, ProfessorFrame.PASS);
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-			String sql = "SELECT password FROM professors WHERE professor_id = ?";
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, professorId);
 			rs = pstmt.executeQuery();
 
@@ -1929,23 +1646,9 @@ class EditMyPageFrame extends Frame {
 				password = rs.getString("password");
 			}
 
-		} catch (ClassNotFoundException ex) {
-			System.err.println("드라이버 로딩 실패: " + ex.getMessage());
-			ex.printStackTrace();
 		} catch (SQLException ex) {
 			System.err.println("SQL 에러: " + ex.getMessage());
 			ex.printStackTrace();
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 		}
 
 		return password;
