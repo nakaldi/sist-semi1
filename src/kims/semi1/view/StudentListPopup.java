@@ -12,10 +12,11 @@ import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import kims.semi1.config.DBConnector;
 
 class StudentListPopup extends Dialog {
 	private List studentList;
@@ -57,18 +58,13 @@ class StudentListPopup extends Dialog {
 
 	// 학생 목록 데이터 로딩 메서드
 	private void loadStudentListData() {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		String sql = "SELECT s.student_id, s.name, s.phone, s.email " + "FROM students s "
+				+ "JOIN enrollments e ON s.student_id = e.student_id " + "WHERE e.course_id = ?";
 
-		try {
-			Class.forName(ProfessorFrame.JDBC_DRIVER);
-			conn = DriverManager.getConnection(ProfessorFrame.DB_URL, ProfessorFrame.USER, ProfessorFrame.PASS);
+		try (Connection conn = DBConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 			// SQL 쿼리 실행 (해당 강의를 수강하는 학생 정보 조회)
-			String sql = "SELECT s.student_id, s.name, s.phone, s.email " + "FROM students s "
-					+ "JOIN enrollments e ON s.student_id = e.student_id " + "WHERE e.course_id = ?";
-			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, courseId);
 			rs = pstmt.executeQuery();
 
@@ -88,23 +84,11 @@ class StudentListPopup extends Dialog {
 				studentList.add(studentInfo);
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+
 		}
 	}
 }
