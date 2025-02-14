@@ -305,6 +305,7 @@ public class StudentController {
 		case "금":
 			return 5;
 		default:
+			//이외의 문자열이 들어가있으면 6번을 넣어서 아무일도 일어나지 않게 수정함
 			return 6;
 		}
 	}
