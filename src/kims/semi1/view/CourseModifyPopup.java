@@ -12,21 +12,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
+import kims.semi1.config.DBConnector;
 
 public class CourseModifyPopup extends Dialog implements ActionListener {
 	private TextField txtCourseName, txtCourseBuilding, txtCourseSemester, txtCourseCredit, txtCourseDescription;
 	private Button btnSave, btnCancel;
 	private ProfessorFrame parentFrame;
 	private String courseId, originalName, originalCredit, originalBuilding, originalSemester, originalDescription;
-
-	// DB 연결 정보
-	static final String JDBC_DRIVER = "oracle.jdbc.driver.OracleDriver"; // JDBC 드라이버 클래스
-	static final String DB_URL = "jdbc:oracle:thin:@localhost:1521:XE"; // DB URL
-	static final String USER = "hamster2"; // DB 계정
-	static final String PASS = "1234"; // DB 비밀번호
 
 	public CourseModifyPopup(ProfessorFrame parentFrame, String courseId, String name, String credits, String building,
 			String semester, String syllabus) {
@@ -137,8 +132,7 @@ public class CourseModifyPopup extends Dialog implements ActionListener {
 		PreparedStatement pstmt = null;
 
 		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+			conn = DBConnector.getConnection();
 
 			// SQL 쿼리 수정: WHERE 절을 course_id 기반으로 변경
 			String sql = "UPDATE courses SET name = ?, credits = ?, syllabus = ?, department_id = ?, semester = ? WHERE course_id = ?";
@@ -158,21 +152,11 @@ public class CourseModifyPopup extends Dialog implements ActionListener {
 				System.out.println("강의 수정에 실패했습니다.");
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBConnector.close(conn, pstmt);
 		}
 	}
 }

@@ -1757,14 +1757,6 @@ public class ProfessorFrame extends Frame {
 		}
 	}
 
-	public static void main(String[] args) {
-		// LoginFrame을 생성하고 ProfessorMainFrame에 전달
-		LoginFrame loginFrame = new LoginFrame();
-		// ProfessorFrame professorFrame = new ProfessorFrame(loginFrame); // professor
-		// id를 넘겨줘야함
-		loginFrame.setVisible(true);
-	}
-
 	// ** 텍스트 필드 값을 업데이트하는 메서드
 	public void updateTextFields(String name, String contact, String email) {
 		txtName.setText(name);

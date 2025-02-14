@@ -13,10 +13,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import kims.semi1.config.DBConnector;
 
 public class SearchCoursePopup extends Dialog implements ActionListener {
 	private TextField txtCourseID, txtCourseName, txtDepartmentID;
@@ -94,8 +95,7 @@ public class SearchCoursePopup extends Dialog implements ActionListener {
 		ResultSet rs = null;
 
 		try {
-			Class.forName(ProfessorFrame.JDBC_DRIVER);
-			conn = DriverManager.getConnection(ProfessorFrame.DB_URL, ProfessorFrame.USER, ProfessorFrame.PASS);
+			conn = DBConnector.getConnection();
 
 			// SQL 쿼리 생성 (검색 조건에 따라 동적으로 쿼리 생성)
 			StringBuilder sql = new StringBuilder(
@@ -160,24 +160,11 @@ public class SearchCoursePopup extends Dialog implements ActionListener {
 
 				courseList.add(courseInfo);
 			}
-
-		} catch (ClassNotFoundException e) {
-			System.err.println("드라이버 로딩 실패: " + e.getMessage());
-			e.printStackTrace();
 		} catch (SQLException e) {
 			System.err.println("SQL 에러: " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBConnector.close(conn, pstmt, rs);
 		}
 	}
 

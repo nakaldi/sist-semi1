@@ -17,12 +17,6 @@ public class AddCoursePopup extends Dialog implements ActionListener {
 	private Button btnAdd, btnCancel;
 	private ProfessorFrame parentFrame;
 
-	// DB 연결 정보
-	static final String JDBC_DRIVER = "oracle.jdbc.driver.OracleDriver"; // JDBC 드라이버 클래스
-	static final String DB_URL = "jdbc:oracle:thin:@localhost:1521:XE"; // DB URL
-	static final String USER = "hamster2"; // DB 계정
-	static final String PASS = "1234"; // DB 비밀번호
-
 	public AddCoursePopup(ProfessorFrame parentFrame) {
 		super(parentFrame, "강의 등록", true);
 		this.parentFrame = parentFrame;
