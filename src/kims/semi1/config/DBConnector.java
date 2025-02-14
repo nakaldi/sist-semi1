@@ -7,9 +7,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DBConnector {
-	private static final String URL = "jdbc:oracle:thin:@localhost:1521:xe";
+	private static final String JDBC = "jdbc:oracle:thin:@";
+	private static final String DEFAULT_URL = "localhost:1521";
+	private static final String DB_NAME = ":xe";
 	private static final String USER = "hamster2";
 	private static final String PASSWORD = "1234";
+	private static String URL = JDBC + DEFAULT_URL + DB_NAME;
 
 	// static 블로은 1.1부터 사용 가능, 클래스 로드를 위해 자주 사용되는 방법
 	// class.forName(Driver~~)은 사실 사용할 필요 없음. 자바 6부터 자동적으로 드라이버를 찾아 로드해줌. 명시적으로 작성해줌
@@ -22,6 +25,16 @@ public class DBConnector {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Driver load failed");
+		}
+	}
+
+	public static void setURL(String args[]) {
+		if (args.length >= 2) {
+			for (int i = 0; i < args.length; i++) {
+				if (args[i].equals("url") && args.length - i > 1 ) {
+					URL = JDBC + args[i + 1] + DB_NAME;
+				}
+			}
 		}
 	}
 
